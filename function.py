@@ -1,11 +1,28 @@
 
-import requests, json
+import requests
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from config import Config
 
+def get_ap_radio(ap_name):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    if '10F' in ap_name:
+        url = f"{Config.dnac}/intent/api/v2/floors/{Config.floor10id}/accessPointPositions"
+    else:
+        url = f"{Config.dnac}/intent/api/v2/floors/{Config.floor13aid}/accessPointPositions"
+    response = requests.get(url, headers=header, verify=False).json().get("response")
+    for r in response:
+        if r["name"] == ap_name:
+            return r["radios"]
+
 def get_ap():
     get_token()
+    access_points = []
     url = f"{Config.dnac}/intent/api/v1/topology/physical-topology"
     header = {
         'Content-Type': 'application/json',
@@ -15,15 +32,40 @@ def get_ap():
     response = requests.get(url, headers=header, verify=False).json().get("response").get("nodes")
     for r in response:
         if "MY-PCH-10F-AP" in r["label"] or "MY-PCH-13AF-AP" in r["label"]:
-            Config.access_points.append(r)
-    print(len(Config.access_points))
+            access_points.append(r)
+    # print(len(access_points))
     ind = 0
-    while ind < len(Config.access_points) - 1:
-        current_ap = Config.access_points[ind]
-        next_ap = Config.access_points[ind+1]
+    while ind < len(access_points) - 1:
+        current_ap = access_points[ind]
+        next_ap = access_points[ind+1]
         if current_ap == next_ap:
-            Config.access_points.remove(next_ap)
+            access_points.remove(next_ap)
         ind += 1
+    return access_points
+
+def get_dev_details(dev_id):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url = f"{Config.dnac}/intent/api/v1/network-device/{dev_id}"
+    response = requests.get(url, headers=header, verify=False)
+    device = response.json().get("response")
+    return device
+
+def get_devName(dev_id):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url = f"{Config.dnac}/intent/api/v1/network-device?id={dev_id}"
+    response = requests.get(url, headers=header, verify=False)
+    devName = response.json().get("response")[0].get("hostname")
+    return devName
 
 def get_ap_detail(ap_mac):
     get_token()
@@ -59,16 +101,16 @@ def get_client_enrichment_detail(client_mac):
             'entity_value': client_mac,
             'X-Auth-Token': Config.token
     }
-    url = f'{Config.dnac}/intent/api/v1/client-enrichment-details'
+    url = f'{Config.dnac}/intent/api/v2/client-enrichment-details'
     client_response = requests.get(url, headers=header, verify=False)
     client = client_response.json()[0]
     # print(client)
     return client
 
-
 # get clients of an AP
 def get_clients():
     get_token()
+    clients = []
     header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -76,15 +118,17 @@ def get_clients():
     }
     url = f'{Config.dnac}/data/api/v1/clients'
     clients_response = requests.get(url, headers=header, verify=False).json()
-    clients = clients_response["response"]
-    for client in clients:
-        connectedDevice = client.get('connectedNetworkDevice', {})
-        if "MY-PCH-" in connectedDevice.get('connectedNetworkDeviceName'):
-            Config.clients.append(client)
+    client = clients_response["response"]
+    for c in client:
+        connectedDevice = c.get('connectedNetworkDevice', {})
+        if "MY-PCH-10F-AP" in connectedDevice.get('connectedNetworkDeviceName') or "MY-PCH-13AF-AP" in connectedDevice.get('connectedNetworkDeviceName'):
+            clients.append(c)
     # print(len(Config.clients))
+    return clients
 
 def get_devices(): # network devices
     get_token()
+    devices = []
     header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -92,16 +136,18 @@ def get_devices(): # network devices
         }
     url_inventory = f"{Config.dnac}/intent/api/v1/network-device"
     response = requests.get(url_inventory, headers=header, verify=False)
-    Config.devices = response.json().get("response", [])
+    devices = response.json().get("response", [])
+    return devices
     # print(response.text)
 
+
 def get_wlc(): #get wlc
-    get_devices()
+    devices = get_devices()
     # print(Config.devices)
 
     Config.wlc = []
 
-    for c in Config.devices:
+    for c in devices:
         if c.get('hostname').startswith("APDC"):
             Config.wlc.append(c)
             # print(json.dumps(c, indent=2))

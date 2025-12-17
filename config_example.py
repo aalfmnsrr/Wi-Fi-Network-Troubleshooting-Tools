@@ -4,8 +4,8 @@ class Config:
     username = "TACACS_USERNAME"
     password = 'TACACS_PASSWORD'
     token = ''
+    port = 5002
 
     # initial values
-    access_points = []
-    devices = []
-    clients = []
+    floor10id = ''
+    floor13aid = ''
