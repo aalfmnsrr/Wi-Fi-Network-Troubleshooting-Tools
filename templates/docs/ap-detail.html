@@ -1,4 +1,660 @@
-<!DOCTYPE html>
+		{% extends 'sidebar.html' %}
+		{% block body %}
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<div class="row mb-2 mb-xl-3">
+						<div class="col-auto d-none d-sm-block">
+							<h3 class ="mb-0">
+							AP Health -
+							<nobr style="color:#3266bb;">{{ ap.nwDeviceName }}</nobr>
+							{% if ap.communicationState == "REACHABLE" %}
+								<span class="badge bg-success ms-2 align-middle">Reachable</span>
+							{% else %}
+								<span class="badge bg-danger ms-2 align-middle">Unreachable</span>
+							{% endif %}
+							</h3>
+						</div>
+
+						<div class="col-auto ms-auto text-end mt-n1">
+
+							<div class="dropdown me-2 d-inline-block position-relative">
+								<a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+								<i class="align-middle mt-n1" data-feather="calendar"></i> Today
+							</a>
+
+														<div class="dropdown-menu dropdown-menu-end">
+															<h6 class="dropdown-header">Settings</h6>
+															<a class="dropdown-item" href="#">Action</a>
+															<a class="dropdown-item" href="#">Another action</a>
+															<a class="dropdown-item" href="#">Something else here</a>
+															<div class="dropdown-divider"></div>
+															<a class="dropdown-item" href="#">Separated link</a>
+									</div>
+								</div>
+
+													<button class="btn btn-primary shadow-sm">
+							<i class="align-middle" data-feather="filter">&nbsp;</i>
+							</button>
+							<button class="btn btn-primary shadow-sm" onclick="location.reload()">
+								<i class="align-middle" data-feather="refresh-cw" >&nbsp;</i>
+							</button>
+						</div>
+					</div>
+					<div class="row">  
+							<div class="col-12 col-sm-6 col-xxl-3 d-flex">
+								<div class="card flex-fill">
+									<div class="card-body py-4">
+										<div class="d-flex align-items-start">
+											<div class="flex-grow-1">
+												<h3 class="mb-2">{{ ap.overallHealth }}</h3>
+												<p class="mb-2">Overall Health</p>
+												{% if 5 > ap.overallHealth %}
+													<i class="align-middle text-danger" data-feather="thumbs-down"></i>
+												{% else %}
+													<i class="align-middle text-success" data-feather="thumbs-up"></i>
+												{% endif %}
+											</div>
+											<div class="d-inline-block ms-3">
+												<div class="stat">
+													<i class="align-middle text-success" data-feather="activity"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-12 col-sm-6 col-xxl-3 d-flex">
+								<div class="card flex-fill">
+									<div class="card-body py-4">
+										<div class="d-flex align-items-start">
+											<div class="flex-grow-1">
+												<h3 class="mb-2">{{ ap.cpu }}%</h3>
+												<p class="mb-2">CPU Utilization</p>
+												{% if ap.cpu > 90 %}
+													<i class="align-middle text-danger" data-feather="thumbs-down"></i>
+												{% else %}
+													<i class="align-middle text-success" data-feather="thumbs-up"></i>
+												{% endif %}
+											</div>
+											<div class="d-inline-block ms-3">
+												<div class="stat">
+													<i class="align-middle text-success" data-feather="cpu"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-12 col-sm-6 col-xxl-3 d-flex">
+								<div class="card flex-fill">
+									<div class="card-body py-4">
+										<div class="d-flex align-items-start">
+											<div class="flex-grow-1">
+												<h3 class="mb-2">{{ ap.memory }}%</h3>
+												<p class="mb-2">Memory</p>
+												{% if ap.memory > 90 %}
+													<i class="align-middle text-danger" data-feather="thumbs-down"></i>
+												{% else %}
+													<i class="align-middle text-success" data-feather="thumbs-up"></i>
+												{% endif %}
+											</div>
+											<div class="d-inline-block ms-3">
+												<div class="stat">
+													<i class="align-middle text-danger" data-feather="hard-drive"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-12 col-sm-6 col-xxl-3 d-flex">
+								<div class="card flex-fill">
+									<div class="card-body py-4">
+										<div class="d-flex align-items-start">
+											<div class="flex-grow-1">
+												{% set parts = ap_details.upTime.split(',') %}
+													<h3 class="mb-2">{{ parts[0] }}</h3>
+												<p class="mb-2">Uptime</p>
+												<div class="mb-0">
+													<!-- <span class="badge badge-soft-success me-2"> +8.65% </span> -->
+													<span class="text-muted">At {{ parts[1] }}</span>
+												</div>
+											</div>
+											<div class="d-inline-block ms-3">
+												<div class="stat">
+													<i class="align-middle text-info" data-feather="chevrons-up"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+					</div>
+
+					<div class="card flex-fill">
+						<div class="card-header">
+							<!-- <div class="card-actions float-end">
+								<div class="dropdown position-relative">
+									<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+										<i class="align-middle" data-feather="more-horizontal"></i>
+									</a>
+
+									<div class="dropdown-menu dropdown-menu-end">
+										<a class="dropdown-item" href="#">Action</a>
+										<a class="dropdown-item" href="#">Another action</a>
+										<a class="dropdown-item" href="#">Something else here</a>
+									</div>
+								</div>
+							</div> -->
+							<h5 class="card-title mb-0">AP Details</h5>
+						</div>
+						<table id="datatables-dashboard-projects" class="table table-striped my-0">
+							<thead>
+								<tr>
+									<th>Key</th>
+									<th class="d-none d-xl-table-cell">Value</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Name</td>
+									<td class="d-none d-xl-table-cell">{{ ap.nwDeviceName }}</td>
+								</tr>
+								<tr>
+									<td>IP Address</td>
+									<td class="d-none d-xl-table-cell">{{ ap.ip_addr_managementIpAddr }}</td>
+								</tr>
+								<tr>
+									<td>MAC Address</td>
+									<td class="d-none d-xl-table-cell">{{ ap.macAddress }}</td>
+								</tr>
+								<tr>
+									<td>Series</td>
+									<td class="d-none d-xl-table-cell">{{ ap.deviceSeries }}</td>
+								</tr>
+								<tr>
+									<td>Software Version</td>
+									<td class="d-none d-xl-table-cell">{{ ap.softwareVersion }}</td>
+								</tr>
+								<tr>
+									<td>Serial Number</td>
+									<td class="d-none d-xl-table-cell">{{ ap_details.serialNumber }}</td>
+								</tr>
+								<tr>
+									<td>Power Type</td>
+									<td class="d-none d-xl-table-cell">{{ ap.powerType }}</td>
+								</tr>
+								<tr>
+									<td>WLC</td>
+									<td class="d-none d-xl-table-cell">{{ wlc }}</td>
+								</tr>
+								<tr>
+									<td>Mode</td>
+									<td class="d-none d-xl-table-cell">{{ ap.mode }}</td>
+								</tr>
+								<tr>
+									<td>Maintenance Mode</td>
+									<td class="d-none d-xl-table-cell">{{ ap.maintenanceMode | capitalize }}</td>
+								</tr>
+								<tr>
+									<td>Error Code</td>
+									{% if ap_details.errorCode == 'null' %}
+										<td class="d-none d-xl-table-cell">N/A</td>
+									{% else %}
+										<td class="d-none d-xl-table-cell" style="color: red;">{{ ap_details.errorCode | capitalize }}</td>
+									{% endif %}
+								</tr>
+								<tr>
+									<td>Error Description</td>
+									{% if not ap_details.errorDescription %}
+										<td class="d-none d-xl-table-cell">N/A</td>
+									{% else %}
+										<td class="d-none d-xl-table-cell" style="color: red;">{{ ap_details.errorDescription | capitalize }}</td>
+									{% endif %}
+								</tr>
+								<tr>
+									<td>Reachability Failure Reason</td>
+									{% if ap_details.reachabilityFailureReason == 'NA' %}
+										<td class="d-none d-xl-table-cell">N/A</td>
+									{% else %}
+										<td class="d-none d-xl-table-cell" style="color: red;">{{ ap_details.reachabilityFailureReason | capitalize }}</td>
+									{% endif %}
+								</tr>
+								{% for r in radio %}
+								<tr>
+									<td>Radio Channel ({{ r.bands[0] }} GHz: {{ r.antenna.name }})</td>
+									<td class="d-none d-xl-table-cell">{{ r.channel }}</td> 
+								</tr>
+								{% endfor %}
+								{% set noiseParts = ap.noise.split(',') %}
+								<tr>
+									<td>Noise Utilization (2.4 GHz)</td>
+									{% if (noiseParts[0]|float) > -81 %}
+										<td class="d-none d-xl-table-cell" style="color: red;">{{ noiseParts[0] | float }} dBm</td> 
+									{% else %}
+										<td class="d-none d-xl-table-cell" style="color: green;">{{ noiseParts[0] | float }} dBm</td> 
+									{% endif %}
+								</tr>
+								<tr>
+									<td>Noise Utilization (5 GHz)</td>
+									{% if (noiseParts[1]|float) > -83 %}
+										<td class="d-none d-xl-table-cell" style="color: red;">{{ noiseParts[1] | float }} dBm</td> 
+									{% else %}
+										<td class="d-none d-xl-table-cell">{{ noiseParts[1] | float }} dBm</td> 
+									{% endif %}
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="row">
+						<div class="col-12 col-lg-6">
+							<div class="card">
+								<div class="card-header">
+									<h5 class="card-title">Radio Tx Power</h5>
+									<!-- <h6 class="card-subtitle text-muted">Line charts are a typical pictorial representation that depicts trends and behaviors over time.</h6> -->
+								</div>
+								<div class="card-body">
+									<div class="chart w-100">
+										<div id="apexcharts-line"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-12 col-lg-6">
+							<div class="card" style="height: 464px;">
+								<div class="card-header">
+									<h5 class="card-title">Health Scores</h5>
+									<!-- <h6 class="card-subtitle text-muted">Polar area charts are similar to pie charts, but each segment has the same angle.</h6> -->
+								</div>
+								<div class="card-body">
+									<div class="chart">
+										<canvas id="chartjs-polar-area"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class ="card flex-fill">
+						<!-- <div class="col-12 col-lg-6">
+							<div class="card"> -->
+								<div class="card-header">
+									<h5 class="card-title">Health Percentages</h5>
+									<!-- <h6 class="card-subtitle text-muted">A radar chart is a way of showing multiple data points and the variation between them.</h6> -->
+								</div>
+								<div class="card-body">
+									<div class="chart">
+										<canvas id="chartjs-radar"></canvas>
+									</div>
+								</div>
+							<!-- </div>
+						</div> -->
+					</div>
+				</div>
+			</main>
+
+			<footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-start">
+							<ul class="list-inline">
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Support</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Help Center</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Privacy</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Terms of Service</a>
+								</li>
+							</ul>
+						</div>
+						<div class="col-6 text-end">
+							<p class="mb-0">
+								&copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+
+	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+	<script id="radio-json" type="application/json">
+		{{ radio | tojson }}
+	</script>
+	
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+	  // Read today’s snapshot from the page ---
+	  const raw = (document.getElementById("radio-json")?.textContent || "").trim();
+	  let snapshot;
+	  try {
+		snapshot = raw ? JSON.parse(raw) : null;
+	  } catch (e) {
+		console.error("Failed to parse radio-json:", e, "raw=", raw);
+		snapshot = null;
+	  }
+  
+	  // Guard: ensure snapshot is an array of radios
+	  if (!Array.isArray(snapshot)) {
+		console.warn("Expected the incoming radio snapshot to be an array. Got:", snapshot);
+		return;
+	  }
+  
+	  const STORAGE_KEY = "radio_daily_history";
+  
+	  // Persist one entry per (local) day; overwrite today on refresh
+	  const today = normalizeLocalDate(new Date());
+	  const history = safeParse(localStorage.getItem(STORAGE_KEY)) || [];
+	  const byDate = new Map(history.map(h => [h.date, h]));
+	  byDate.set(today, { date: today, radios: snapshot });
+  
+	  const final = Array
+		.from(byDate.values())
+		.sort((a, b) => new Date(a.date) - new Date(b.date))
+		.slice(-30); // keep last 30 days 
+  
+	  localStorage.setItem(STORAGE_KEY, JSON.stringify(final));
+  
+	  // Build x-axis categories (DD MMM) 
+	  const categories = final.map(h => formatDayLabel(h.date));
+  
+	  // Build up to 3 series: one per radio index in the daily snapshot 
+	  // If a day is missing that radio index, push null so ApexCharts skips it.
+	  function seriesForRadioIndex(idx) {
+		return final.map(h => {
+		  const arr = Array.isArray(h.radios) ? h.radios : [];
+		  const r = arr[idx];
+		  return (r && Number.isFinite(r.txPower)) ? r.txPower : null;
+		});
+	  }
+  
+	  const s1 = seriesForRadioIndex(0);
+	  const s2 = seriesForRadioIndex(1);
+	  const s3 = seriesForRadioIndex(2);
+  
+	  // Series names based on *today’s* radios (band + antenna name if available) 
+	  const r1 = snapshot[0];
+	  const r2 = snapshot[1];
+	  const r3 = snapshot[2];
+  
+	  const nameFromRadio = (r, fallback) => {
+		if (!r) return fallback;
+		const band = Array.isArray(r.bands) && r.bands.length ? `${r.bands[0]} GHz` : "Radio";
+		const ant  = (r.antenna && r.antenna.name) ? ` (${r.antenna.name})` : "";
+		return `${band}${ant}`;
+	  };
+  
+	  const series = [];
+	  if (s1.some(v => v !== null)) series.push({ name: nameFromRadio(r1, "Radio 1"), data: s1 });
+	  if (s2.some(v => v !== null)) series.push({ name: nameFromRadio(r2, "Radio 2"), data: s2 });
+	  if (s3.some(v => v !== null)) series.push({ name: nameFromRadio(r3, "Radio 3"), data: s3 });
+  
+	  // Render chart (Tx Power over days)
+	  const options = {
+		chart: {
+		  height: 350,
+		  type: "line",
+		  zoom: { enabled: false }
+		},
+		dataLabels: { enabled: false },
+		stroke: {
+		  width: [4, 4, 4],
+		  curve: "straight",
+		  dashArray: [0, 0, 0]
+		},
+		markers: { size: 3 },
+		series,
+		xaxis: { categories },
+		yaxis: {
+		  title: { text: "Tx Power (dBm)" }
+		},
+		tooltip: {
+		  y: {
+			formatter: (val) => (val == null ? "No data" : `${val} dBm`)
+		  }
+		},
+		grid: { borderColor: "#f1f1f1" }
+	  };
+  
+	  const mount = document.querySelector("#apexcharts-line");
+	  if (!mount) {
+		console.error("Container #apexcharts-line not found.");
+		return;
+	  }
+	  new ApexCharts(mount, options).render();
+  
+	  // Helpers
+	  function safeParse(s) {
+		if (!s) return null;
+		try { return JSON.parse(s); } catch { return null; }
+	  }
+  
+	  // Normalize to local YYYY-MM-DD 
+	  function normalizeLocalDate(d) {
+		const local = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+		const y = local.getFullYear();
+		const m = String(local.getMonth() + 1).padStart(2, "0");
+		const day = String(local.getDate()).padStart(2, "0");
+		return `${y}-${m}-${day}`;
+	  }
+  
+	  // Format "YYYY-MM-DD" to "DD MMM"
+	  function formatDayLabel(dateStr) {
+		const d = new Date(dateStr + "T00:00:00");
+		const day = String(d.getDate()).padStart(2, "0");
+		const mon = new Intl.DateTimeFormat("en", { month: "short" }).format(d);
+		return `${day} ${mon}`;
+	  }
+	});
+	</script>
+	
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			$("#datetimepicker-dashboard").datetimepicker({
+				inline: true,
+				sideBySide: false,
+				format: "L"
+			});
+		});
+	</script>
+	<script id="health-scores" type="application/json">
+		{{ ap | tojson }}
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			const raw = document.getElementById("health-scores").textContent;
+			const ap_data = JSON.parse(raw);
+			// Polar Area chart
+			new Chart(document.getElementById("chartjs-polar-area"), {
+				type: "polarArea",
+				data: {
+					labels: ["Noise", "Interference", "Utilization", "Memory", "CPU", "Air Quality"],
+					datasets: [{
+						label: "Model S",
+						data: [ap_data.noiseScore, ap_data.interferenceScore, ap_data.utilizationScore, ap_data.memoryScore, ap_data.cpuScore, ap_data.airQualityScore],
+						backgroundColor: [
+							window.theme.primary,
+							window.theme.success,
+							window.theme.danger,
+							window.theme.warning,
+							window.theme.info
+						]
+					}]
+				},
+				options: {
+					maintainAspectRatio: false
+				}
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			const raw = document.getElementById("health-scores").textContent;
+			const ap_data = JSON.parse(raw);
+			// interference data per band
+			let inter24 = null, intere5 = null;
+			if (ap_data.interference) {
+			const interParts = ap_data.interference.split(',').map(Number);
+			inter24 = interParts[0] ?? null;
+			intere5  = interParts[1] ?? null;
+			}
+			// rf utilization data per band
+			let rf24 = null, rf5 = null;
+			if (ap_data.utilization) {
+			const rfParts = ap_data.utilization.split(',').map(Number);
+			rf24 = rfParts[0] ?? null;
+			rf5  = rfParts[1] ?? null;
+			}
+			// air quality data per band
+			let air24 = null, air5 = null;
+			if (ap_data.airQuality) {
+				const airParts = ap_data.airQuality.split(',').map(Number);
+				air24 = airParts[0] ?? null;
+				air5 = airParts[1] ?? null;
+			}
+			// Radar chart
+			new Chart(document.getElementById("chartjs-radar"), {
+				type: "radar",
+				data: {
+					labels: ["Interference", "RF Utilization", "Air Quality"],
+					datasets: [{
+						label: "2.4 GHz",
+						backgroundColor: "rgba(0, 123, 255, 0.2)",
+						borderColor: window.theme.primary,
+						pointBackgroundColor: window.theme.primary,
+						pointBorderColor: "#fff",
+						pointHoverBackgroundColor: "#fff",
+						pointHoverBorderColor: window.theme.primary,
+						data: [inter24, rf24, air24]
+					}, {
+						label: "5 GHz",
+						backgroundColor: "rgba(220, 53, 69, 0.2)",
+						borderColor: window.theme.danger,
+						pointBackgroundColor: window.theme.danger,
+						pointBorderColor: "#fff",
+						pointHoverBackgroundColor: "#fff",
+						pointHoverBorderColor: window.theme.danger,
+						data: [intere5, rf5, air5]
+					}]
+				},
+				options: {
+					maintainAspectRatio: false
+				}
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			const raw = (document.getElementById("health-scores")?.textContent || "").trim();
+			let ap_data;
+			try {
+				ap_data = raw ? JSON.parse(raw) : null;
+			} catch (e) {
+				console.error("Failed to parse #health-scores JSON:", e, "raw=", raw);
+				return;
+			}
+			if (!ap_data || typeof ap_data !== "object") {
+				console.warn("No health scores object found:", ap_data);
+				return;
+  			}	
+			const parts = String(ap_data.noise || "").split(",").map(v => Number(v.trim()));
+			const noise24 = Number.isFinite(parts[0]) ? parts[0] : null;
+			const noise5  = Number.isFinite(parts[1]) ? parts[1] : null;
+			const values = [noise24 ?? 0, noise5 ?? 0];
+			const primary = (window.theme?.primary) || "#4e73df";
+			const canvas = document.getElementById("chartjs-bar");
+			if (!canvas) {
+				console.error("#chartjs-bar canvas not found.");
+				return;
+			}
+			// Bar chart
+			new Chart(canvas, {
+				type: "bar",
+				data: {
+					labels: ["2.4 GHz", "5 GHz"],
+					datasets: [{
+						label: "Noise (dBm)",
+						backgroundColor: window.theme.primary,
+						borderColor: window.theme.primary,
+						hoverBackgroundColor: window.theme.primary,
+						hoverBorderColor: window.theme.primary,
+						data: [-72, noise24],
+						barPercentage: .7,
+						categoryPercentage: .7,
+						borderWidth: 0,
+						borderSkipped: 'bottom',
+						barThickness: 40 
+					}, {
+						label: "This year",
+						backgroundColor: "#E8EAED",
+						borderColor: "#E8EAED",
+						hoverBackgroundColor: "#E8EAED",
+						hoverBorderColor: "#E8EAED",
+						data: [-72, noise5],
+						barPercentage: .75,
+						categoryPercentage: .5
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							display: false
+						},
+					tooltip: {
+						callbacks: {
+							label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} dBm`
+						}
+					}
+					},
+					scales: {
+						y: {
+							min: -100,
+							max: -40,
+							grid: {
+								display: false
+							},
+							ticks: {
+								stepSize: 20,
+								callback: (v) => `${v} dBm`,
+							}
+						},
+						x: {
+							grid: {
+								color: "transparent"
+							}
+						}
+					},
+					layout: {
+						padding: {top: 8, right: 8, bottom: 8, left: 8}
+					}
+				}
+			});
+		});
+	</script>
+	
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			$("#datatables-dashboard-projects").DataTable({
+				lengthChange: false,
+				bFilter: false,
+				autoWidth: false,
+				ordering: false
+			});
+		});
+	</script>
+
+</body>
+
+</html>
+{% endblock %}<!DOCTYPE html>
 <html lang="en">
 
 <head>
