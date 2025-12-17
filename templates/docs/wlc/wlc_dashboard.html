@@ -35,84 +35,97 @@
 						</div>
 					</div>
 					<div class="row">
+<!-- 
+								<div class="row justify-content-center mt-3 mb-2">
+									<div class="col-auto">
+										<nav class="nav btn-group">
+											<a href="#monthly" class="btn btn-outline-primary active" data-bs-toggle="tab">Monthly billing</a>
+											<a href="#annual" class="btn btn-outline-primary" data-bs-toggle="tab">Annual billing</a>
+										</nav>
+									</div>
+								</div>
+	 -->
 							<div class="w-100">
-								
-								<div class="row">
-									{% for wlc in wlcs %}
-					
-									<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
-										<div class="card flex-fill">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title"></h5>
-													</div>
+								<div class="tab-content">
+									<div class="tab-pane fade show active" id="monthly">
 
-										
-												</div>
-												<a href="{{ url_for('wlc_ssid', wlc_id=wlc.id) }}" class="btn btn-outline-primary d-inline-block mt-1 mb-4" style="font-size: 1.5em;">
-													{{ wlc.hostname }}
-												  </a>
-												<div class="mb-0">
-											
-													<p>
-														<strong>IP Address:</strong>
-														<a href="https://{{ wlc.managementIpAddress }}" target="_blank">{{ wlc.managementIpAddress }}</a>
-													</p>
-													<p><strong>MAC Address:</strong> {{ wlc.macAddress }}</p>
-													<p><strong>Model:</strong> {{ wlc.type }}</p>
-													<p><strong>Software Version:</strong> {{ wlc.softwareType }} : {{ wlc.softwareVersion }} </p>
-													<p><strong>Serial Number:</strong> {{ wlc.serialNumber }}</p>
-													<p><strong>Platform ID:</strong> {{ wlc.platformId }}</p>
-													<p><strong>Role:</strong> {{ wlc.role }}</p>
-													<p><strong>Uptime:</strong> {{ wlc.upTime }}</p>
-													<p><strong>Last Update:</strong> {{ wlc.lastUpdated }}</p>
-													<p><strong>Status:</strong> 
-														<span class="badge {% if wlc.inventoryStatusDetail == '<status><general code="SUCCESS"/></status>' %}bg-success{% else %}bg-danger{% endif %}">
-															{% if wlc.inventoryStatusDetail == '<status><general code="SUCCESS"/></status>' %}
-															  SUCESS
-															{% else %}
-															  FAILURE
-															{% endif %}
-														  </span>
-													</p>
+								
+											<div class="row">
+												{% for wlc in wlcs %}
+								
+												<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
+													<div class="card flex-fill">
+														<div class="card-body">
+															<div class="row">
+																<div class="col mt-0">
+																	<h5 class="card-title"></h5>
+																</div>
+
 													
-												</div>
-											</div>
-										</div>
-									</div>
-									{% endfor %}
-								</div>
-
-								<div class="row">
-							
-									{% for wh in wlc_health %}
-								
-									<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
-										<div class="card flex-fill">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title"></h5>
+															</div>
+															<a href="{{ url_for('wlc_ssid', dc=wlc.dc, id=wlc.id) }}" target="_blank" class="btn btn-outline-primary d-inline-block mt-1 mb-4" style="font-size: 1.5em;">
+																{{ wlc.hostname }}
+															</a>
+															<div class="mb-0">
+														
+																<p>
+																	<strong>IP Address:</strong>
+																	<a href="https://{{ wlc.managementIpAddress }}" target="_blank">{{ wlc.managementIpAddress }}</a>
+																</p>
+																<p><strong>MAC Address:</strong> {{ wlc.macAddress }}</p>
+																<p><strong>Model:</strong> {{ wlc.type }}</p>
+																<p><strong>Software Version:</strong> {{ wlc.softwareType }} : {{ wlc.softwareVersion }} </p>
+																<p><strong>Serial Number:</strong> {{ wlc.serialNumber }}</p>
+																<p><strong>Platform ID:</strong> {{ wlc.platformId }}</p>
+																<p><strong>Role:</strong> {{ wlc.role }}</p>
+																<p><strong>Uptime:</strong> {{ wlc.upTime }}</p>
+																<p><strong>Last Update:</strong> {{ wlc.lastUpdated }}</p>
+																<p><strong>Status:</strong> 
+																	<span class="badge {% if wlc.inventoryStatusDetail == '<status><general code="SUCCESS"/></status>' %}bg-success{% else %}bg-danger{% endif %}">
+																		{% if wlc.inventoryStatusDetail == '<status><general code="SUCCESS"/></status>' %}
+																		SUCESS
+																		{% else %}
+																		FAILURE
+																		{% endif %}
+																	</span>
+																</p>
+																
+															</div>
+														</div>
 													</div>
 												</div>
-												  <p  style="font-size: 1.5em;">Device Health</p>
+												{% endfor %}
+											</div>
 
-												<div class="mb-0">
-											
-													<p><strong>Temperature: </strong> {{ ((wh.maxTemperature | int) / 100) | round(1) }} C</p>
-													<p><strong>Overall Health: </strong> {{ wh.overallHealth }}</p>
-													<p><strong>Memory Utilization Health: </strong> {{ wh.memoryUtilizationHealth }} </p>
-													<p><strong>Location: </strong> {{ wh.location }}</p>
-													<p><strong>Reachbility: </strong> {{ wh.reachabilityHealth }}</p>
-													<p><strong>AP Count (All): </strong>{{ wh.apCount }}</p>
-						
+										<div class="row">
+									
+											{% for wh in wlc_health %}
+										
+											<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
+												<div class="card flex-fill">
+													<div class="card-body">
+														<div class="row">
+															<div class="col mt-0">
+																<h5 class="card-title"></h5>
+															</div>
+														</div>
+														<p  style="font-size: 1.5em;">Device Health</p>
+
+														<div class="mb-0">
+													
+															<p><strong>Temperature (<{{ ((wh.maxTemperature | int) / 100) | round(1) }} C) : </strong> {{ ((wh.avgTemperature | int) / 100) | round(1) }} C</p>
+															<p><strong>Overall Health: </strong> {{ wh.overallHealth }}</p>
+															<p><strong>Memory Utilization: </strong> {{ wh.memoryUtilization }} % </p>
+															<p><strong>Location: </strong> {{ wh.location }}</p>
+															<p><strong>Reachbility: </strong> {{ wh.reachabilityHealth }}</p>
+															<p><strong>AP Count (All): </strong>{{ wh.apCount }}</p>
+								
+														</div>
+													</div>
 												</div>
 											</div>
+											{% endfor %}
 										</div>
-									</div>
-									{% endfor %}
-								</div>
 
 								<div class="row">
 									{% for wlc in wlcs %}
@@ -144,11 +157,12 @@
 									</div>
 									{% endfor %}
 								  </div>
-
+`								</div>
 							</div>
+						</div>
 					</div>
 
-
+<!-- 
 					<div class="row">
 						<div class="col-12 col-lg-4 d-flex">
 							<div class="card flex-fill w-100">
@@ -285,7 +299,7 @@
 								</div>
 							</div>
 						</div>
-					</div>
+					</div> -->
 
 					<div class="row">
 						

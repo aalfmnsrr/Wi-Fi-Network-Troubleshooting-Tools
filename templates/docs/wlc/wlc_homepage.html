@@ -1,16 +1,12 @@
-			{% extends 'sidebar.html' %}
-			{% block body %}
+{% extends 'sidebar.html' %}
+{% block body %}
 
 			<main class="content">
 				<div class="container-fluid p-0">
 
 					<div class="row mb-2 mb-xl-3">
 						<div class="col-auto d-none d-sm-block">
-				
-
-							<h3>Details for WLC {{hostname}} </h3>
-
-
+							<h3>WLC Dashboard for MY</h3>
 						</div>
 
 						<div class="col-auto ms-auto text-end mt-n1">
@@ -31,146 +27,133 @@
 							</div>
 
 							<button class="btn btn-primary shadow-sm">
-      <i class="align-middle" data-feather="filter">&nbsp;</i>
-    </button>
-							<button class="btn btn-primary shadow-sm">
-      <i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
-    </button>
+								<i class="align-middle" data-feather="filter">&nbsp;</i>
+								</button>
+								<button class="btn btn-primary shadow-sm">
+								<i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
+								</button>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-lg-6 col-xl-5 d-flex">
-							<div class="w-100">
+			
+							<div style="margin: 170px;">
+								<div class="row" >
+									<div class="col-md-2 col-lg-12 col-xxl-6 d-flex">
+										<div class="card flex-fill">
+											<a  href ="{{ url_for('wlc', dc='APDC')}}" target="_blank" >
+											<div class="card-body">
+												<div class="row">
+													<div class="col mt-0">
+														
+														<h5 class="card-title">Data Center</h5>
+													</div>
 
-							
-
-							</div>
-						</div>
-					</div>
-
-					<div class="row">
-						<!-- <div class="col-12 col-lg-7 col-xl-8 d-flex"> -->
-							<div class="card flex-fill">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static"><i class="align-middle" data-feather="more-horizontal"></i></a>
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">SSID</h5>
-								</div>
-								<table id="datatables-dashboard-traffic" class="table table-striped my-0">
-									<thead>
-										<tr>
-											<th>ID</th>
-											<th class="d-none d-xl-table-cell">SSID</th>
-											<th class="d-none d-xl-table-cell ">Profile Name</th>
-											<th class="d-none d-xl-table-cell ">L2 Security</th>
-											<th class="d-none d-xl-table-cell ">L3 Security</th>
-											<th class="d-none d-xl-table-cell ">Admin Status</th>
-											<th class="d-none d-xl-table-cell ">Frequency</th>
-										</tr>
-									</thead>
-									<tbody>
-									
-										{% for ssid in ssids %}
-											<tr>
-												<td>{{ ssid.wlanId }}</td>
-												<td class="d-none d-xl-table-cell">{{ssid.ssidName}}</td>
-												<td class="d-none d-xl-table-cell ">{{ssid.wlanProfileName}}</td>
-												<td class="d-none d-xl-table-cell ">{{ssid.l2Security}}</td>
-												<td class="d-none d-xl-table-cell ">{{ssid.l3Security}}</td>
-												<td class="d-none d-xl-table-cell ">{{ssid.adminStatus}}</td>
-												<td class="d-none d-xl-table-cell ">{{ssid.radioPolicy}}</td>
-											</tr>
-										{% endfor %}
-
-										
-									</tbody> 
-								</table>
-							</div>
-						<!-- </div> -->
-
-					</div>
-
-					<div class="row">
-						<!-- <div class="col-12 col-lg-7 col-xl-8 d-flex"> -->
-							<div class="card flex-fill" style="width:100%; overflow-x:auto;">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static"><i class="align-middle" data-feather="more-horizontal"></i></a>
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Inteface Details</h5>
-								</div>
-								<table id="datatables-dashboard-traffic1" class="table table-striped my-0">
-									<thead>
-										<tr>
-											<th>ID</th>
-											<th class="d-none d-xl-table-cell">Interface</th>
-											<th class="d-none d-xl-table-cell">IP Address</th>
-											<th class="d-none d-xl-table-cell">MAC Address</th>
-											<th class="d-none d-xl-table-cell ">Status</th>
-											<th class="d-none d-xl-table-cell ">Duplex</th>
-											<th class="d-none d-xl-table-cell ">Speed</th>
-											<th class="d-none d-xl-table-cell ">Port Mode</th>
-											<th class="d-none d-xl-table-cell ">MTU</th>
-											<th class="d-none d-xl-table-cell ">Type</th>
-											<th class="d-none d-xl-table-cell ">Description</th>
-										</tr>
-									</thead>
-									<tbody>
-									
-										{% for i in int %}
-											<tr>
-												<td>{{ i.ifIndex }}</td>
-												<td class="d-none d-xl-table-cell">{{i.portName}}</td>
+													<div class="col-auto">
+														<div class="stat stat-sm">
+															<i class="align-middle" data-feather="arrow-up-right"></i>
 													
-												<td class="d-none d-xl-table-cell">
-													{% if i.addresses is defined and i.addresses and i.addresses|length > 0 %}
-													{% for a in i.addresses %}
-														{% if a.address.ipAddress.address is defined and a.address.ipAddress.address %}
-														{{ a.address.ipAddress.address }}{% if not loop.last %}<br>{% endif %}
-														{% endif %}
-													{% endfor %}
-													{% else %}
-													NA
-													{% endif %}
-												</td>
-  
-
-											
-
-												<td class="d-none d-xl-table-cell">{{i.macAddress}}</td>
-												<td class="d-none d-xl-table-cell ">{{i.status}}</td>
-												<td class="d-none d-xl-table-cell ">{{i.duplex}}</td>
-												<!-- <td class="d-none d-xl-table-cell  text-danger">{{i.duplex}}</td> -->
-												<td class="d-none d-xl-table-cell ">{{i.speed}}</td>
-												<td class="d-none d-xl-table-cell ">{{i.portMode}}</td>
-												<td class="d-none d-xl-table-cell ">{{i.mtu}}</td>
-												<td class="d-none d-xl-table-cell ">{{i.portType}}</td>
-												<td class="d-none d-xl-table-cell ">{{i.description}}</td>
-											</tr>
-										{% endfor %}
-
-										
-									</tbody> 
-								</table>
+														</div>
+													</div>
+												</div>
+												<span class="h1 d-inline-block mt-1 mb-4">APDC</span>
+												<div class="mb-0">
+													
+													<!-- <span class="badge badge-soft-success me-2"> +3.65% </span> -->
+													<!-- <span class="text-muted">Since last week</span> -->
+												</div>
+												
+												
+											</div></a>
+										</div>
+									</div>
+									<div class="col-md-2 col-lg-12 col-xxl-6 d-flex">
+										<div class="card flex-fill">
+											<a  href ="{{ url_for('wlc', dc='HKDC')}}" target="_blank" >
+												<div class="card-body">
+													<div class="row">
+														<div class="col mt-0">
+															
+															<h5 class="card-title">Data Center</h5>
+														</div>
+	
+														<div class="col-auto">
+															<div class="stat stat-sm">
+																<i class="align-middle" data-feather="arrow-up-right"></i>
+														
+															</div>
+														</div>
+													</div>
+													<span class="h1 d-inline-block mt-1 mb-4">HKDC</span>
+													<div class="mb-0">
+														
+														<!-- <span class="badge badge-soft-success me-2"> +3.65% </span> -->
+														<!-- <span class="text-muted">Since last week</span> -->
+													</div>
+													
+													
+												</div></a>
+										</div>
+									</div>
+								</div>
+								<div class="row d-lg-none d-xxl-flex">
+									<div class="col-md-2 col-lg-12 col-xxl-6 d-flex">
+										<div class="card flex-fill">
+											<a  href ="{{ url_for('wlc', dc='THDC')}}" target="_blank" >
+												<div class="card-body">
+													<div class="row">
+														<div class="col mt-0">
+															
+															<h5 class="card-title">Data Center</h5>
+														</div>
+	
+														<div class="col-auto">
+															<div class="stat stat-sm">
+																<i class="align-middle" data-feather="arrow-up-right"></i>
+														
+															</div>
+														</div>
+													</div>
+													<span class="h1 d-inline-block mt-1 mb-4">THDC</span>
+													<div class="mb-0">
+														
+														<!-- <span class="badge badge-soft-success me-2"> +3.65% </span> -->
+														<!-- <span class="text-muted">Since last week</span> -->
+													</div>
+													
+													
+												</div></a>
+										</div>
+									</div>
+									<div class="col-md-2 col-lg-12 col-xxl-6 d-flex">
+										<div class="card flex-fill">
+											<a  href ="{{ url_for('wlc', dc='IDDC')}}" target="_blank" >
+												<div class="card-body">
+													<div class="row">
+														<div class="col mt-0">
+															
+															<h5 class="card-title">Data Center</h5>
+														</div>
+	
+														<div class="col-auto">
+															<div class="stat stat-sm">
+																<i class="align-middle" data-feather="arrow-up-right"></i>
+														
+															</div>
+														</div>
+													</div>
+													<span class="h1 d-inline-block mt-1 mb-4">IDDC</span>
+													<div class="mb-0">
+														
+														<!-- <span class="badge badge-soft-success me-2"> +3.65% </span> -->
+														<!-- <span class="text-muted">Since last week</span> -->
+													</div>
+													
+													
+												</div></a>
+										</div>
+									</div>
+								</div>
 							</div>
-						</div>
 
-					<!-- </div> -->
 
 				</div>
 			</main>
@@ -433,73 +416,40 @@
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 			$("#datatables-dashboard-traffic").DataTable({
-				pageLength: 8,
+				pageLength: 10,
 				lengthChange: false,
 				bFilter: false,
 				autoWidth: false,
 				order: [
-					[1, "desc"]
+					[0, "desc"]
 				]
 			});
 		});
-
-		
 	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			$("#datatables-dashboard-traffic1").DataTable({
-				pageLength: 8,
-				lengthChange: false,
-				bFilter: false,
-				autoWidth: false,
-				order: [
-					[1, "desc"]
-				],
-				scrollX: true,        //
-				// scrollY: '400px',     
-				scrollCollapse: true, 
-				paging: true 
-
-			});
-		});
-
 		
-	</script>
-
-	
 	<script>
-		document.addEventListener("DOMContentLoaded", function () {
+	document.addEventListener("DOMContentLoaded", function () {
 		const commonOptions = {
-			pageLength: 10,
-			lengthChange: false,
-			searching: true,          // enable filtering
+		pageLength: 8,
+		lengthChange: false,
+		searching: false,
 			autoWidth: false,
-			// order: [[1, "desc"]],     // sort by 2nd column (SSID) descending
-			responsive: true
+		responsive: true
 		};
 
-
-		$("#datatables-ssid-1").DataTable({
-			...commonOptions,
-			order: [[1, "desc"]] // needs ≥2 columns
-		});
-
-		$("#datatables-ssid-2").DataTable({
-			...commonOptions,
-			order: [[1, "desc"]] // needs ≥2 columns
-		});
-
-		$("#datatables-ssid-3").DataTable({
+		// Initialize all tables that share the 'datatable' class
+		$(".datatable").each(function () {
+		$(this).DataTable({
 			...commonOptions,
 			order: [[0, "asc"]] // single-column table
 		});
-
-
-		// $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().draw(false);
-
 		});
+
+		$.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().draw(false);
+	});
 	</script>
 
+	
 
 </body>
 

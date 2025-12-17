@@ -1,5 +1,5 @@
 
-import requests
+import requests,json
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from config import Config
@@ -141,29 +141,39 @@ def get_devices(): # network devices
     # print(response.text)
 
 
-def get_wlc(): #get wlc
-    devices = get_devices()
-    # print(Config.devices)
+def get_wlc(dc): #get wlc
+    wlc = []
+    get_token()
 
-    Config.wlc = []
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Wireless Controller"
+    response = requests.get(url_inventory, headers=header, verify=False)
+    devices = response.json().get("response", [])
 
-    for c in devices:
-        if c.get('hostname').startswith("APDC"):
-            Config.wlc.append(c)
-            # print(json.dumps(c, indent=2))
+    if dc == "APDC":
+        for c in devices:
+            if c.get('hostname').startswith("APDC"):
+                wlc.append(c)
+    elif dc == "THDC":
+        for c in devices:
+            if c.get('hostname').startswith("TH-NTT"):
+                wlc.append(c)
+    elif dc == "IDDC":
+        for c in devices:
+            if c.get('hostname').startswith("INDO"):
+                wlc.append(c)
+    elif dc == "HKDC":
+        for c in devices:
+            if c.get('hostname').startswith("HK-NTT"):
+                wlc.append(c)
+    else:
+        print('dc not found')
 
-    wlc_IP=[]
-
-    for c in Config.wlc:
-        IP = c.get('managementIpAddress')
-        wlc_IP.append(IP)
-
-    # print(Config.wlc)
-    
-    # return wlc_IP
-
-    # print (get_wlc()[1]) ['10.54.241.253', '10.54.242.253']
-
+    return wlc
 
 def wlc_id(wlc_ip):
 
@@ -207,7 +217,7 @@ def wlc_int(wlc_id):
 def get_ssid(wlc_id):
 
     get_token()
-    get_wlc()
+
 
     url_inventory = f'{Config.dnac}/intent/api/v1/wirelessControllers/{wlc_id}/ssidDetails'
 
@@ -226,7 +236,7 @@ def get_ssid(wlc_id):
 def get_AP_in_WLC(wlc_ip):
 
     get_token()
-    get_wlc()
+
     i = 0
     ap_wlc = []  
 
@@ -248,10 +258,10 @@ def get_AP_in_WLC(wlc_ip):
     return ap_wlc
 
 
-def health_wlc(wlc_ip):
+def health_wlc(dc, wlc_ip):
     #note that both AP wlc has the same site id
     get_token()
-    get_wlc()
+   
 
     url = f"{Config.dnac}/intent/api/v1/topology/physical-topology"
     header = {
@@ -264,20 +274,38 @@ def health_wlc(wlc_ip):
 
     response = requests.get(url, headers = header, verify = False).json().get('response').get('nodes')
 
-    for r in response:
-        if "APDC3S12-WLC" in r["label"]:
-            siteId = r["additionalInfo"]["siteid"]
-    
+    if dc == "APDC":
+        for r in response:
+            if "APDC3S12-WLC" in r["label"]:
+                siteId = r["additionalInfo"]["siteid"]
+    elif dc == "THDC":
+        for r in response:
+            if "TH-NTT-02F-WLC02" in r["label"]:
+                siteId = r["additionalInfo"]["siteid"]
+    elif dc == "IDDC":
+        for r in response:
+            if "INDO01B01" in r["label"]:
+                siteId = r["additionalInfo"]["siteid"]
+    elif dc == "HKDC":
+        for r in response:
+            if "HK-NTT" in r["label"]:
+                siteId = r["additionalInfo"]["siteid"]
+    else:
+        print('dc not found')
+    print(siteId)
     url_health = f"{Config.dnac}/intent/api/v1/device-health?siteId={siteId}" 
-
+        
     response_health = requests.get(url_health, headers = header, verify = False).json().get('response')
-    #one site id contains both ap wlc
-    
-    return response_health
+    #one site id contains both wlc or other things
+
+    for r in response_health:
+        if r.get("deviceFamily") == "WIRELESS_CONTROLLER":
+            health.append(r)
+
+    return health
 
 def wlc_int(wlc_id):
     get_token()
-    get_wlc()
 
     url = f"{Config.dnac}/intent/api/v1/interface/network-device/{wlc_id}"
     header = {
@@ -302,7 +330,7 @@ def wlc_int(wlc_id):
 # wlc_int(wlc_id('10.54.241.253'))
 
 
-# get_wlc()
+# print(json.dumps(get_wlc('HKDC'), indent=2))
 
 # print(get_AP_in_WLC("10.54.242.253"))
 

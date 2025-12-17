@@ -1,6 +1,6 @@
 from flask import Flask, render_template, render_template_string
 from config import Config
-import function
+import function, json
 
 app = Flask(__name__, template_folder='templates/docs')
 
@@ -43,17 +43,17 @@ def devices():
     devices = function.get_devices()
     return render_template("network-devices.html", devices=devices)
 
-@app.route('/wlc/id=<wlc_id>', methods=['POST', 'GET'])
-def wlc_ssid(wlc_id):
-
+@app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
+def wlc_ssid(dc, id):
+    
     # id = function.wlc_id(function.get_wlc()[1])
-    ssids = function.get_ssid(wlc_id)
+    ssids = function.get_ssid(id)
 
-    interface = function.wlc_int(wlc_id)
-    wlc = Config.wlc
+    interface = function.wlc_int(id)
+    wlc = function.get_wlc(dc)
 
     for w in wlc:
-        if wlc_id == w.get('id'):
+        if id == w.get('id'):
             hostname = w.get('hostname')
 
     # print(hostname)
@@ -61,16 +61,26 @@ def wlc_ssid(wlc_id):
     return render_template("/wlc/wlc_ssid.html", hostname=hostname, ssids = ssids, int = interface)
 
 @app.route('/wlc', methods=['POST', 'GET'])
-def wlc():
-    
-    function.get_wlc()
-    ap_wlc = {}
-    wlc = Config.wlc
+def wlc_home():
 
-    for w in Config.wlc:
+    return render_template("/wlc/wlc_homepage.html")
+
+@app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
+def wlc(dc):
+    
+    # function.get_wlc(dc)
+    ap_wlc = {}
+    # print(dc)
+    wlc = function.get_wlc(dc)
+    for item in wlc:
+        item["dc"] = dc        
+
+    for w in wlc:
         ip = w['managementIpAddress']
         ap_wlc[ip] = function.get_AP_in_WLC(ip)
-        wlc_health = function.health_wlc(ip)
+        # print(ip)
+        wlc_health = function.health_wlc(dc, ip)
+        # print(json.dumps(wlc_health, indent=2))
 
     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
 
