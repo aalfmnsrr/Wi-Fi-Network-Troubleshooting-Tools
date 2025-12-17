@@ -4,7 +4,7 @@ class Config:
     username = "TACACS_USERNAME"
     password = 'TACACS_PASSWORD'
     token = ''
-    port = 5002
+    port = 5004
 
     # initial values
     floor10id = ''
