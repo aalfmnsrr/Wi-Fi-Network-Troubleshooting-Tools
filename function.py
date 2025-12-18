@@ -139,3 +139,95 @@ def get_devices(): # network devices
     devices = response.json().get("response", [])
     return devices
     # print(response.text)
+
+# Alif Switches Devices
+def get_switches(role = None): # switches devices
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Switches and Hubs"
+    params = {}
+    if role:
+        params['role'] = role
+
+    response = requests.get(url_inventory, headers = header, params = params, verify=False)
+    Config.devices = response.json().get("response", [])
+    
+
+def get_switch_details(device_id):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device?id={device_id}"
+    response = requests.get(url_inventory, headers = header, verify=False).json().get("response")
+    response = response[0]
+
+    return response
+
+def get_switch_health(device_mac):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/device-detail?identifier=macAddress&searchBy={device_mac}"
+   
+    try:
+        response = requests.get(url_inventory, headers = header, verify=False, timeout=10)
+    
+    except requests.RequestException as e:
+        raise RuntimeError(f"DNAC request failed: {e}")
+
+    if response.status_code != 200:
+        try:
+            err_body = response.json()
+        except Exception:
+            err_body = response.text
+        raise RuntimeError(f"DNAC returned {response.status_code}: {err_body}")
+    
+    try:
+        body = response.json()
+    except ValueError:
+        raise RuntimeError("DNAC returned non-JSON response")
+    
+    data = body.get("response")
+    return data
+
+def get_vlan(device_id):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/vlan"
+
+    try:
+        response = requests.get(url_inventory, headers = header, verify=False, timeout=10)
+    
+    except requests.RequestException as e:
+        raise RuntimeError(f"DNAC request failed: {e}")
+
+    if response.status_code != 200:
+        try:
+            err_body = response.json()
+        except Exception:
+            err_body = response.text
+        raise RuntimeError(f"DNAC returned {response.status_code}: {err_body}")
+
+    try:
+        body = response.json()
+    except ValueError:
+        raise RuntimeError("DNAC returned non-JSON response")
+    
+    vlan = body.get("response")
+    return vlan
