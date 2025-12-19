@@ -29,7 +29,7 @@ def session_check(func):
 @session_check
 def dashboard():
     # function.get_devices()
-    print('dashboard called')
+    # print('dashboard called')
     return render_template("dashboard.html")
 
 @app.route('/clients', methods=['POST', 'GET'])
@@ -52,7 +52,7 @@ def device_detail(client_mac):
 @session_check
 def access_points():
     access_points = function.get_ap()
-    print(len(access_points))
+    # print(len(access_points))
     # print(access_points)
     return render_template("access-points.html", access_points=access_points)
 
