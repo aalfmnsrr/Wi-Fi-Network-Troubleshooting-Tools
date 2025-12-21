@@ -3,6 +3,31 @@ import requests,json
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from config import Config
+from datetime import datetime, timedelta
+
+def get_date(*input):
+    if len(input) != 0:
+        date = datetime.now() - timedelta(days=input[0])
+    else:
+        # define variable
+        date = datetime.now()
+    year = date.strftime("%Y")
+    month = date.strftime("%m")
+    day = date.strftime("%d")
+    time = date.strftime("%H.%M")
+    # print (time)
+    return {"year": year, "month": month, "day": day, "time": time}
+
+def append_file(filename, output):
+    try:
+        if not filename:
+            file = open(filename, "w")
+        file = open(filename, "a")
+        file.writelines(output)
+        file.close()
+        return "File Successfully saved."
+    except FileNotFoundError as error:
+        return str(error)
 
 def get_ap_radio(ap_name):
     get_token()
