@@ -84,6 +84,29 @@ def wlc(dc):
 
     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
 
+@app.route('/sor', methods=['POST', 'GET'])
+def t():
+# function.get_wlc(dc)
+    ap_wlc = {}
+    # print(dc)
+    dc = 'APDC'
+    wlc = function.get_wlc(dc)
+    for item in wlc:
+        item["dc"] = dc        
+
+    for w in wlc:
+        ip = w['managementIpAddress']
+        ap_wlc[ip] = function.get_AP_in_WLC(ip)
+        # print(ap_wlc[ip])
+        # print(ip)
+        wlc_health = function.health_wlc(dc, ip)
+        # print(json.dumps(wlc_health, indent=2))
+    
+    for a in ap_wlc:
+        print(a[1])
+
+    return render_template("/sorfinatest.html" ,  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
+
 
 if __name__ == '__main__':
     # index()

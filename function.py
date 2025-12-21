@@ -250,10 +250,26 @@ def get_AP_in_WLC(wlc_ip):
     response = requests.get(url_wlc, headers=header, verify=False).json().get('response')
 
     for r in response:
-        if "MY-PCH-10F-AP" in r["hostname"]:
+        if "MY-PCH-" in r["hostname"]:
             ap_wlc.append(r)
-        elif "MY-PCH-13AF-AP" in r["hostname"]:
+            ap_wlc[-1]["office"] = "MY"
+        elif "PH-GTT" in r["hostname"]:
             ap_wlc.append(r)
+            ap_wlc[-1]["office"] = "PH"
+                # print(i.get("office"))
+        elif "SG-CPG-" in r["hostname"]:
+            ap_wlc.append(r)
+            ap_wlc[-1]["office"] = "SG"
+                # print(i.get("office"))
+                
+        # elif "MY-PCH-13AF-AP" in r["hostname"]:
+        #     ap_wlc.append(r)
+        # print(ap_wlc.get("office", []))
+
+    # for ap in ap_wlc:
+    #     print(ap.get('office'))
+
+              
 
     return ap_wlc
 
@@ -292,7 +308,7 @@ def health_wlc(dc, wlc_ip):
                 siteId = r["additionalInfo"]["siteid"]
     else:
         print('dc not found')
-    print(siteId)
+    # print(siteId)
     url_health = f"{Config.dnac}/intent/api/v1/device-health?siteId={siteId}" 
         
     response_health = requests.get(url_health, headers = header, verify = False).json().get('response')
