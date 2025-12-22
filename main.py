@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, session, redirect, url_for
 from config import Config
 from markupsafe import Markup
 from functools import wraps
-import function, access_point, client
+import json
+import function, access_point, client, wlcs
 import bcrypt
 from datetime import timedelta
 
@@ -116,6 +117,44 @@ def signout():
         return render_template("sign-in.html")
     else:
         return render_template("sign-in.html")
+
+@app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
+@session_check
+def wlc_ssid(dc, id):
+    
+    ssids = wlcs.get_ssid(id)
+
+    interface = wlcs.wlc_int(id)
+    wlc = wlcs.get_wlc(dc)
+
+    for w in wlc:
+        if id == w.get('id'):
+            hostname = w.get('hostname')
+
+    # print(hostname)
+  
+    return render_template("/wlc/wlc_ssid.html", hostname=hostname, ssids = ssids, int = interface)
+
+@app.route('/wlc', methods=['POST', 'GET'])
+@session_check
+def wlc_home():
+    return render_template("/wlc/wlc_homepage.html")
+
+@app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
+@session_check
+def wlc(dc):
+    
+    ap_wlc = {}
+    wlc = wlcs.get_wlc(dc)
+    for item in wlc:
+        item["dc"] = dc        
+
+    for w in wlc:
+        ip = w['managementIpAddress']
+        ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
+        # print(ip)
+        wlc_health = wlcs.health_wlc(dc, ip)
+    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
 
 if __name__ == '__main__':
     # index()

@@ -8,7 +8,6 @@ class Config:
     password = 'TACACS_PASSWORD'
     token = ''
     port = 5004
-    SECRET_KEY = 'SECRET_KEY'
 
     # initial values
     floor10id = ''
