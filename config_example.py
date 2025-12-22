@@ -3,6 +3,7 @@ import bcrypt
 class Config:
     # credentials
     dnac = "https://10.54.201.2/dna"
+    script_path = "PATH/TO/YOUR/SCRIPT/"
     username = "TACACS_USERNAME"
     password = 'TACACS_PASSWORD'
     token = ''
