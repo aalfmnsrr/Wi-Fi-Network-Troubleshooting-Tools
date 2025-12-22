@@ -10,8 +10,8 @@ class Config:
     port = 5004
 
     # initial values
-    floor10id = '10TH_FLOOR_ID'
-    floor13aid = '13A_FLOOR_ID'
+    floor10id = ''
+    floor13aid = ''
 
     # list of users
     users = {
