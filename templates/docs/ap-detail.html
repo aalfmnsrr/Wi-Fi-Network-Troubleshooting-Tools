@@ -187,7 +187,12 @@
 								</tr>
 								<tr>
 									<td>WLC</td>
-									<td class="d-none d-xl-table-cell">{{ wlc }}</td>
+									<td class="d-none d-xl-table-cell">
+										<a href="{{ url_for('wlc_ssid', dc=wlc_dc, id=wlc_id ) }}">
+											{{ wlcName }}
+										</a>
+									</td>
+								</a>
 								</tr>
 								<tr>
 									<td>Mode</td>
