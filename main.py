@@ -3,7 +3,7 @@ from config import Config
 from markupsafe import Markup
 from functools import wraps
 import json
-import function, access_point, client, wlcs
+import function, access_point, client, wlcs, switch
 import bcrypt
 from datetime import timedelta
 
@@ -31,6 +31,7 @@ def dashboard():
     # function.get_devices()
     # print('dashboard called')
     return render_template("dashboard.html")
+
 
 @app.route('/clients', methods=['POST', 'GET'])
 @session_check
@@ -158,6 +159,32 @@ def wlc(dc):
         # print(ip)
         wlc_health = wlcs.health_wlc(dc, ip)
     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
+
+# Alif
+@app.route('/switches', methods=['POST', 'GET'])
+def switches():
+    role_filter = request.args.get('role')
+    devices = switch.get_switches(role = role_filter)
+    return render_template("switches.html", devices=devices)
+
+@app.route('/switches/<device_id>', methods=['GET'])
+def switch_detail(device_id):
+    device = switch.get_switch_details(device_id)
+
+    device_mac = device.get('macAddress')
+    sw = switch.get_switch_health(device_mac)
+
+    vlans = switch.get_vlan(device_id)
+    vlan_count = len(vlans)
+    
+    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count)
+
+@app.route('/switches/<device_id>/vlans', methods=['GET'])
+def switch_vlans(device_id):
+    device = switch.get_switch_details(device_id)
+    vlans = switch.get_vlan(device_id)
+    
+    return render_template("sw-vlan.html", device=device, vlans=vlans)
 
 if __name__ == '__main__':
     # index()
