@@ -26,6 +26,25 @@ def append_file(filename, output):
         return "File Successfully saved."
     except FileNotFoundError as error:
         return str(error)
+    
+def get_dc(wlc_id):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url = f"{Config.dnac}/intent/api/v1/network-device/{wlc_id}"
+    response = requests.get(url, headers=header, verify=False)
+    device = response.json().get("response")
+    if device["snmpLocation"] == "Singapore Regional Data Center"or device["hostname"].startswith('APDC'):
+        return "APDC"
+    elif device["snmpLocation"] == "AXA Group Operations Hongkong" or  device["hostname"].startswith('APDC'):
+        return "HKDC"
+    elif "Thailand" in device["snmpLocation"] or  device["hostname"].startswith('TH'):
+        return "THDC"
+    elif device["snmpLocation"] == "AXA Group Operations Indonesia" or  device["hostname"].startswith('ID'):
+        return "IDDC"
 
 def get_device(dev_id):
     get_token()
