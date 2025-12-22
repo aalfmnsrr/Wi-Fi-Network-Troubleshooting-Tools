@@ -180,25 +180,7 @@ def get_switch_health(device_mac):
     
     url_inventory = f"{Config.dnac}/intent/api/v1/device-detail?identifier=macAddress&searchBy={device_mac}"
    
-    try:
-        response = requests.get(url_inventory, headers = header, verify=False, timeout=10)
-    
-    except requests.RequestException as e:
-        raise RuntimeError(f"DNAC request failed: {e}")
-
-    if response.status_code != 200:
-        try:
-            err_body = response.json()
-        except Exception:
-            err_body = response.text
-        raise RuntimeError(f"DNAC returned {response.status_code}: {err_body}")
-    
-    try:
-        body = response.json()
-    except ValueError:
-        raise RuntimeError("DNAC returned non-JSON response")
-    
-    data = body.get("response")
+    data = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return data
 
 def get_vlan(device_id):
@@ -211,23 +193,5 @@ def get_vlan(device_id):
     
     url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/vlan"
 
-    try:
-        response = requests.get(url_inventory, headers = header, verify=False, timeout=10)
-    
-    except requests.RequestException as e:
-        raise RuntimeError(f"DNAC request failed: {e}")
-
-    if response.status_code != 200:
-        try:
-            err_body = response.json()
-        except Exception:
-            err_body = response.text
-        raise RuntimeError(f"DNAC returned {response.status_code}: {err_body}")
-
-    try:
-        body = response.json()
-    except ValueError:
-        raise RuntimeError("DNAC returned non-JSON response")
-    
-    vlan = body.get("response")
+    vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return vlan

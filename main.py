@@ -9,6 +9,16 @@ def dashboard():
     function.get_devices()
     return render_template("dashboard.html")
 
+@app.route('/charts-chartjs', methods=['POST', 'GET'])
+def charts_chartjs():
+    
+    return render_template("charts-chartjs.html")
+
+@app.route('/charts-apexcharts', methods=['POST', 'GET'])
+def charts_apexcharts():
+    
+    return render_template("charts-apexcharts.html")
+
 @app.route('/clients', methods=['POST', 'GET'])
 def clients():
     clients = function.get_clients()
@@ -52,48 +62,21 @@ def switches():
 
 @app.route('/switches/<device_id>', methods=['GET'])
 def switch_detail(device_id):
-    try:
-        device = function.get_switch_details(device_id)
-        
-    except Exception as e:
-        abort(500, description = f"Failed to retrieve device details: {e}")
-    
-    if not device:
-        abort(404, description = "Switch device not found")
+    device = function.get_switch_details(device_id)
 
     device_mac = device.get('macAddress')
-    
-    sw_health = None
-    if device_mac:
-        try:
-            sw_health = function.get_switch_health(device_mac)
-        except Exception:
-            sw_health = None
-    
-    vlan_count = None
-    try:
-        vlans = function.get_vlan(device_id)
-        vlan_count = len(vlans)
-    except Exception as e:
-        print("VLAN count error:", e)
+    sw = function.get_switch_health(device_mac)
 
-    return render_template("sw-details.html", device=device, sw_health=sw_health, vlan_count=vlan_count)
+    vlans = function.get_vlan(device_id)
+    vlan_count = len(vlans)
+    
+    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count)
 
 @app.route('/switches/<device_id>/vlans', methods=['GET'])
 def switch_vlans(device_id):
-    try:
-        device = function.get_switch_details(device_id)
-        if not device:
-            abort(404, description="Switch device not found")
-    except Exception as e:
-        abort(500, description=f"Failed to retriece device details: {e}")
-
-    vlans = None
-    try:
-        vlans = function.get_vlan(device_id)
-    except Exception as e:
-        abort(500, description=f"Failed to retrieve VLANS: {e}")
-
+    device = function.get_switch_details(device_id)
+    vlans = function.get_vlan(device_id)
+    
     return render_template("sw-vlan.html", device=device, vlans=vlans)
 
 if __name__ == '__main__':

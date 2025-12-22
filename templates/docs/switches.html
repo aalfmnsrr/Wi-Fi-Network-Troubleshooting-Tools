@@ -34,12 +34,9 @@
                                         <th>Hostname</th>
                                         <th>Role</th>
                                         <th>IP Address</th>
-                                        <th>Type</th>
-                                        <th>Serial Number</th>
                                         <th>MAC Addresss</th>
-                                        <th>Software Type</th>
                                         <th>Software Version</th>
-                                        <th>Reachability Status</th>
+                                        <th>Device Type</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -48,12 +45,9 @@
                                     <td><a href = "/switches/{{device.id}}">{{ device.hostname }}</a></td>
                                     <td>{{ device.role }}</td>
                                     <td>{{ device.managementIpAddress }}</td>
-                                    <td>{{ device.type }}</td>
-                                    <td>{{ device.serialNumber }}</td>
                                     <td>{{ device.macAddress }}</td>
-                                    <td>{{ device.softwareType }}</td>
                                     <td>{{ device.softwareVersion }}</td>
-                                    <td>{{ device.reachabilityStatus }}</td>
+                                    <td>{{ device.type }}</td>
                                 </tr>
                                 {% endfor %}
                                 </tbody>
@@ -62,12 +56,9 @@
                                         <th>Hostname</th>
                                         <th>Role</th>
                                         <th>IP Address</th>
-                                        <th>Type</th>
-                                        <th>Serial Number</th>
                                         <th>MAC Addresss</th>
-                                        <th>Software Type</th>
                                         <th>Software Version</th>
-                                        <th>Reachability Status</th>
+                                        <th>Device Type</th>
                                     </tr>
                                 </tfoot>
                             </table>
