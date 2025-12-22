@@ -1,5 +1,4 @@
-
-import requests,json
+import requests, json
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from config import Config
@@ -203,7 +202,6 @@ def get_wlc(dc): #get wlc
 def wlc_id(wlc_ip):
 
     get_token()
-    get_wlc()
     url_inventory = f"https://{Config.dnac_IP}/api/v1/network-device/ip-address/{wlc_ip}"
     header = {
             'Content-Type': 'application/json',
@@ -222,8 +220,6 @@ def wlc_id(wlc_ip):
 def wlc_int(wlc_id):
 
     get_token()
-    get_wlc()
-    
     url_inventory = f"https://{Config.dnac_IP}/api/v1/interface/network-device/{wlc_id}"
 
     header = {
@@ -242,8 +238,6 @@ def wlc_int(wlc_id):
 def get_ssid(wlc_id):
 
     get_token()
-
-
     url_inventory = f'{Config.dnac}/intent/api/v1/wirelessControllers/{wlc_id}/ssidDetails'
 
     header = {
@@ -261,7 +255,6 @@ def get_ssid(wlc_id):
 def get_AP_in_WLC(wlc_ip):
 
     get_token()
-
     i = 0
     ap_wlc = []  
 
@@ -297,7 +290,6 @@ def get_AP_in_WLC(wlc_ip):
               
 
     return ap_wlc
-
 
 def health_wlc(dc, wlc_ip):
     #note that both AP wlc has the same site id
@@ -361,17 +353,3 @@ def wlc_int(wlc_id):
     #     print(r.get("portName"))
 
     return response
-
-
-# wlc_int('baa57c39-1a79-41df-9f56-4bbadd26d84f')
-
-# print(health_wlc('10.54.241.253')[1])
-# wlc_id('10.54.241.253')
-
-# wlc_int(wlc_id('10.54.241.253'))
-
-
-# print(json.dumps(get_wlc('HKDC'), indent=2))
-
-# print(get_AP_in_WLC("10.54.242.253"))
-

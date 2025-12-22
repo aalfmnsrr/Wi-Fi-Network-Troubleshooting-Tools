@@ -122,7 +122,6 @@ def signout():
 @session_check
 def wlc_ssid(dc, id):
     
-    # id = function.wlc_id(function.get_wlc()[1])
     ssids = function.get_ssid(id)
 
     interface = function.wlc_int(id)
