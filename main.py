@@ -32,15 +32,6 @@ def dashboard():
     # print('dashboard called')
     return render_template("dashboard.html")
 
-@app.route('/charts-chartjs', methods=['POST', 'GET'])
-def charts_chartjs():
-    
-    return render_template("charts-chartjs.html")
-
-@app.route('/charts-apexcharts', methods=['POST', 'GET'])
-def charts_apexcharts():
-    
-    return render_template("charts-apexcharts.html")
 
 @app.route('/clients', methods=['POST', 'GET'])
 @session_check
