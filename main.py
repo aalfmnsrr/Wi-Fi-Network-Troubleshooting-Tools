@@ -119,6 +119,7 @@ def signout():
         return render_template("sign-in.html")
 
 @app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
+@session_check
 def wlc_ssid(dc, id):
     
     # id = function.wlc_id(function.get_wlc()[1])
@@ -136,11 +137,12 @@ def wlc_ssid(dc, id):
     return render_template("/wlc/wlc_ssid.html", hostname=hostname, ssids = ssids, int = interface)
 
 @app.route('/wlc', methods=['POST', 'GET'])
+@session_check
 def wlc_home():
-
     return render_template("/wlc/wlc_homepage.html")
 
 @app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
+@session_check
 def wlc(dc):
     
     # function.get_wlc(dc)
@@ -158,30 +160,6 @@ def wlc(dc):
         # print(json.dumps(wlc_health, indent=2))
 
     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
-
-@app.route('/sor', methods=['POST', 'GET'])
-def t():
-# function.get_wlc(dc)
-    ap_wlc = {}
-    # print(dc)
-    dc = 'APDC'
-    wlc = function.get_wlc(dc)
-    for item in wlc:
-        item["dc"] = dc        
-
-    for w in wlc:
-        ip = w['managementIpAddress']
-        ap_wlc[ip] = function.get_AP_in_WLC(ip)
-        # print(ap_wlc[ip])
-        # print(ip)
-        wlc_health = function.health_wlc(dc, ip)
-        # print(json.dumps(wlc_health, indent=2))
-    
-    for a in ap_wlc:
-        print(a[1])
-
-    return render_template("/sorfinatest.html" ,  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
-
 
 if __name__ == '__main__':
     # index()
