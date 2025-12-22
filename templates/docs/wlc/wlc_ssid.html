@@ -53,14 +53,14 @@
 							<div class="card flex-fill">
 								<div class="card-header">
 									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
+										<!-- <div class="dropdown position-relative">
 											<a href="#" data-bs-toggle="dropdown" data-bs-display="static"><i class="align-middle" data-feather="more-horizontal"></i></a>
 											<div class="dropdown-menu dropdown-menu-end">
 												<a class="dropdown-item" href="#">Action</a>
 												<a class="dropdown-item" href="#">Another action</a>
 												<a class="dropdown-item" href="#">Something else here</a>
 											</div>
-										</div>
+										</div> -->
 									</div>
 									<h5 class="card-title mb-0">SSID</h5>
 								</div>
@@ -81,7 +81,7 @@
 										{% for ssid in ssids %}
 											<tr>
 												<td>{{ ssid.wlanId }}</td>
-												<td class="d-none d-xl-table-cell">{{ssid.ssidName}}</td>
+												<td class="d-none d-xl-table-cell"><strong>{{ssid.ssidName}}</strong></td>
 												<td class="d-none d-xl-table-cell ">{{ssid.wlanProfileName}}</td>
 												<td class="d-none d-xl-table-cell ">{{ssid.l2Security}}</td>
 												<td class="d-none d-xl-table-cell ">{{ssid.l3Security}}</td>
@@ -102,7 +102,7 @@
 						<!-- <div class="col-12 col-lg-7 col-xl-8 d-flex"> -->
 							<div class="card flex-fill" style="width:100%; overflow-x:auto;">
 								<div class="card-header">
-									<div class="card-actions float-end">
+									<!-- <div class="card-actions float-end">
 										<div class="dropdown position-relative">
 											<a href="#" data-bs-toggle="dropdown" data-bs-display="static"><i class="align-middle" data-feather="more-horizontal"></i></a>
 											<div class="dropdown-menu dropdown-menu-end">
@@ -111,7 +111,7 @@
 												<a class="dropdown-item" href="#">Something else here</a>
 											</div>
 										</div>
-									</div>
+									</div> -->
 									<h5 class="card-title mb-0">Inteface Details</h5>
 								</div>
 								<table id="datatables-dashboard-traffic1" class="table table-striped my-0">
@@ -135,7 +135,7 @@
 										{% for i in int %}
 											<tr>
 												<td>{{ i.ifIndex }}</td>
-												<td class="d-none d-xl-table-cell">{{i.portName}}</td>
+												<td class="d-none d-xl-table-cell"><strong>{{i.portName}}</strong></td>
 													
 												<td class="d-none d-xl-table-cell">
 													{% if i.addresses is defined and i.addresses and i.addresses|length > 0 %}

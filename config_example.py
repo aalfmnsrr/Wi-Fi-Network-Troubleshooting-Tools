@@ -3,11 +3,11 @@ import bcrypt
 class Config:
     # credentials
     dnac = "https://10.54.201.2/dna"
+    script_path = "PATH/TO/YOUR/SCRIPT/"
     username = "TACACS_USERNAME"
     password = 'TACACS_PASSWORD'
     token = ''
     port = 5004
-    SECRET_KEY = 's3cr3t-k3y!'
 
     # initial values
     floor10id = '10TH_FLOOR_ID'
