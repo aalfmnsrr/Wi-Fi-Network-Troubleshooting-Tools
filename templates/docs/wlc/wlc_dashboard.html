@@ -91,7 +91,7 @@
 									
 											{% for wh in wlc_health %}
 										
-											<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
+											<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex" >
 												<div class="card flex-fill">
 													<div class="card-body">
 														<div class="row">
@@ -101,7 +101,7 @@
 														</div>
 														<p  style="font-size: 1.5em;">Device Health</p>
 
-														<div class="mb-0">
+														<div class="mb-0" >
 													
 															<p><strong>Temperature (<{{ ((wh.maxTemperature | int) / 100) | round(1) }} C) : </strong> {{ ((wh.avgTemperature | int) / 100) | round(1) }} C</p>
 															<p><strong>Overall Health: </strong> {{ wh.overallHealth }}</p>
@@ -153,9 +153,11 @@
 														</tr>
 													</thead>
 													<tbody>
+												
 														{% for a in ap_wlc[wlc.managementIpAddress] %}
-															<tr>
-																<td style="padding-left: 70px;">{{ a.hostname if a.hostname else 'N/A' }}</td> <!-- Assuming AP has a name -->
+															<tr> 
+																<td style="padding-left: 70px;"><a href="{{url_for('ap_detail', ap_mac = a.macAddress)}}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
+																	{{ a.hostname if a.hostname else 'N/A' }}</td> 
 																<td  class="hide-column">{{ a.associatedWlcIp }}</td>
 																<td  class="hide-column">{{ a.office }}</td>
 															</tr>

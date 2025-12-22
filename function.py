@@ -208,7 +208,6 @@ def wlc_id(wlc_ip):
             'Accept': 'application/json',
             'X-Auth-Token': Config.token
         }
-
     response = requests.get(url_inventory, headers=header, verify=False)
 
     # print(json.dumps(response.json(), indent=2))
@@ -245,7 +244,6 @@ def get_ssid(wlc_id):
             'Accept': 'application/json',
             'X-Auth-Token': Config.token
         }
-
     response = requests.get(url_inventory, headers=header, verify=False)
 
     response = response.json().get('response')
@@ -274,21 +272,10 @@ def get_AP_in_WLC(wlc_ip):
         elif "PH-GTT" in r["hostname"]:
             ap_wlc.append(r)
             ap_wlc[-1]["office"] = "PH"
-                # print(i.get("office"))
         elif "SG-CPG-" in r["hostname"]:
             ap_wlc.append(r)
             ap_wlc[-1]["office"] = "SG"
-                # print(i.get("office"))
                 
-        # elif "MY-PCH-13AF-AP" in r["hostname"]:
-        #     ap_wlc.append(r)
-        # print(ap_wlc.get("office", []))
-
-    # for ap in ap_wlc:
-    #     print(ap.get('office'))
-
-              
-
     return ap_wlc
 
 def health_wlc(dc, wlc_ip):
@@ -348,8 +335,5 @@ def wlc_int(wlc_id):
     } 
 
     response = requests.get(url, headers = header, verify = False).json().get('response')
-
-    # for r in response:
-    #     print(r.get("portName"))
 
     return response

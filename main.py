@@ -144,9 +144,7 @@ def wlc_home():
 @session_check
 def wlc(dc):
     
-    # function.get_wlc(dc)
     ap_wlc = {}
-    # print(dc)
     wlc = function.get_wlc(dc)
     for item in wlc:
         item["dc"] = dc        
@@ -156,8 +154,6 @@ def wlc(dc):
         ap_wlc[ip] = function.get_AP_in_WLC(ip)
         # print(ip)
         wlc_health = function.health_wlc(dc, ip)
-        # print(json.dumps(wlc_health, indent=2))
-
     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
 
 if __name__ == '__main__':
