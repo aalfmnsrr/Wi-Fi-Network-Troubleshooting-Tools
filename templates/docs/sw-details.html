@@ -208,6 +208,11 @@
                                 <td class="d-none d-xl-table-cell" style="color: red;">{{ device.reachabilityFailureReason | capitalize }}</td>
                             {% endif %}
                         </tr>
+                        <tr>
+                            <td>AP</td>
+                            <td class="d-none d-xl-table-cell"><a href="{{ url_for('switch_access_points', device_id=device_id) }}">{{ ap_cnt }}</a></td>
+                        </tr>
+
                     </tbody>
                 </table>
             </div>

@@ -167,24 +167,51 @@ def switches():
     devices = switch.get_switches(role = role_filter)
     return render_template("switches.html", devices=devices)
 
+
+@app.route('/switches/<device_id>/aps', methods=['GET'])
+@session_check
+def switch_access_points(device_id):
+    # APs connected to this switch only
+    sw = function.get_device(device_id)
+    aps = switch.get_ap_neighbors(device_id)
+    return render_template("access-points.html", access_points=aps, source_switch=device_id, sw=sw)
+
+
 @app.route('/switches/<device_id>', methods=['GET'])
 def switch_detail(device_id):
-    device = switch.get_switch_details(device_id)
+    device = function.get_device(device_id)
 
     device_mac = device.get('macAddress')
-    sw = switch.get_switch_health(device_mac)
+    sw = function.get_device_detail(device_mac)
 
     vlans = switch.get_vlan(device_id)
     vlan_count = len(vlans)
+
+    access_points = []
+    access_points = switch.get_ap_neighbors(device_id)
+    ap_cnt = len(access_points)
+
+    ap_groups = switch.group_ap_labels_by_floor(access_points)
     
-    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count)
+    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count, access_points = access_points, ap_cnt = ap_cnt, ap_groups = ap_groups, device_id = device_id)
 
 @app.route('/switches/<device_id>/vlans', methods=['GET'])
 def switch_vlans(device_id):
-    device = switch.get_switch_details(device_id)
+    device = function.get_device(device_id)
     vlans = switch.get_vlan(device_id)
     
     return render_template("sw-vlan.html", device=device, vlans=vlans)
+
+# @app.route('/access-points', methods=["POST", "GET"])
+# @session_check
+# def access_points_neighbor():
+#     aps = access_point.get_ap()
+
+#     ap_neighbor = []
+#     for item in aps:
+#         ap_neighbor = [x for x in aps if x.split('-')[2] == floor]    
+    
+#     return render_template("access-points.html", ap_neighbor = ap_neighbor)
 
 if __name__ == '__main__':
     # index()

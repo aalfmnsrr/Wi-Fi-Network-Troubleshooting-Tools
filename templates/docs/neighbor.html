@@ -1,0 +1,28 @@
+
+<!-- sw-details.html -->
+
+<h2>Connected Access Points</h2>
+<ul>
+  {% for ap in ap_neighbors %}
+    <li>
+      {{ ap.label }}
+      {% if ap.ip %} ({{ ap.ip }}){% endif %}
+      {% if ap.family %} — {{ ap.family }}{% endif %}
+    </li>
+  {% else %}
+    <li>No APs directly connected to this switch.</li>
+  {% endfor %}
+</ul>
+
+{% if ap_groups %}
+  <hr>
+  <h3>APs by Floor</h3>
+  {% for floor, aps in ap_groups.items() %}
+    <strong>{{ floor }}</strong>
+    <ul>
+      {% for name in aps %}
+        <li>{{ name }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+{% endif %}
