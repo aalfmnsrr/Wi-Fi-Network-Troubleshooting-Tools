@@ -3,7 +3,7 @@ from config import Config
 from markupsafe import Markup
 from functools import wraps
 import json
-import function, access_point, client, wlcs
+import function, access_point, client, wlcs, switch
 import bcrypt
 from datetime import timedelta
 
@@ -32,6 +32,7 @@ def dashboard():
     # print('dashboard called')
     return render_template("dashboard.html")
 
+
 @app.route('/clients', methods=['POST', 'GET'])
 @session_check
 def clients():
@@ -53,26 +54,18 @@ def device_detail(client_mac):
 def access_points():
     access_points = access_point.get_ap()
     return render_template("access-points.html", 
-                           access_points=access_points, 
-                           my_ap = Config.my_ap,
-                           th_ap = Config.th_ap,
-                           id_ap = Config.id_ap,
-                           ph_ap = Config.ph_ap,
-                           hk_ap = Config.hk_ap,
-                           sg_ap = Config.sg_ap,
-                           mo_ap = Config.mo_ap,
-                           )
+                           access_points=access_points)
 
-@app.route('/access_points/<ap_mac>', methods=['POST', 'GET'])
+@app.route('/access_points/<ap_mac>/<site_id>', methods=['POST', 'GET'])
 @session_check
-def ap_detail(ap_mac):
+def ap_detail(ap_mac, site_id):
+
     ap = function.get_device_detail(ap_mac)
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
     wlc_dc = function.get_dc(wlc_id)
-    print(wlc_id, wlcName, wlc_dc)
     ap_details = function.get_device(ap.get("nwDeviceId"))
-    radio = access_point.get_ap_radio(ap.get("nwDeviceName"))
+    radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio)
 
 @app.route('/network-devices', methods=['POST', 'GET'])
@@ -165,6 +158,32 @@ def wlc(dc):
         # print(ip)
         wlc_health = wlcs.health_wlc(dc, ip)
     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
+
+# Alif
+@app.route('/switches', methods=['POST', 'GET'])
+def switches():
+    role_filter = request.args.get('role')
+    devices = switch.get_switches(role = role_filter)
+    return render_template("switches.html", devices=devices)
+
+@app.route('/switches/<device_id>', methods=['GET'])
+def switch_detail(device_id):
+    device = switch.get_switch_details(device_id)
+
+    device_mac = device.get('macAddress')
+    sw = switch.get_switch_health(device_mac)
+
+    vlans = switch.get_vlan(device_id)
+    vlan_count = len(vlans)
+    
+    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count)
+
+@app.route('/switches/<device_id>/vlans', methods=['GET'])
+def switch_vlans(device_id):
+    device = switch.get_switch_details(device_id)
+    vlans = switch.get_vlan(device_id)
+    
+    return render_template("sw-vlan.html", device=device, vlans=vlans)
 
 if __name__ == '__main__':
     # index()
