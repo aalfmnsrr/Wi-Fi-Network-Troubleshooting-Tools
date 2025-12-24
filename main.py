@@ -44,29 +44,28 @@ def clients():
 @app.route('/client-detail/<client_mac>', methods=['POST', 'GET'])
 @session_check
 def device_detail(client_mac):
-    client = client.get_client_enrichment_detail(client_mac)
-    connectedAP = client["connectedDevice"][0].get("deviceDetails")
-    client = client["userDetails"]
-    return render_template('client-detail.html', client=client, connectedAP=connectedAP)
+    clients = client.get_client_enrichment_detail(client_mac)
+    connectedAP = clients["connectedDevice"][0].get("deviceDetails")
+    clients = clients["userDetails"]
+    return render_template('client-detail.html', client=clients, connectedAP=connectedAP)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
 def access_points():
     access_points = access_point.get_ap()
-    # print(len(access_points))
-    # print(access_points)
-    return render_template("access-points.html", access_points=access_points)
+    return render_template("access-points.html", 
+                           access_points=access_points)
 
-@app.route('/access_points/<ap_mac>', methods=['POST', 'GET'])
+@app.route('/access_points/<ap_mac>/<site_id>', methods=['POST', 'GET'])
 @session_check
-def ap_detail(ap_mac):
+def ap_detail(ap_mac, site_id):
+
     ap = function.get_device_detail(ap_mac)
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
     wlc_dc = function.get_dc(wlc_id)
-    print(wlc_id, wlcName, wlc_dc)
     ap_details = function.get_device(ap.get("nwDeviceId"))
-    radio = access_point.get_ap_radio(ap.get("nwDeviceName"))
+    radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio)
 
 @app.route('/network-devices', methods=['POST', 'GET'])
