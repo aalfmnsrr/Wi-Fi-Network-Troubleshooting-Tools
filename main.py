@@ -43,18 +43,25 @@ def clients():
 @app.route('/client-detail/<client_mac>', methods=['POST', 'GET'])
 @session_check
 def device_detail(client_mac):
-    client = client.get_client_enrichment_detail(client_mac)
-    connectedAP = client["connectedDevice"][0].get("deviceDetails")
-    client = client["userDetails"]
-    return render_template('client-detail.html', client=client, connectedAP=connectedAP)
+    clients = client.get_client_enrichment_detail(client_mac)
+    connectedAP = clients["connectedDevice"][0].get("deviceDetails")
+    clients = clients["userDetails"]
+    return render_template('client-detail.html', client=clients, connectedAP=connectedAP)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
 def access_points():
     access_points = access_point.get_ap()
-    # print(len(access_points))
-    # print(access_points)
-    return render_template("access-points.html", access_points=access_points)
+    return render_template("access-points.html", 
+                           access_points=access_points, 
+                           my_ap = Config.my_ap,
+                           th_ap = Config.th_ap,
+                           id_ap = Config.id_ap,
+                           ph_ap = Config.ph_ap,
+                           hk_ap = Config.hk_ap,
+                           sg_ap = Config.sg_ap,
+                           mo_ap = Config.mo_ap,
+                           )
 
 @app.route('/access_points/<ap_mac>', methods=['POST', 'GET'])
 @session_check

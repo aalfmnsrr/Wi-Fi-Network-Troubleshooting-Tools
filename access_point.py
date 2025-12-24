@@ -28,7 +28,7 @@ def get_ap():
     }
     response = requests.get(url, headers=header, verify=False).json().get("response").get("nodes")
     for r in response:
-        if "MY-PCH-10F-AP" in r["label"] or "MY-PCH-13AF-AP" in r["label"]:
+        if "Access Point" in r["deviceType"]:
             access_points.append(r)
     # print(len(access_points))
     ind = 0
@@ -38,7 +38,23 @@ def get_ap():
         if current_ap == next_ap:
             access_points.remove(next_ap)
         ind += 1
+    get_ap_by_country(access_points)
     return access_points
+
+def get_ap_by_country(ap):
+    for node in ap:
+        if "TH" in node['label']:
+            Config.th_ap.append(node)
+        elif "MY" in node['label']:
+            Config.my_ap.append(node)
+        elif "ID" in node['label']:
+            Config.id_ap.append(node)
+        elif "HK" in node['label']:
+            Config.hk_ap.append(node)
+        elif "SG" in node['label']:
+            Config.sg_ap.append(node)
+        elif "MO" in node['label']:
+            Config.mo_ap.append(node)
 
 def get_ap_radio(ap_name):
     function.get_token()
