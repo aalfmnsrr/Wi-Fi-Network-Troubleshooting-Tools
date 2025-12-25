@@ -19,7 +19,7 @@
                 <div class="col-auto ms-auto text-end mt-n1">
 
                     <div class="dropdown me-2 d-inline-block position-relative">
-                        <a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                        <a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropDOWN" data-bs-display="static">
                         <i class="align-middle mt-n1" data-feather="calendar"></i> Today
                     </a>
 
@@ -50,7 +50,7 @@
                                         <h3 class="mb-2">{{ sw.overallHealth }}</h3>
                                         <p class="mb-2">Overall Health</p>
                                         {% if 5 > sw.overallHealth %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
                                         {% else %}
                                             <i class="align-middle text-success" data-feather="thumbs-up"></i>
                                         {% endif %}
@@ -73,7 +73,7 @@
                                         <p class="mb-2">CPU Utilization</p>
                                         {% set cpu_val = sw.cpu|default('0')|replace('%','')|float %}
                                         {% if cpu_val > 90 %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
                                         {% else %}
                                             <i class="align-middle text-success" data-feather="thumbs-up"></i>
                                         {% endif %}
@@ -102,7 +102,7 @@
                                         <p class="mb-2">Memory</p>
                                         {% set mem_val = sw.cpu|default('0')|replace('%','')|float %}
                                         {% if mem_val > 90 %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
                                         {% else %}
                                             <i class="align-middle text-success" data-feather="thumbs-up"></i>
                                         {% endif %}
@@ -139,82 +139,144 @@
                         </div>
                     </div>
             </div>
+            <div class="row">
 
-            <div class="card flex-fill">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Switch Details</h5>
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Switch Details</h5>
+                    </div>
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th class="d-none d-xl-table-cell">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Name</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.nwDeviceName }}</td>
+                            </tr>
+                            <tr>
+                                <td>IP Address</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.ip_addr_managementIpAddr }}</td>
+                            </tr>
+                            <tr>
+                                <td>MAC Address</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.macAddress }}</td>
+                            </tr>
+                            <tr>
+                                <td>Series</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.deviceSeries }}</td>
+                            </tr>
+                            <tr>
+                                <td>Software Version</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.softwareVersion }}</td>
+                            </tr>
+                            <tr>
+                                <td>Serial Number</td>
+                                <td class="d-none d-xl-table-cell">{{ device.serialNumber }}</td>
+                            </tr>
+                            <tr>
+                                <td>VLAN Count</td>
+                                <td><a href = "/switches/{{device.id}}/vlans">{{ vlan_count | default('-', true)}}</a></td>
+                            </tr>
+                            <tr>
+                                <td>AP</td>
+                                <td class="d-none d-xl-table-cell">
+                                    <a href="{{ url_for('switch_access_points', device_id=device_id) }}">
+                                    {{ ap_cnt }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Maintenance Mode</td>
+                                <td>{{ sw.maintenanceMode | capitalize }}</td>
+                            </tr>
+                            <tr>
+                                <td>Error Code</td>
+                                {% if device.errorCode == 'null' %}
+                                    <td>N/A</td>
+                                {% else %}
+                                    <td style="color: red;">{{ device.errorCode | capitalize }}</td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Error Description</td>
+                                {% if not device.errorDescription %}
+                                    <td>N/A</td>
+                                {% else %}
+                                    <td style="color: red;">{{ device.errorDescription | capitalize }}</td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Reachability Failure Reason</td>
+                                {% if device.reachabilityFailureReason == '' or 'N/A' %}
+                                    <td>N/A</td>
+                                {% else %}
+                                    <td style="color: red;">{{ device.reachabilityFailureReason | capitalize }}</td>
+                                {% endif %}
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <table id="datatables-dashboard-projects" class="table table-striped my-0">
-                    <thead>
-                        <tr>
-                            <th>Key</th>
-                            <th class="d-none d-xl-table-cell">Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Name</td>
-                            <td class="d-none d-xl-table-cell">{{ sw.nwDeviceName }}</td>
-                        </tr>
-                        <tr>
-                            <td>IP Address</td>
-                            <td class="d-none d-xl-table-cell">{{ sw.ip_addr_managementIpAddr }}</td>
-                        </tr>
-                        <tr>
-                            <td>MAC Address</td>
-                            <td class="d-none d-xl-table-cell">{{ sw.macAddress }}</td>
-                        </tr>
-                        <tr>
-                            <td>Series</td>
-                            <td class="d-none d-xl-table-cell">{{ sw.deviceSeries }}</td>
-                        </tr>
-                        <tr>
-                            <td>Software Version</td>
-                            <td class="d-none d-xl-table-cell">{{ sw.softwareVersion }}</td>
-                        </tr>
-                        <tr>
-                            <td>Serial Number</td>
-                            <td class="d-none d-xl-table-cell">{{ device.serialNumber }}</td>
-                        </tr>
-                        <tr>
-                            <td>VLAN Count</td>
-                            <td class="d-none d-xl-table-cell"><a href = "/switches/{{device.id}}/vlans">{{ vlan_count | default('-', true)}}</a></td>
-                        </tr>
-                        <tr>
-                            <td>Maintenance Mode</td>
-                            <td class="d-none d-xl-table-cell">{{ sw.maintenanceMode | capitalize }}</td>
-                        </tr>
-                        <tr>
-                            <td>Error Code</td>
-                            {% if device.errorCode == 'null' %}
-                                <td class="d-none d-xl-table-cell">N/A</td>
-                            {% else %}
-                                <td class="d-none d-xl-table-cell" style="color: red;">{{ device.errorCode | capitalize }}</td>
-                            {% endif %}
-                        </tr>
-                        <tr>
-                            <td>Error Description</td>
-                            {% if not device.errorDescription %}
-                                <td class="d-none d-xl-table-cell">N/A</td>
-                            {% else %}
-                                <td class="d-none d-xl-table-cell" style="color: red;">{{ device.errorDescription | capitalize }}</td>
-                            {% endif %}
-                        </tr>
-                        <tr>
-                            <td>Reachability Failure Reason</td>
-                            {% if device.reachabilityFailureReason == '' or 'N/A' %}
-                                <td class="d-none d-xl-table-cell">N/A</td>
-                            {% else %}
-                                <td class="d-none d-xl-table-cell" style="color: red;">{{ device.reachabilityFailureReason | capitalize }}</td>
-                            {% endif %}
-                        </tr>
-                        <tr>
-                            <td>AP</td>
-                            <td class="d-none d-xl-table-cell"><a href="{{ url_for('switch_access_points', device_id=device_id) }}">{{ ap_cnt }}</a></td>
-                        </tr>
-
-                    </tbody>
-                </table>
+            </div>
+            <div class="row">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Interface Details</h5>
+                    </div>
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                        <thead>
+                            <tr>
+                                <th>Interface Name</th>
+                                <th>Operational Status</th>
+                                <th>Admin Status</th>
+                                <th>Port Channel ID</th>
+                                <th>Type</th>
+                                <th>Allowed VLAN(s)</th>
+                                <th>Link Speed</th>
+                                <th>Duplex</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for intf in sw_interface %}
+                            <tr>
+                                <td>{{ intf.name | default('-', true) }}</td>
+    
+                                {% set oper = (intf.operStatus | default('', true)) %}
+                                {% if not oper or oper == 'DOWN' %}
+                                    <td style="color: red;">{{ oper or 'DOWN' }}</td>
+                                {% else %}
+                                    <td style="color: green;">{{ oper }}</td>
+                                {% endif %}
+           
+                                {% set admin = (intf.adminStatus | default('', true)) %}
+                                {% if not admin or admin == 'DOWN' %}
+                                    <td style="color: red;">{{ admin or 'DOWN' }}</td>
+                                {% else %}
+                                    <td style="color: green;">{{ admin }}</td>
+                                {% endif %}
+    
+                                {% set pcID = (intf.portChannelId | default('', true)) %}
+                                {% if not pcID or pcID == "-1.0" %}
+                                    <td> - </td>
+                                {% else %}
+                                    <td>{{ pcID }}</td>
+                                {% endif %}
+                           
+                                <td>{{ intf.portMode | default('-', true) }}</td>
+                            
+                                <td>{{ intf.vlanId | default('-', true) }}</td>
+                            
+                                <td>{{ intf.speed_fmt | default('-', true) }}</td>
+                            
+                                <td>{{ intf.duplexOper | default('-', true) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -246,9 +308,8 @@
             </div>
         </div>
     </footer>
-</div>
-</div>
-<script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {

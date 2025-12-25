@@ -165,6 +165,48 @@ def group_ap_labels_by_floor(ap_nodes):
 #     data = requests.get(url_inventory, headers=header, verify=False).json().get("response")
 #     return data
 
+def get_interface(device_id):
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/data/api/v1/interfaces?networkDeviceId={device_id}"
+   
+    interfaces = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return interfaces
+
+
+# /Alip/ap-wifi-tools/switch.py
+
+def format_speed_kbps(value):
+    """
+    Convert numeric speed from Kbps to a human-friendly string:
+    - 1,000,000 Kbps => 1.00 Gbps
+    - 100,000 Kbps   => 100 Mbps
+    - 500 Kbps       => 500 Kbps
+    Handles None/empty gracefully.
+    """
+    if value is None:
+        return '-'
+    try:
+        s = str(value).strip()
+        if not s:
+            return '-'
+        n = int(s)  # n is Kbps (as per DNAC)
+    except Exception:
+        # Non-numeric strings pass through
+        return str(value)
+
+    if n >= 1_000_000:
+        return f"{n / 1_000_000:.0f} Gbps"
+    elif n >= 1_000:
+        return f"{n / 1_000:.0f} Mbps"
+    else:
+        return f"{n} Kbps"
+
 def get_vlan(device_id):
     function.get_token()
     header = {

@@ -190,10 +190,26 @@ def switch_detail(device_id):
     access_points = []
     access_points = switch.get_ap_neighbors(device_id)
     ap_cnt = len(access_points)
-
     ap_groups = switch.group_ap_labels_by_floor(access_points)
-    
-    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count, access_points = access_points, ap_cnt = ap_cnt, ap_groups = ap_groups, device_id = device_id)
+
+    sw_interface = switch.get_interface(device_id)
+    # Decorate each interface with a formatted speed string
+    # Ensure sw_interface is a list/dict iterable; adjust if your structure is different
+    if isinstance(sw_interface, list):
+        for intf in sw_interface:
+            intf['speed_fmt'] = switch.format_speed_kbps(intf.get('speed'))
+    elif isinstance(sw_interface, dict):
+        # In some payloads interfaces are under a key like 'interfaces'
+        interfaces = sw_interface.get('interfaces', [])
+        for intf in interfaces:
+            intf['speed_fmt'] = switch.format_speed_kbps(intf.get('speed'))
+        # If you want to render the nested list, reassign:
+        sw_interface = interfaces
+
+
+    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count, 
+    access_points = access_points, ap_cnt = ap_cnt, ap_groups = ap_groups, device_id = device_id, 
+    sw_interface = sw_interface)
 
 @app.route('/switches/<device_id>/vlans', methods=['GET'])
 def switch_vlans(device_id):
