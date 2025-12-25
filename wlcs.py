@@ -19,18 +19,22 @@ def get_wlc(dc): #get wlc
         for c in devices:
             if c.get('hostname').startswith("APDC"):
                 wlc.append(c)
+                wlc[-1]["dc"] = "APDC"
     elif dc == "THDC":
         for c in devices:
             if c.get('hostname').startswith("TH-NTT"):
                 wlc.append(c)
+                wlc[-1]["dc"] = "THDC"
     elif dc == "IDDC":
         for c in devices:
             if c.get('hostname').startswith("INDO"):
                 wlc.append(c)
+                wlc[-1]["dc"] = "IDDC"
     elif dc == "HKDC":
         for c in devices:
             if c.get('hostname').startswith("HK-NTT"):
                 wlc.append(c)
+                wlc[-1]["dc"] = "HKDC"
     else:
         print('dc not found')
 
@@ -112,6 +116,8 @@ def get_AP_in_WLC(wlc_ip):
         elif "SG-CPG-" in r["hostname"]:
             ap_wlc.append(r)
             ap_wlc[-1]["office"] = "SG"
+        else:
+            ap_wlc.append(r)
                 
     return ap_wlc
 
@@ -134,23 +140,23 @@ def health_wlc(dc, wlc_ip):
     if dc == "APDC":
         for r in response:
             if "APDC3S12-WLC" in r["label"]:
-                siteId = r["additionalInfo"]["siteid"]
+                siteIdWlc = r["additionalInfo"]["siteid"]
     elif dc == "THDC":
         for r in response:
             if "TH-NTT-02F-WLC02" in r["label"]:
-                siteId = r["additionalInfo"]["siteid"]
+                siteIdWlc = r["additionalInfo"]["siteid"]
     elif dc == "IDDC":
         for r in response:
             if "INDO01B01" in r["label"]:
-                siteId = r["additionalInfo"]["siteid"]
+                siteIdWlc = r["additionalInfo"]["siteid"]
     elif dc == "HKDC":
         for r in response:
             if "HK-NTT" in r["label"]:
-                siteId = r["additionalInfo"]["siteid"]
+                siteIdWlc = r["additionalInfo"]["siteid"]
     else:
         print('dc not found')
     # print(siteId)
-    url_health = f"{Config.dnac}/intent/api/v1/device-health?siteId={siteId}" 
+    url_health = f"{Config.dnac}/intent/api/v1/device-health?siteId={siteIdWlc}" 
         
     response_health = requests.get(url_health, headers = header, verify = False).json().get('response')
     #one site id contains both wlc or other things
