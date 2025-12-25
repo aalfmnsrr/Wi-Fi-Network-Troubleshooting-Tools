@@ -154,12 +154,16 @@
 													</thead>
 													<tbody>
 												
-														{% for a in ap_wlc[wlc.managementIpAddress] %}
+														{% for ap in ap_wlc[wlc.managementIpAddress] %}
 															<tr> 
-																<td style="padding-left: 70px;"><a href="{{url_for('ap_detail', ap_mac = a.macAddress)}}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
-																	{{ a.hostname if a.hostname else 'N/A' }}</td> 
-																<td  class="hide-column">{{ a.associatedWlcIp }}</td>
-																<td  class="hide-column">{{ a.office }}</td>
+																{% for a in aps %}
+																	{% if ap.hostname == a.label%}
+																		<td style="padding-left: 70px;"><a href="{{ url_for('ap_detail', ap_mac = ap.macAddress, site_id=a.additionalInfo.siteid) }}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
+																			{{ ap.hostname if ap.hostname else 'N/A' }}</td> 
+																		<td  class="hide-column">{{ ap.associatedWlcIp }}</td>
+																		<td  class="hide-column">{{ ap.office }}</td>
+																	{% endif %}
+																{% endfor %}
 															</tr>
 														{% endfor %}
 													</tbody>

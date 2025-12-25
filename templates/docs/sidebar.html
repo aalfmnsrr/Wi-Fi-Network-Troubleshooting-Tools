@@ -30,7 +30,7 @@
 	<div class="wrapper">
     <nav id="sidebar" class="sidebar">
                 <div class="sidebar-content js-simplebar">
-                    <a class="sidebar-brand" href="index.html">
+                    <a class="sidebar-brand" href="{{ url_for('dashboard') }}">
             <img src="{{ url_for('static', filename='/assets/img/AGO!.png') }}" alt="AXA GO" x="0px" y="0px"
             width="120px" height="120px" viewBox="0 0 20 20" enable-background="new 0 0 20 20">
             </a>
@@ -62,6 +62,15 @@
                             <a class="sidebar-link" href ="{{ url_for('wlc_home') }}">
                                 <i class="align-middle" data-feather="wifi"></i> <span class="align-middle">Wireless Controllers</span>
                             </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a data-bs-target="#maps" data-bs-toggle="collapse" href ="{{ url_for('wlc_home') }}" class="sidebar-link collapsed"><i class="align-middle" data-feather="wifi"></i> <span class="align-middle">Wireless Controllers</span></a>
+                            <ul id="maps" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                                <li class="sidebar-item"><a class="sidebar-link" href="{{ url_for('wlc', dc='APDC')}}">Regional DC</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="{{ url_for('wlc', dc='HKDC')}}">Hong Kong DC</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="{{ url_for('wlc', dc='THDC')}}">Thailand DC</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="{{ url_for('wlc', dc='IDDC')}}">Indonesia DC</a></li>
+                            </ul>
                         </li>
                         <li class="sidebar-item">
                             <a class="sidebar-link" href ="{{ url_for('switches') }}">

@@ -157,7 +157,10 @@ def wlc(dc):
         ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
         # print(ip)
         wlc_health = wlcs.health_wlc(dc, ip)
-    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
+
+    aps = access_point.get_ap()
+
+    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc, aps = aps)
 
 # Alif
 @app.route('/switches', methods=['POST', 'GET'])
