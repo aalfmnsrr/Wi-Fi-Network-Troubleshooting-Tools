@@ -42,240 +42,271 @@
                 </div>
             </div>
             <div class="row">  
-                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h3 class="mb-2">{{ sw.overallHealth }}</h3>
-                                        <p class="mb-2">Overall Health</p>
-                                        {% if 5 > sw.overallHealth %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <h3 class="mb-2">{{ sw.overallHealth }}</h3>
+                                    <p class="mb-2">Overall Health</p>
+                                    {% if 5 > sw.overallHealth %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-success" data-feather="activity"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <h3 class="mb-2">
+                                        {% if sw and sw.cpu is not none %}
+                                        {{ "{:,.2f}".format(sw.cpu|float) }} %
                                         {% else %}
-                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        —
                                         {% endif %}
-                                    </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-success" data-feather="activity"></i>
-                                        </div>
+                                    </h3>
+                                    <p class="mb-2">CPU Utilization</p>
+                                    {% set cpu_val = sw.cpu|default('0')|replace('%','')|float %}
+                                    {% if cpu_val > 90 %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-success" data-feather="cpu"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h3 class="mb-2">{{ sw.cpu }}%</h3>
-                                        <p class="mb-2">CPU Utilization</p>
-                                        {% set cpu_val = sw.cpu|default('0')|replace('%','')|float %}
-                                        {% if cpu_val > 90 %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                </div>
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <h3 class="mb-2">
+                                        {% if sw and sw.memory is not none %}
+                                        {{ "{:,.2f}".format(sw.memory|float) }} %
                                         {% else %}
-                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        —
                                         {% endif %}
-                                    </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-success" data-feather="cpu"></i>
-                                        </div>
+                                    </h3>
+                                    <p class="mb-2">Memory</p>
+                                    {% set mem_val = sw.memory|default('0')|replace('%','')|float %}
+                                    {% if mem_val > 90 %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-danger" data-feather="hard-drive"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h3 class="mb-2">
-                                            {% if sw and sw.memory is not none %}
-                                            {{ "{:,.2f}".format(sw.memory|float) }} %
-                                            {% else %}
-                                            —
-                                            {% endif %}
-                                        </h3>
-                                        <p class="mb-2">Memory</p>
-                                        {% set mem_val = sw.cpu|default('0')|replace('%','')|float %}
-                                        {% if mem_val > 90 %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
-                                        {% else %}
-                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
-                                        {% endif %}
+                </div>
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    {% set parts = device.upTime.split(',') %}
+                                        <h3 class="mb-2">{{ parts[0] }}</h3>
+                                    <p class="mb-2">Uptime</p>
+                                    <div class="mb-0">
+                                        <!-- <span class="badge badge-soft-success me-2"> +8.65% </span> -->
+                                        <span class="text-muted">At {{ parts[1] }}</span>
                                     </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-danger" data-feather="hard-drive"></i>
-                                        </div>
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-info" data-feather="chevrons-up"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        {% set parts = device.upTime.split(',') %}
-                                            <h3 class="mb-2">{{ parts[0] }}</h3>
-                                        <p class="mb-2">Uptime</p>
-                                        <div class="mb-0">
-                                            <!-- <span class="badge badge-soft-success me-2"> +8.65% </span> -->
-                                            <span class="text-muted">At {{ parts[1] }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-info" data-feather="chevrons-up"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            </div>
-            <div class="row">
-
-                <div class="card flex-fill">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Switch Details</h5>
-                    </div>
-                    <table id="datatables-dashboard-projects" class="table table-striped my-0">
-                        <thead>
-                            <tr>
-                                <th>Key</th>
-                                <th class="d-none d-xl-table-cell">Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Name</td>
-                                <td class="d-none d-xl-table-cell">{{ sw.nwDeviceName }}</td>
-                            </tr>
-                            <tr>
-                                <td>IP Address</td>
-                                <td class="d-none d-xl-table-cell">{{ sw.ip_addr_managementIpAddr }}</td>
-                            </tr>
-                            <tr>
-                                <td>MAC Address</td>
-                                <td class="d-none d-xl-table-cell">{{ sw.macAddress }}</td>
-                            </tr>
-                            <tr>
-                                <td>Series</td>
-                                <td class="d-none d-xl-table-cell">{{ sw.deviceSeries }}</td>
-                            </tr>
-                            <tr>
-                                <td>Software Version</td>
-                                <td class="d-none d-xl-table-cell">{{ sw.softwareVersion }}</td>
-                            </tr>
-                            <tr>
-                                <td>Serial Number</td>
-                                <td class="d-none d-xl-table-cell">{{ device.serialNumber }}</td>
-                            </tr>
-                            <tr>
-                                <td>VLAN Count</td>
-                                <td><a href = "/switches/{{device.id}}/vlans">{{ vlan_count | default('-', true)}}</a></td>
-                            </tr>
-                            <tr>
-                                <td>AP</td>
-                                <td class="d-none d-xl-table-cell">
-                                    <a href="{{ url_for('switch_access_points', device_id=device_id) }}">
-                                    {{ ap_cnt }}
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Maintenance Mode</td>
-                                <td>{{ sw.maintenanceMode | capitalize }}</td>
-                            </tr>
-                            <tr>
-                                <td>Error Code</td>
-                                {% if device.errorCode == 'null' %}
-                                    <td>N/A</td>
-                                {% else %}
-                                    <td style="color: red;">{{ device.errorCode | capitalize }}</td>
-                                {% endif %}
-                            </tr>
-                            <tr>
-                                <td>Error Description</td>
-                                {% if not device.errorDescription %}
-                                    <td>N/A</td>
-                                {% else %}
-                                    <td style="color: red;">{{ device.errorDescription | capitalize }}</td>
-                                {% endif %}
-                            </tr>
-                            <tr>
-                                <td>Reachability Failure Reason</td>
-                                {% if device.reachabilityFailureReason == '' or 'N/A' %}
-                                    <td>N/A</td>
-                                {% else %}
-                                    <td style="color: red;">{{ device.reachabilityFailureReason | capitalize }}</td>
-                                {% endif %}
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
-            <div class="row">
-                <div class="card flex-fill">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Interface Details</h5>
+            
+            <div class="col-auto d-none d-sm-block">
+                <h3 class ="mb-3"> Detail Information </h3>
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs mb-3" id="switchTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="details-tab" data-bs-toggle="tab"
+                            data-bs-target="#details-pane" type="button" role="tab"
+                            aria-controls="details-pane" aria-selected="true">
+                        Switch Details
+                    </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="interfaces-tab" data-bs-toggle="tab"
+                            data-bs-target="#interfaces-pane" type="button" role="tab"
+                            aria-controls="interfaces-pane" aria-selected="false">
+                        Interface Details
+                    </button>
+                    </li>
+                </ul>
+            </div>
+
+            
+            <div class="tab-content" id="switchTabContent">
+                <!-- Switch Details Pane -->
+                <div class="tab-pane fade show active" id="details-pane" role="tabpanel" aria-labelledby="details-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Switch Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th class="d-none d-xl-table-cell">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td class="d-none d-xl-table-cell">{{ sw.nwDeviceName }}</td>
+                                </tr>
+                                <tr>
+                                    <td>IP Address</td>
+                                    <td class="d-none d-xl-table-cell">{{ sw.ip_addr_managementIpAddr }}</td>
+                                </tr>
+                                <tr>
+                                    <td>MAC Address</td>
+                                    <td class="d-none d-xl-table-cell">{{ sw.macAddress }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Series</td>
+                                    <td class="d-none d-xl-table-cell">{{ sw.deviceSeries }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Software Version</td>
+                                    <td class="d-none d-xl-table-cell">{{ sw.softwareVersion }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Serial Number</td>
+                                    <td class="d-none d-xl-table-cell">{{ device.serialNumber }}</td>
+                                </tr>
+                                <tr>
+                                    <td>VLAN Count</td>
+                                    <td><a href = "/switches/{{device.id}}/vlans">{{ vlan_count | default('-', true)}}</a></td>
+                                </tr>
+                                <tr>
+                                    <td>AP</td>
+                                    <td class="d-none d-xl-table-cell">
+                                        <a href="{{ url_for('switch_access_points', device_id=device_id) }}">
+                                        {{ ap_cnt }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Maintenance Mode</td>
+                                    <td>{{ sw.maintenanceMode | capitalize }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Error Code</td>
+                                    {% if device.errorCode == 'null' %}
+                                        <td>N/A</td>
+                                    {% else %}
+                                        <td style="color: red;">{{ device.errorCode | capitalize }}</td>
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    <td>Error Description</td>
+                                    {% if not device.errorDescription %}
+                                        <td>N/A</td>
+                                    {% else %}
+                                        <td style="color: red;">{{ device.errorDescription | capitalize }}</td>
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    <td>Reachability Failure Reason</td>
+                                    {% if device.reachabilityFailureReason == '' or 'N/A' %}
+                                        <td>N/A</td>
+                                    {% else %}
+                                        <td style="color: red;">{{ device.reachabilityFailureReason | capitalize }}</td>
+                                    {% endif %}
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <table id="datatables-dashboard-projects" class="table table-striped my-0">
-                        <thead>
-                            <tr>
-                                <th>Interface Name</th>
-                                <th>Operational Status</th>
-                                <th>Admin Status</th>
-                                <th>Port Channel ID</th>
-                                <th>Type</th>
-                                <th>Allowed VLAN(s)</th>
-                                <th>Link Speed</th>
-                                <th>Duplex</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for intf in sw_interface %}
-                            <tr>
-                                <td>{{ intf.name | default('-', true) }}</td>
-    
-                                {% set oper = (intf.operStatus | default('', true)) %}
-                                {% if not oper or oper == 'DOWN' %}
-                                    <td style="color: red;">{{ oper or 'DOWN' }}</td>
-                                {% else %}
-                                    <td style="color: green;">{{ oper }}</td>
-                                {% endif %}
-           
-                                {% set admin = (intf.adminStatus | default('', true)) %}
-                                {% if not admin or admin == 'DOWN' %}
-                                    <td style="color: red;">{{ admin or 'DOWN' }}</td>
-                                {% else %}
-                                    <td style="color: green;">{{ admin }}</td>
-                                {% endif %}
-    
-                                {% set pcID = (intf.portChannelId | default('', true)) %}
-                                {% if not pcID or pcID == "-1.0" %}
-                                    <td> - </td>
-                                {% else %}
-                                    <td>{{ pcID }}</td>
-                                {% endif %}
-                           
-                                <td>{{ intf.portMode | default('-', true) }}</td>
-                            
-                                <td>{{ intf.vlanId | default('-', true) }}</td>
-                            
-                                <td>{{ intf.speed_fmt | default('-', true) }}</td>
-                            
-                                <td>{{ intf.duplexOper | default('-', true) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                </div>
+                <div class="tab-pane fade" id="interfaces-pane" role="tabpanel" aria-labelledby="interfaces-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Interface Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-modi-projects" class="table table-striped my-0">
+                            <thead>
+                                <tr>
+                                    <th>Interface Name</th>
+                                    <th>Operational Status</th>
+                                    <th>Admin Status</th>
+                                    <th>Port Channel ID</th>
+                                    <th>Type</th>
+                                    <th>Allowed VLAN(s)</th>
+                                    <th>Link Speed</th>
+                                    <th>Duplex</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for intf in sw_interface %}
+                                <tr>
+                                    <td>{{ intf.name | default('-', true) }}</td>
+        
+                                    {% set oper = (intf.operStatus | default('', true)) %}
+                                    {% if not oper or oper == 'DOWN' %}
+                                        <td style="color: red;">{{ oper or 'DOWN' }}</td>
+                                    {% else %}
+                                        <td style="color: green;">{{ oper }}</td>
+                                    {% endif %}
+                
+                                    {% set admin = (intf.adminStatus | default('', true)) %}
+                                    {% if not admin or admin == 'DOWN' %}
+                                        <td style="color: red;">{{ admin or 'DOWN' }}</td>
+                                    {% else %}
+                                        <td style="color: green;">{{ admin }}</td>
+                                    {% endif %}
+        
+                                    {% set pcID = (intf.portChannelId | default('', true)) %}
+                                    {% if not pcID or pcID == "-1.0" %}
+                                        <td> - </td>
+                                    {% else %}
+                                        <td>{{ pcID }}</td>
+                                    {% endif %}
+                                
+                                    <td>{{ intf.portMode | default('-', true) }}</td>
+                                
+                                    <td>{{ intf.vlanId | default('-', true) }}</td>
+                                
+                                    <td>{{ intf.speed_fmt | default('-', true) }}</td>
+                                
+                                    <td>{{ intf.duplexOper | default('-', true) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -309,130 +340,80 @@
         </div>
     </footer>
 
-    <script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
+    <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
 
     <script>
+    // DataTables with Column Search by Text Inputs
     document.addEventListener("DOMContentLoaded", function() {
-    var markers = [{
-            coords: [37.77, -122.41],
-            name: "San Francisco: 375"
-        },
-        {
-            coords: [40.71, -74.00],
-            name: "New York: 350"
-        },
-        {
-            coords: [39.09, -94.57],
-            name: "Kansas City: 250"
-        },
-        {
-            coords: [36.16, -115.13],
-            name: "Las Vegas: 275"
-        },
-        {
-            coords: [32.77, -96.79],
-            name: "Dallas: 225"
-        }
-    ];
-    var map = new jsVectorMap({
-        map: "us_aea_en",
-        selector: "#usa_map",
-        zoomButtons: true,
-        markers: markers,
-        markerStyle: {
-            initial: {
-                r: 9,
-                stroke: window.theme.white,
-                strokeWidth: 7,
-                stokeOpacity: .4,
-                fill: window.theme.primary
-            },
-            hover: {
-                fill: window.theme.primary,
-                stroke: window.theme.primary
-            }
-        },
-        regionStyle: {
-            initial: {
-                fill: window.theme["gray-200"]
-            }
-        },
-        zoomOnScroll: false
+        
+        // Setup - add a text input to each footer cell
+        $('#datatables-column-search-text-inputs tfoot th').each(function() {
+            var title = $(this).text();
+            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+        });
+        // DataTables
+        var table = $('#datatables-column-search-text-inputs').DataTable();
+        
+        // Apply the search
+        table.columns().every(function() {
+            var that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+                if (that.search() !== this.value) {
+                    that
+                        .search(this.value)
+                        .draw();
+                }
+            });
+        });
     });
-    window.addEventListener("resize", () => {
-        map.updateSize();
-    });
-    setTimeout(function() {
-        map.updateSize();
-    }, 250);
-    });
-    </script>
-    <script>
+    // DataTables with Column Search by Select Inputs
     document.addEventListener("DOMContentLoaded", function() {
-    $("#datatables-dashboard-products").DataTable({
-        pageLength: 6,
-        lengthChange: false,
-        bFilter: false,
-        autoWidth: false
-    });
-    });
-    </script>
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-    // Bar chart
-    new Chart(document.getElementById("chartjs-dashboard-bar"), {
-        type: "bar",
-        data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-            datasets: [{
-                label: "Last year",
-                backgroundColor: window.theme.primary,
-                borderColor: window.theme.primary,
-                hoverBackgroundColor: window.theme.primary,
-                hoverBorderColor: window.theme.primary,
-                data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79],
-                barPercentage: .325,
-                categoryPercentage: .5
-            }, {
-                label: "This year",
-                backgroundColor: window.theme["primary-light"],
-                borderColor: window.theme["primary-light"],
-                hoverBackgroundColor: window.theme["primary-light"],
-                hoverBorderColor: window.theme["primary-light"],
-                data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68],
-                barPercentage: .325,
-                categoryPercentage: .5
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            cornerRadius: 15,
-            legend: {
-                display: false
-            },
-            scales: {
-                yAxes: [{
-                    gridLines: {
-                        display: false
-                    },
-                    ticks: {
-                        stepSize: 20
-                    },
-                    stacked: true,
-                }],
-                xAxes: [{
-                    gridLines: {
-                        color: "transparent"
-                    },
-                    stacked: true,
-                }]
+        $('#datatables-column-search-select-inputs').DataTable({
+            initComplete: function() {
+                this.api().columns().every(function() {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function() {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+                    column.data().unique().sort().each(function(d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
             }
-        }
-    });
+        });
     });
     </script>
 
-</body>
-
-</html>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            $("#datatables-dashboard-projects").DataTable({
+                lengthChange: false,
+                bFilter: false,
+                autoWidth: false,
+                ordering: false
+            });
+        });
+    </script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        $("#datatables-dashboard-modi-projects").DataTable({
+            paging: true,        // enable pagination
+            pageLength: 10,      // show 10 rows per page
+            lengthChange: false,  // allow user to change rows/page via a dropdown (optional)
+            autoWidth: false,
+            ordering: false,
+            bFilter: false,      // keep search disabled (optional)
+            info: true           // show "Showing X to Y of Z entries"
+        });
+        });
+    </script>
+    
 {% endblock %}
