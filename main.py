@@ -210,6 +210,11 @@ def switch_vlans(device_id):
     
     return render_template("sw-vlan.html", device=device, vlans=vlans)
 
+@app.route('/search-client', methods=['GET', 'POST'])
+def search_client():
+    return render_template('search-client-by-mac.html')
+
+
 if __name__ == '__main__':
     # index()
     app.run(debug=True, host='0.0.0.0', port=Config.port)
