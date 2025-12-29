@@ -3,7 +3,7 @@ from config import Config
 from markupsafe import Markup
 from functools import wraps
 import json
-import function, access_point, client, wlcs, switch
+import function, access_point, client_function, wlcs, switch
 import bcrypt
 from datetime import timedelta
 
@@ -36,18 +36,40 @@ def dashboard():
 @app.route('/clients', methods=['POST', 'GET'])
 @session_check
 def clients():
-    client_list = client.get_clients()
+
+    country = request.args.get('country')
+    branch = request.args.get('branch')
+    floor = request.args.get('floor')
+    offset = request.args.get('offset')
+
+
+    query_connected_ap = ""
+    if country:
+        query_connected_ap+= country
+    if branch:
+        query_connected_ap= query_connected_ap + "-" + branch
+    if floor:
+        query_connected_ap= query_connected_ap + "-" + floor
+        query_connected_ap = query_connected_ap + "-AP*"
+    else:
+        query_connected_ap = query_connected_ap + "*"
+
+
+    clients = client_function.get_clients(200,offset,f"{query_connected_ap}")
+    branch_database = client_function.get_branch_database()
     # print(clients)
     # print(len(clients))
-    return render_template("clients.html", clients=client_list)
+    return render_template("clients.html", clients=clients, database=branch_database)
+
 
 @app.route('/client-detail/<client_mac>', methods=['POST', 'GET'])
 @session_check
 def device_detail(client_mac):
-    clients = client.get_client_enrichment_detail(client_mac)
-    connectedAP = clients["connectedDevice"][0].get("deviceDetails")
-    clients = clients["userDetails"]
-    return render_template('client-detail.html', client=clients, connectedAP=connectedAP)
+    client = function.get_client_enrichment_detail(client_mac)
+    client = client["userDetails"]
+    connectedAP = client["connectedDevice"][0]
+    neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
+    return render_template('client-detail.html', client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
