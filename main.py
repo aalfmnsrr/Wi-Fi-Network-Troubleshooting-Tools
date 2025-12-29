@@ -65,7 +65,7 @@ def clients():
 @app.route('/client-detail/<client_mac>', methods=['POST', 'GET'])
 @session_check
 def device_detail(client_mac):
-    client = function.get_client_enrichment_detail(client_mac)
+    client = client_function.get_client_enrichment_detail(client_mac)
     client = client["userDetails"]
     connectedAP = client["connectedDevice"][0]
     neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
