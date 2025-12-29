@@ -164,6 +164,13 @@
                         Interface Details
                     </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="stack-tab" data-bs-toggle="tab"
+                            data-bs-target="#stack-pane" type="button" role="tab"
+                            aria-controls="stack-pane" aria-selected="false">
+                        Stack Details
+                    </button>
+                    </li>
                 </ul>
             </div>
 
@@ -308,6 +315,70 @@
                         </table>
                     </div>
                 </div>
+                <div class="tab-pane fade" id="stack-pane" role="tabpanel" aria-labelledby="stack-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Stack Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-modi-projects" class="table table-striped my-0 text-center">
+                            <thead>
+                                <tr>
+                                    <th>Switch Num</th>
+                                    <th>Serial Number</th>
+                                    <th>Product ID</th>
+                                    <th>MAC Address</th>
+                                    <th>Role</th>
+                                    <th>State</th>
+                                    <th>Priority</th>
+                                    <th>Port 1</th>
+                                    <th>Port 2</th>                                   
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in stack_info %}
+                                <tr>
+                                    <td>{{ s.switch_num }}</td>
+                                    <td>{{ s.serial }}</td>
+                                    <td>{{ s.pID }}</td>
+                                    <td>{{ s.mac | capitalize }}</td>
+                                    <td>{{ s.role }}</td>
+                                    <td>{{ s.state }}</td>
+                                    <td>{{ s.priority }}</td>
+                                    <td>{{ s.port1_neighbor_sw }}</td>
+                                    <td>{{ s.port2_neighbor_sw }}</td> 
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Health Scores</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart">
+                                <canvas id="chartjs-bar"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">POE Statistics</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="chart w-100">
+                                <div id="apexcharts-pie" style="max-width: 440px;margin:auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -415,5 +486,86 @@
         });
         });
     </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Jinja renders inside quotes; Number() ensures a numeric value
+            const cpu = Number('{{ sw.cpuScore | default(0) }}');
+            const mem = Number('{{ sw.memoryScore | default(0) }}');
+            
+            const primaryColor = (window.theme && window.theme.primary) ? window.theme.primary : "#4e73df";
+            
+            const el = document.getElementById("chartjs-bar");
+            if (!el) return;
+            
+            new Chart(el, {
+                type: "bar",
+                data: {
+                labels: ["CPU", "Memory"],
+                datasets: [{
+                    label: "",
+                    backgroundColor: [primaryColor, "#E8EAED"],
+                    borderColor: [primaryColor, "#E8EAED"],
+                    hoverBackgroundColor: [primaryColor, "#E8EAED"],
+                    hoverBorderColor: [primaryColor, "#E8EAED"],
+                    data: [cpu, mem],
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                }]
+                },
+                options: {
+                maintainAspectRatio: false,
+                legend: { display: false },
+                // If you're on Chart.js v2.x, keep yAxes/xAxes; if on v3/v4, switch to scales.y / scales.x
+                scales: {
+                    yAxes: [{
+                    gridLines: { display: false },
+                    ticks: {
+                        min: 0,
+                        max: 10,
+                        stepSize: 2,
+                        callback: function(value) { return value; }
+                    }
+                    }],
+                    xAxes: [{ gridLines: { color: "transparent" } }]
+                },
+                tooltips: {
+                    callbacks: { label: function(tooltipItem) { return tooltipItem.yLabel; } }
+                }
+                }
+            });
+        });
+    </script>
+    <script>
+		document.addEventListener("DOMContentLoaded", function() {
+			const pbud = Number('{{ poe.powerAllocated | default(0) }}');
+            const pallo = Number('{{ poe.powerConsumed | default(0) }}');
+            const prem = Number('{{ poe.powerRemaining | default(0) }}');
+            
+            // Pie chart
+			var options = {
+				chart: {
+					height: 350,
+					type: "donut",
+				},
+				dataLabels: {
+					enabled: false
+				},
+				series: [pbud, pallo, prem],
+                labels: ["Power Budgeted", "Power Consumed", "Power Remaining"],
+			}
+			var chart = new ApexCharts(
+				document.querySelector("#apexcharts-pie"),
+				options
+			);
+			chart.render();
+
+		});
+	</script>
+    
+    
+    
+    
+    
     
 {% endblock %}

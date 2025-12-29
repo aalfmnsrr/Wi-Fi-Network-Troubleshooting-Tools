@@ -3,8 +3,7 @@ import requests, function, access_point
 from config import Config
 from collections import defaultdict
 
-# Alif Switches Devices
-def get_switches(role = None): # switches devices
+def get_switches(role = None): # get switch by role
     function.get_token()
     header = {
             'Content-Type': 'application/json',
@@ -20,6 +19,109 @@ def get_switches(role = None): # switches devices
     devices = []
     devices = response.json().get("response", [])
     return devices
+
+def get_vlan(device_id):
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/vlan"
+
+    vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return vlan
+
+def get_interface(device_id):
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/data/api/v1/interfaces?networkDeviceId={device_id}"
+   
+    interfaces = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return interfaces
+
+def get_stack_info(device_id):
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/stack"
+   
+    stack = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return stack
+
+def dict_stack(stack):
+    # this function will return list of dict of stack
+    stack_dict = []
+    sws = stack.get('stackSwitchInfo')
+    ports = stack.get('stackPortInfo')
+
+    neighbors = {}
+    for p in ports:
+        sp = p.get('switchPort') 
+        np = p.get('neighborPort')     
+        if sp and np and '/' in sp and '/' in np:
+            neighbors[sp] = np
+    
+    def neighbor_member_num(port_str):
+        member_str, _ = port_str.split('/', 1)
+        return int(member_str)
+    
+    
+    for s in sws:
+        member_num = s.get('stackMemberNumber')
+        if member_num is None:
+            continue
+
+        member_num = int(member_num)
+
+        # Local ports: 1/1 and 1/2, 2/1 and 2/2, etc.
+        local_p1 = f"{member_num}/1"
+        local_p2 = f"{member_num}/2"
+
+        # Resolve neighbor switch numbers
+        p1_neighbor_sw = neighbor_member_num(neighbors.get(local_p1))
+        p2_neighbor_sw = neighbor_member_num(neighbors.get(local_p2))
+
+        stack_dict.append({
+            'switch_num': member_num,
+            'serial': s.get('serialNumber') or '-',
+            'pID': s.get('platformId') or '-',
+            'mac': s.get('macAddress') or '-',
+            'role': s.get('role') or '-',
+            'state': s.get('state') or '-',
+            'priority': s.get('switchPriority') or '-',
+            # Display-friendly: convert None to '-' so Jinja shows a dash instead of blank
+            'port1_neighbor_sw': p1_neighbor_sw if p1_neighbor_sw is not None else '-',
+            'port2_neighbor_sw': p2_neighbor_sw if p2_neighbor_sw is not None else '-',
+        })
+
+    # Sort rows by switch number ascending
+    stack_dict.sort(key=lambda r: r['switch_num'])
+    return stack_dict
+
+def get_poe(device_id): 
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/poe"
+   
+    poe = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return poe
+
 
 def _is_ap_node(node: dict) -> bool:
     """
@@ -42,7 +144,6 @@ def _is_ap_node(node: dict) -> bool:
         return True
 
     return False
-
 
 def get_ap_neighbors(switch_device_id):
     """
@@ -115,9 +216,6 @@ def get_ap_neighbors(switch_device_id):
 
     return deduped
 
-
-# switch.py (optional helpers)
-
 def parse_ap_name(ap_label: str):
     parts = (ap_label or "").split('-')
     if len(parts) >= 4:
@@ -137,49 +235,6 @@ def group_ap_labels_by_floor(ap_nodes):
         floor = info["floor"] or "UNKNOWN"
         groups.setdefault(floor, []).append(label)
     return groups
-
-
-# def get_switch_details(device_id):
-#     function.get_token()
-#     header = {
-#             'Content-Type': 'application/json',
-#             'Accept': 'application/json',
-#             'X-Auth-Token': Config.token
-#         }
-#     url_inventory = f"{Config.dnac}/intent/api/v1/network-device?id={device_id}"
-#     response = requests.get(url_inventory, headers = header, verify=False).json().get("response")
-#     response = response[0]
-
-#     return response
-
-# def get_switch_health(device_mac):
-#     function.get_token()
-#     header = {
-#             'Content-Type': 'application/json',
-#             'Accept': 'application/json',
-#             'X-Auth-Token': Config.token
-#         }
-    
-#     url_inventory = f"{Config.dnac}/intent/api/v1/device-detail?identifier=macAddress&searchBy={device_mac}"
-   
-#     data = requests.get(url_inventory, headers=header, verify=False).json().get("response")
-#     return data
-
-def get_interface(device_id):
-    function.get_token()
-    header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Auth-Token': Config.token
-        }
-    
-    url_inventory = f"{Config.dnac}/data/api/v1/interfaces?networkDeviceId={device_id}"
-   
-    interfaces = requests.get(url_inventory, headers=header, verify=False).json().get("response")
-    return interfaces
-
-
-# /Alip/ap-wifi-tools/switch.py
 
 def format_speed_kbps(value):
     """
@@ -207,15 +262,28 @@ def format_speed_kbps(value):
     else:
         return f"{n} Kbps"
 
-def get_vlan(device_id):
-    function.get_token()
-    header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Auth-Token': Config.token
-        }
-    
-    url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/vlan"
+# def get_switch_details(device_id):
+#     function.get_token()
+#     header = {
+#             'Content-Type': 'application/json',
+#             'Accept': 'application/json',
+#             'X-Auth-Token': Config.token
+#         }
+#     url_inventory = f"{Config.dnac}/intent/api/v1/network-device?id={device_id}"
+#     response = requests.get(url_inventory, headers = header, verify=False).json().get("response")
+#     response = response[0]
 
-    vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
-    return vlan
+#     return response
+
+# def get_switch_health(device_mac):
+#     function.get_token()
+#     header = {
+#             'Content-Type': 'application/json',
+#             'Accept': 'application/json',
+#             'X-Auth-Token': Config.token
+#         }
+    
+#     url_inventory = f"{Config.dnac}/intent/api/v1/device-detail?identifier=macAddress&searchBy={device_mac}"
+   
+#     data = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+#     return data
