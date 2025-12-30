@@ -39,7 +39,7 @@ def get_dc(wlc_id):
     device = response.json().get("response")
     if device["snmpLocation"] == "Singapore Regional Data Center"or device["hostname"].startswith('APDC'):
         return "APDC"
-    elif device["snmpLocation"] == "AXA Group Operations Hongkong" or  device["hostname"].startswith('APDC'):
+    elif device["snmpLocation"] == "AXA Group Operations Hongkong" or  device["hostname"].startswith('HK'):
         return "HKDC"
     elif "Thailand" in device["snmpLocation"] or  device["hostname"].startswith('TH'):
         return "THDC"

@@ -1,0 +1,74 @@
+{% extends 'sidebar.html' %}
+{% block body %}
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+      }
+      .form-container {
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+      input[type="text"] {
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 15px;
+      }
+      button {
+        padding: 10px;
+        font-size: 1em;
+        background-color: #3f80ea;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #3461c2;
+      }
+    </style>
+
+<div class="form-container">
+  <h2>Search Client by MAC</h2>
+  <form id="macForm">
+    <label for="mac">Enter MAC Address:</label>
+    <input type="text" id="mac" name="mac_address" placeholder="00:1A:2B:3C:4D:5E" required />
+    <button type="submit">Search</button>
+  </form>
+</div>
+
+<script>
+  document.getElementById('macForm').addEventListener('submit', function(e) {
+    e.preventDefault(); 
+    const macInput = document.getElementById('mac').value.trim();
+    if (macInput) {
+      const encodedMac = encodeURIComponent(macInput);
+      window.location.href = `/client-detail/${encodedMac}`;
+    }
+  });
+</script>
+
+
+</body>
+</html>
+{% endblock %}

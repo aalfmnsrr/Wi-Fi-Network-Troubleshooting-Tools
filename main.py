@@ -3,7 +3,7 @@ from config import Config
 from markupsafe import Markup
 from functools import wraps
 import json
-import function, access_point, client, wlcs, switch
+import function, access_point, client_function, wlcs, switch
 import bcrypt
 from datetime import timedelta
 
@@ -36,37 +36,58 @@ def dashboard():
 @app.route('/clients', methods=['POST', 'GET'])
 @session_check
 def clients():
-    client_list = client.get_clients()
+
+    country = request.args.get('country')
+    branch = request.args.get('branch')
+    floor = request.args.get('floor')
+    offset = request.args.get('offset')
+
+
+    query_connected_ap = ""
+    if country:
+        query_connected_ap+= country
+    if branch:
+        query_connected_ap= query_connected_ap + "-" + branch
+    if floor:
+        query_connected_ap= query_connected_ap + "-" + floor
+        query_connected_ap = query_connected_ap + "-AP*"
+    else:
+        query_connected_ap = query_connected_ap + "*"
+
+
+    clients = client_function.get_clients(200,offset,f"{query_connected_ap}")
+    branch_database = client_function.get_branch_database()
     # print(clients)
     # print(len(clients))
-    return render_template("clients.html", clients=client_list)
+    return render_template("clients.html", clients=clients, database=branch_database)
+
 
 @app.route('/client-detail/<client_mac>', methods=['POST', 'GET'])
 @session_check
 def device_detail(client_mac):
-    client = client.get_client_enrichment_detail(client_mac)
-    connectedAP = client["connectedDevice"][0].get("deviceDetails")
+    client = client_function.get_client_enrichment_detail(client_mac)
     client = client["userDetails"]
-    return render_template('client-detail.html', client=client, connectedAP=connectedAP)
+    connectedAP = client["connectedDevice"][0]
+    neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
+    return render_template('client-detail.html', client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
 def access_points():
     access_points = access_point.get_ap()
-    # print(len(access_points))
-    # print(access_points)
-    return render_template("access-points.html", access_points=access_points)
+    return render_template("access-points.html", 
+                           access_points=access_points)
 
-@app.route('/access_points/<ap_mac>', methods=['POST', 'GET'])
+@app.route('/access_points/<ap_mac>/<site_id>', methods=['POST', 'GET'])
 @session_check
-def ap_detail(ap_mac):
+def ap_detail(ap_mac, site_id):
+
     ap = function.get_device_detail(ap_mac)
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
     wlc_dc = function.get_dc(wlc_id)
-    print(wlc_id, wlcName, wlc_dc)
     ap_details = function.get_device(ap.get("nwDeviceId"))
-    radio = access_point.get_ap_radio(ap.get("nwDeviceName"))
+    radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio)
 
 @app.route('/network-devices', methods=['POST', 'GET'])
@@ -158,7 +179,10 @@ def wlc(dc):
         ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
         # print(ip)
         wlc_health = wlcs.health_wlc(dc, ip)
-    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc)
+
+    aps = access_point.get_ap()
+
+    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc, aps = aps)
 
 # Alif
 @app.route('/switches', methods=['POST', 'GET'])
@@ -233,6 +257,11 @@ def switch_vlans(device_id):
 #         ap_neighbor = [x for x in aps if x.split('-')[2] == floor]    
     
 #     return render_template("access-points.html", ap_neighbor = ap_neighbor)
+
+@app.route('/search-client', methods=['GET', 'POST'])
+def search_client():
+    return render_template('search-client-by-mac.html')
+
 
 if __name__ == '__main__':
     # index()

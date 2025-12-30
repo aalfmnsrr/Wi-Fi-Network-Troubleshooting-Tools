@@ -1,6 +1,7 @@
 import function
 import requests
 from config import Config
+from re import compile
 
 def get_floor_id():
     function.get_token()
@@ -11,11 +12,11 @@ def get_floor_id():
         }
     url = f"{Config.dnac}/intent/api/v1/site"
     response = requests.get(url, headers=header, verify=False).json().get("response")
+    pattern = compile(r'\dF$')
     for r in response:
-        if "PFCC Tower 4-5/10F" in r["siteNameHierarchy"]:
-            Config.floor10id = r["id"]
-        elif "PFCC Tower 4-5/13AF" in r["siteNameHierarchy"]:
-            Config.floor13aid = r["id"]
+        siteName = r.get("siteNameHierarchy")
+        if pattern.search(siteName):
+            Config.floor_id.append(r["id"])
 
 def get_ap():
     function.get_token()
@@ -28,8 +29,22 @@ def get_ap():
     }
     response = requests.get(url, headers=header, verify=False).json().get("response").get("nodes")
     for r in response:
-        if "MY-PCH-10F-AP" in r["label"] or "MY-PCH-13AF-AP" in r["label"]:
+        if "Access Point" in r["deviceType"]:
             access_points.append(r)
+            if r['label'].startswith("MY"):
+                r["location"] = "Malaysia"
+            elif r['label'].startswith("ID"):
+                r["location"] = "Indonesia"
+            elif r['label'].startswith("HK"):
+                r["location"] = "Hong Kong"
+            elif r['label'].startswith("TH"):
+                r["location"] = "Thailand"
+            elif r["label"].startswith("PH"):
+                r["location"] = "Philippines"
+            elif r['label'].startswith("SG"):
+                r["location"] = "Singapore"
+            elif r['label'].startswith("MO"):
+                r["location"] = "Macao"
     # print(len(access_points))
     ind = 0
     while ind < len(access_points) - 1:
@@ -40,7 +55,8 @@ def get_ap():
         ind += 1
     return access_points
 
-def get_ap_radio(ap_name):
+def get_ap_radio(ap_name, site_id):
+    # print(ap_name)
     function.get_token()
     get_floor_id()
     header = {
@@ -48,11 +64,11 @@ def get_ap_radio(ap_name):
             'Accept': 'application/json',
             'X-Auth-Token': Config.token
         }
-    if '10F' in ap_name:
-        url = f"{Config.dnac}/intent/api/v2/floors/{Config.floor10id}/accessPointPositions"
-    else:
-        url = f"{Config.dnac}/intent/api/v2/floors/{Config.floor13aid}/accessPointPositions"
+    url = f"{Config.dnac}/intent/api/v2/floors/{site_id}/accessPointPositions"
     response = requests.get(url, headers=header, verify=False).json().get("response")
+    # print(response)
     for r in response:
+        # print(r)
         if r["name"] == ap_name:
+            # print('true')
             return r["radios"]

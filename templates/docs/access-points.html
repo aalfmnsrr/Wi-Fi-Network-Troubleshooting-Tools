@@ -4,24 +4,36 @@
 				<div class="container-fluid p-0">
 
 					<h1 class="h3 mb-3">Access Points</h1>
-
+<!-- 
 					<div class="alert alert-warning alert-dismissible" role="alert">
-						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						<div class="alert-message">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
+						<!-- <div class="alert-message">
 							<p class="mb-0">
 								<strong>jQuery required!</strong> This plugin requires jQuery to be functional. If you want to remove jQuery from your application, please check out <a href="docs-installation.html#drop-jquery">these docs</a>.
 							</p>
-						</div>
-					</div>
+						</div> -->
+					<!-- </div> -->
 					<div class="row">
 						<div class="col-12">
 							<div class="card">
-								<div class="card-header">
+								<!-- <div class="card-header">
 									<h5 class="card-title">DataTables with Column Search by Text Inputs</h5>
 									<h6 class="card-subtitle text-muted">The searching functionality provided by DataTables is useful for quickly search through the information in the table. See official documentation <a href="https://datatables.net/examples/api/multi_filter.html"
 										 target="_blank" rel="noopener noreferrer nofollow">here</a>.</h6>
-								</div>
+								</div> -->
 								<div class="card-body">
+									<div class="card-body text-center">
+										<div class="mb-3">
+											<button class="btn btn-secondary ms-2 country-filter" id="clear-filter">All</button>
+											<button class="btn btn-outline-primary country-filter" data-country="Malaysia">MY</button>
+											<button class="btn btn-outline-secondary country-filter" data-country="Thailand">TH</button>
+											<button class="btn btn-outline-success country-filter" data-country="Indonesia">ID</button>
+											<button class="btn btn-outline-danger country-filter" data-country="Hong Kong">HK</button>
+											<button class="btn btn-outline-warning country-filter" data-country="Philippines">PH</button>
+											<button class="btn btn-outline-info country-filter" data-country="Singapore">SG</button>
+											<button class="btn btn-outline-dark country-filter" data-country="Macao">MO</button>
+										</div>
+									</div>
 									<table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
 										<thead>
 											<tr>
@@ -30,16 +42,18 @@
 												<th>MAC Address</th>
 												<th>Software Version</th>
 												<th>Device Type</th>
+												<th>Location</th>
 											</tr>
 										</thead>
 										<tbody>
 										{% for ap in access_points %}
 										<tr>
-											<td><a href="{{ url_for('ap_detail', ap_mac=ap.additionalInfo.macAddress) }}">{{ ap.label }}</a></td>
+											<td><a href="{{ url_for('ap_detail', ap_mac=ap.additionalInfo.macAddress, site_id=ap.additionalInfo.siteid) }}">{{ ap.label }}</a></td>
 											<td>{{ ap.ip }}</td>
 											<td>{{ ap.additionalInfo.macAddress }}</td>
 											<td>{{ ap.softwareVersion }}</td>
 											<td>{{ ap.deviceType }}</td>
+											<td>{{ ap.location }}</td>
 										</tr>
 										{% endfor %}
 										</tbody>
@@ -50,6 +64,7 @@
 												<th>MAC Address</th>
 												<th>Software Version</th>
 												<th>Device Type</th>
+												<th>Location</th>
 											</tr>
 										</tfoot>
 									</table>
@@ -92,55 +107,47 @@
 	</div>
 
 	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
-
+	
 	<script>
-		// DataTables with Column Search by Text Inputs
 		document.addEventListener("DOMContentLoaded", function() {
-			
-			// Setup - add a text input to each footer cell
-			$('#datatables-column-search-text-inputs tfoot th').each(function() {
-				var title = $(this).text();
-				$(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-			});
-			// DataTables
-			var table = $('#datatables-column-search-text-inputs').DataTable();
-			
-			// Apply the search
-			table.columns().every(function() {
-				var that = this;
-				$('input', this.footer()).on('keyup change clear', function() {
-					if (that.search() !== this.value) {
-						that
-							.search(this.value)
-							.draw();
-					}
-				});
+		$('#datatables-column-search-text-inputs tfoot th').each(function() {
+			var title = $(this).text();
+			$(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+		});
+	
+		var table = $('#datatables-column-search-text-inputs').DataTable({
+			columnDefs: [
+			{ searchable: true } 
+			]
+		});
+	
+		table.columns().every(function() {
+			var that = this;
+			$('input', this.footer()).on('keyup change clear', function() {
+			if (that.search() !== this.value) {
+				that.search(this.value).draw();
+			}
 			});
 		});
-		// DataTables with Column Search by Select Inputs
-		document.addEventListener("DOMContentLoaded", function() {
-			$('#datatables-column-search-select-inputs').DataTable({
-				initComplete: function() {
-					this.api().columns().every(function() {
-						var column = this;
-						var select = $('<select class="form-control"><option value=""></option></select>')
-							.appendTo($(column.footer()).empty())
-							.on('change', function() {
-								var val = $.fn.dataTable.util.escapeRegex(
-									$(this).val()
-								);
-								column
-									.search(val ? '^' + val + '$' : '', true, false)
-									.draw();
-							});
-						column.data().unique().sort().each(function(d, j) {
-							select.append('<option value="' + d + '">' + d + '</option>')
-						});
-					});
-				}
-			});
+	
+		// Button filtering on Country column
+		const COUNTRY_COL = 5; 
+		$('.country-filter').on('click', function() {
+			const code = $(this).data('country');
+			table.column(COUNTRY_COL).search('^' + code + '$', true, false).draw();
+		});
+	
+		// Clear all filters
+		$('#clear-filter').on('click', function() {
+			table.columns().search('');
+			$('#datatables-column-search-text-inputs tfoot input').val('');
+			table.search(''); 
+			table.draw();
+		});
 		});
 	</script>
+	
+	
 </body>
 
 </html>

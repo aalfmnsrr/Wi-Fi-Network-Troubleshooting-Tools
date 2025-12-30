@@ -1,156 +1,263 @@
 {% extends 'sidebar.html' %}
 {% block body %}
-			<main class="content">
-				<div class="container-fluid p-0">
+<main class="content">
+    <div class="container-fluid p-0">
 
-					<h1 class="h3 mb-3">Clients</h1>
 
-					<div class="alert alert-warning alert-dismissible" role="alert">
-						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						<div class="alert-message">
-							<p class="mb-0">
-								<strong>jQuery required!</strong> This plugin requires jQuery to be functional. If you want to remove jQuery from your application, please check out <a href="docs-installation.html#drop-jquery">these docs</a>.
-							</p>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-12">
-							<div class="card">
-								<div class="card-header">
-									<h5 class="card-title">DataTables with Column Search by Text Inputs</h5>
-									<h6 class="card-subtitle text-muted">The searching functionality provided by DataTables is useful for quickly search through the information in the table. See official documentation <a href="https://datatables.net/examples/api/multi_filter.html"
-										 target="_blank" rel="noopener noreferrer nofollow">here</a>.</h6>
-								</div>
-								<div class="card-body">
-									<table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
-										<thead>
-											<tr>
-												<th>Username</th>
-												<th>Connection Status</th>
-												<th>IP Address</th>
-												<th>MAC Address</th>
-												<th>Device Name</th>
-												<th>Device Type</th>
-												<th>Connected AP</th>
-												<th>Connection Type</th>
-											</tr>
-										</thead>
-										<tbody>
-										{% for client in clients %}
-										<tr>
-											<td><a href= "{{ url_for('device_detail', client_mac=client.macAddress) }}">{{ client.username }}</a></td>
-											<td>{{ client.connectionStatus | capitalize }}</td>
-											<td>{{ client.ipv4Address }}</td>
-											<td>{{ client.macAddress }}</td>
-											<td>{{ client.name }}</td>
-											<td>{{ client.deviceType }}</td>
-											<td>{{ client.connectedNetworkDevice.connectedNetworkDeviceName }}</td>
-											<td>{{ client.type }}</td>
-										</tr>
-										{% endfor %}
-										</tbody>
-										<tfoot>
-											<tr>
-												<th>Username</th>
-												<th>Connection Status</th>
-												<th>IP Address</th>
-												<th>MAC Address</th>
-												<th>Device Name</th>
-												<th>Device Type</th>
-												<th>Connected AP</th>
-												<th>Connection Type</th>
-											</tr>
-										</tfoot>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
+        <h1 class="h3 mb-3">Clients Page</h1>
 
-				</div>
-			</main>
+        <!-- All list will be implemented from database -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <select class="form-select" id="countrySelect" aria-label="Country Select">
+                    <option value="All">All Countries</option>
+                </select>
+            </div>
 
-			<footer class="footer">
-				<div class="container-fluid">
-					<div class="row text-muted">
-						<div class="col-6 text-start">
-							<ul class="list-inline">
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Support</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Help Center</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Privacy</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Terms of Service</a>
-								</li>
-							</ul>
-						</div>
-						<div class="col-6 text-end">
-							<p class="mb-0">
-								&copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
-							</p>
-						</div>
-					</div>
-				</div>
-			</footer>
-		</div>
-	</div>
+            <div class="col-md-3">
+                <select class="form-select" id="branchSelect" aria-label="Branch Select">
+                    <option value="All">All Branches</option>
+                </select>
+            </div>
 
-	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+            <div class="col-md-3">
+                <select class="form-select" id="floorSelect" aria-label="Floor Select">
+                    <option value="All">All Floors</option>
+                </select>
+            </div>
 
-	<script>
-		// DataTables with Column Search by Text Inputs
-		document.addEventListener("DOMContentLoaded", function() {
-			
-			// Setup - add a text input to each footer cell
-			$('#datatables-column-search-text-inputs tfoot th').each(function() {
-				var title = $(this).text();
-				$(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-			});
-			// DataTables
-			var table = $('#datatables-column-search-text-inputs').DataTable();
-			
-			// Apply the search
-			table.columns().every(function() {
-				var that = this;
-				$('input', this.footer()).on('keyup change clear', function() {
-					if (that.search() !== this.value) {
-						that
-							.search(this.value)
-							.draw();
-					}
-				});
-			});
-		});
-		// DataTables with Column Search by Select Inputs
-		document.addEventListener("DOMContentLoaded", function() {
-			$('#datatables-column-search-select-inputs').DataTable({
-				initComplete: function() {
-					this.api().columns().every(function() {
-						var column = this;
-						var select = $('<select class="form-control"><option value=""></option></select>')
-							.appendTo($(column.footer()).empty())
-							.on('change', function() {
-								var val = $.fn.dataTable.util.escapeRegex(
-									$(this).val()
-								);
-								column
-									.search(val ? '^' + val + '$' : '', true, false)
-									.draw();
-							});
-						column.data().unique().sort().each(function(d, j) {
-							select.append('<option value="' + d + '">' + d + '</option>')
-						});
-					});
-				}
-			});
-		});
-	</script>
-</body>
+            <div class="col-md-1">
+                <button class="btn btn-outline-primary w-100" onclick="window.location.href=window.location.pathname;" title="Reset Filters">
+                    &#x21bb; 
+                </button>
+            </div>
+        </div>
 
-</html>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-primary" style="border-width: 2px;">
+                    <div class="card-body p-2">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white border-0 fw-bold">Search by</span>
+                            <input type="text" class="form-control border-0" id="customSearchBox" placeholder="Mac / Hostname / IP">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Client List</h5>
+                    </div>
+                    <div class="card-body">
+                        <table id="datatables-client-list" class="table table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Status</th>
+                                    <th>IP Address</th>
+                                    <th>MAC Address</th>
+                                    <th>Device Name</th>
+                                    <th>Type</th>
+                                    <th>Connected AP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in clients %}
+                                <tr>
+                                    <td><a href="{{ url_for('device_detail', client_mac=client.macAddress) }}">{{ client.username }}</a></td>
+                                    <td>
+                                        {% if client.connectionStatus|lower == 'connected' %}
+                                            <span class="badge bg-success">Connected</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Disconnected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ client.ipv4Address }}</td>
+                                    <td>{{ client.macAddress }}</td>
+                                    <td>{{ client.name }}</td>
+                                    <td>{{ client.deviceType }}</td>
+                                    <td>
+                                        {% if client.connectedNetworkDevice %}
+                                            {{ client.connectedNetworkDevice.connectedNetworkDeviceName }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</main>
+
+
+<footer class="footer">
+    <div class="container-fluid">
+        <div class="row text-muted">
+            <div class="col-6 text-start">
+                <p class="mb-0">&copy; 2025 - AppStack</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // --- 1. DATA INGESTION ---
+        // Convert Flask variable to JavaScript object using tojson filter
+        const db = {{ database | tojson }};
+        const countryList = db[0]; // List of strings ['HK', 'ID'...]
+        const branchList  = db[1]; // List of lists of strings
+        const floorList   = db[2]; // List of lists of lists of strings
+        console.log(countryList)
+        const countrySelect = document.getElementById('countrySelect');
+        const branchSelect = document.getElementById('branchSelect');
+        const floorSelect = document.getElementById('floorSelect');
+
+        // Helper to get URL params
+        const urlParams = new URLSearchParams(window.location.search);
+
+
+        // --- 2. POPULATION LOGIC ---
+
+        // Helper to add options to a select element
+        function addOption(selectElement, value, text) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.text = text;
+            selectElement.add(option);
+        }
+
+        // Helper to clear options (keeping the first "All" option)
+        function clearSelect(selectElement, defaultText) {
+            selectElement.innerHTML = `<option value="All">${defaultText}</option>`;
+        }
+
+        // Initialize Dropdowns
+        function initDropdowns() {
+            // A. Populate Countries (Level 0)
+            countryList.forEach(c => addOption(countrySelect, c, c));
+
+            // B. Restore Country Selection from URL
+            const currentCountry = urlParams.get('country');
+            if (currentCountry && countryList.includes(currentCountry)) {
+                countrySelect.value = currentCountry;
+                
+                // Get index of country to find relevant branches
+                const countryIndex = countryList.indexOf(currentCountry);
+
+                // C. Populate Branches (Level 1)
+                const branches = branchList[countryIndex];
+                if (branches) {
+                    branches.forEach(b => addOption(branchSelect, b, b));
+                }
+
+                // D. Restore Branch Selection from URL
+                const currentBranch = urlParams.get('branch');
+                if (currentBranch && branches && branches.includes(currentBranch)) {
+                    branchSelect.value = currentBranch;
+                    
+                    // Get index of branch to find relevant floors
+                    const branchIndex = branches.indexOf(currentBranch);
+
+                    // E. Populate Floors (Level 2)
+                    const floors = floorList[countryIndex][branchIndex];
+                    if (floors) {
+                        floors.forEach(f => addOption(floorSelect, f, f));
+                    }
+
+                    // F. Restore Floor Selection from URL
+                    const currentFloor = urlParams.get('floor');
+                    if (currentFloor && floors.includes(currentFloor)) {
+                        floorSelect.value = currentFloor;
+                    }
+                }
+            }
+        }
+
+        // Run Initialization
+        initDropdowns();
+
+
+        // --- 3. EVENT HANDLERS (URL UPDATES) ---
+
+        function updateFilters() {
+            const url = new URL(window.location.href);
+            
+            // 1. Handle Country
+            const countryVal = countrySelect.value;
+            if (countryVal !== 'All') {
+                // If country changed, we must reset branch and floor in URL
+                if (url.searchParams.get('country') !== countryVal) {
+                    url.searchParams.delete('branch');
+                    url.searchParams.delete('floor');
+                }
+                url.searchParams.set('country', countryVal);
+            } else {
+                url.searchParams.delete('country');
+                url.searchParams.delete('branch'); // Reset children if parent is All
+                url.searchParams.delete('floor');
+            }
+
+            // 2. Handle Branch
+            const branchVal = branchSelect.value;
+            if (branchVal !== 'All' && countryVal !== 'All') {
+                if (url.searchParams.get('branch') !== branchVal) {
+                    url.searchParams.delete('floor');
+                }
+                url.searchParams.set('branch', branchVal);
+            } else {
+                url.searchParams.delete('branch');
+                url.searchParams.delete('floor');
+            }
+
+            // 3. Handle Floor
+            const floorVal = floorSelect.value;
+            if (floorVal !== 'All' && branchVal !== 'All') {
+                url.searchParams.set('floor', floorVal);
+            } else {
+                url.searchParams.delete('floor');
+            }
+
+            // Reload Page
+            window.location.href = url.toString();
+        }
+
+        // Attach Listeners
+        countrySelect.addEventListener('change', updateFilters);
+        branchSelect.addEventListener('change', updateFilters);
+        floorSelect.addEventListener('change', updateFilters);
+
+
+        // --- 4. DATATABLES & SEARCH ---
+        var table = $('#datatables-client-list').DataTable({
+            "dom": 'rtip', 
+            "pageLength": 20
+        });
+
+        $('#customSearchBox').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+    });
+</script>
 {% endblock %}
+
+
+
