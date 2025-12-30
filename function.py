@@ -40,11 +40,11 @@ def get_dc(wlc_id):
     if device["snmpLocation"] == "Singapore Regional Data Center"or device["hostname"].startswith('APDC'):
         return "APDC"
     elif device["snmpLocation"] == "AXA Group Operations Hongkong" or  device["hostname"].startswith('HK'):
-        return "HKDC"
+        return "HK-NTT"
     elif "Thailand" in device["snmpLocation"] or  device["hostname"].startswith('TH'):
-        return "THDC"
+        return "TH-NTT"
     elif device["snmpLocation"] == "AXA Group Operations Indonesia" or  device["hostname"].startswith('ID'):
-        return "IDDC"
+        return "INDO"
 
 def get_device(dev_id):
     get_token()

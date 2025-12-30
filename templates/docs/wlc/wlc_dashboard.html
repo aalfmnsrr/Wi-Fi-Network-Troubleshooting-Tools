@@ -53,7 +53,7 @@
 
 													
 															</div>
-															<a href="{{ url_for('wlc_ssid', dc=wlc.dc, id=wlc.id) }}" target="_blank" class="btn btn-outline-primary d-inline-block mt-1 mb-4" style="font-size: 1.5em;">
+															<a href="{{ url_for('wlc_ssid', dc=dc, id=wlc.id) }}" target="_blank" class="btn btn-outline-primary d-inline-block mt-1 mb-4" style="font-size: 1.5em;">
 																{{ wlc.hostname }}
 															</a>
 															<div class="mb-0">
@@ -127,7 +127,7 @@
 								  
 											<h4 style="font-size: 1.5em; margin-top:40px; margin-left: 20px;">Access Point for {{ wlc.hostname }}</h4>
 									
-											{% if wlc.dc == 'APDC' %}
+											{% if wlc.hostname.startswith('APDC') %}
 											
 											<div class="row justify-content-center mt-3 mb-2">
 											  <div class="col-auto">

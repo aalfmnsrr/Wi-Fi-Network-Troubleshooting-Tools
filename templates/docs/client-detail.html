@@ -126,12 +126,16 @@
                                         <i class="align-middle text-primary" data-feather="router" style="width: 32px; height: 32px;"></i>
                                     </div>
                                     <div>
-                                        {% if connectedAP.name %}
-                                            <h4 class="mb-0">{{ connectedAP.name }}</h4>
-                                            <small class="text-muted">MAC: {{ connectedAP.mac or 'Unknown' }}</small></br>
-                                            <small class="text-muted">IP: {{ connectedAP.mgmtIp or 'Unknown' }}</small>
-                                        {% else %}
-                                            <h4 class="mb-0 text-danger">No AP Connected</h4>
+                                        {% if connectedAP.name%}
+                                            {% for a in aps %}
+                                                {% if connectedAP.name == a.label%}
+                                                    <h4 class="mb-0"><a href= {{ url_for('ap_detail', ap_mac = connectedAP.mac, site_id=a.additionalInfo.siteid) }}>{{ connectedAP.name }}</a></h4>
+                                                    <small class="text-muted">MAC: {{ connectedAP.mac or 'Unknown' }}</small></br>
+                                                    <small class="text-muted">IP: {{ connectedAP.mgmtIp or 'Unknown' }}</small>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {%else%}
+                                        <h4 class="mb-0 text-danger">No AP Connected</h4>
                                         {% endif %}
                                     </div>
                                 </div>

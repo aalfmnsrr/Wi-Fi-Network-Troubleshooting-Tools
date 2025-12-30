@@ -1,4 +1,4 @@
-import requests
+import requests, function
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from config import Config
@@ -9,13 +9,8 @@ database = [
     []
 ]
 
-header = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Auth-Token': Config.token
-    }
-
 def get_client_enrichment_detail(client_mac):
+    function.get_token()
     header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -37,6 +32,13 @@ def get_ap(limit, offset):
     :param limit: maximum quantity of data to query (API Support max 500/query)
     :param offset: set the starting row of query (value >= 1, else error)
     """
+    function.get_token()
+    header = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Auth-Token': Config.token
+    }
+
     url = f"{Config.dnac}/intent/api/v1/network-device"
     params = {
         "limit": limit,
@@ -53,7 +55,6 @@ def fetch_all_ap(limit=500):
     
     :param limit: set limit to max size
     """
-
     offset = 1
     while True:
         devices = get_ap(limit, offset)
@@ -86,7 +87,6 @@ def get_branch_database():
         ]
 
     """
-
     for i in list(fetch_all_ap()):
         hostname = i['hostname']
         country = hostname.split("-")[0]
@@ -125,6 +125,12 @@ def get_clients(limit, offset, connectedAP):
     :param offset: set the starting row of query (value >= 1, else error)
     :param connectedAP: Hostname of AP (ID-ATO-17F-AP12, ID*, ID-ATO-*), support wildcard suffix
     """
+    function.get_token()
+    header = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Auth-Token': Config.token
+    }
     url = f"{Config.dnac}/data/api/v1/clients"
     params = {
         "limit": limit,
@@ -143,6 +149,12 @@ def get_neighbor_topology(client_mac):
     
     :param client_mac: mac address of client/user device
     """
+    function.get_token()
+    header = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Auth-Token': Config.token
+    }
     url = f"{(Config.dnac)[:-4]}/api/assurance/v1/host/{client_mac}/neighbor-topology"
     params = {
 
@@ -150,3 +162,10 @@ def get_neighbor_topology(client_mac):
     response = requests.get(url, headers=header, params=params, verify=False)
     response.raise_for_status() 
     return response.json().get("response", [])
+
+a = get_client_enrichment_detail("88:F4:DA:2A:04:13")
+# b = get_neighbor_topology("88:9C:AD:E6:6E:A0")
+
+import json
+
+# print(json.dumps(a, indent=2))

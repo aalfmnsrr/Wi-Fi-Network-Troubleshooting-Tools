@@ -15,28 +15,12 @@ def get_wlc(dc): #get wlc
     response = requests.get(url_inventory, headers=header, verify=False)
     devices = response.json().get("response", [])
 
-    if dc == "APDC":
-        for c in devices:
-            if c.get('hostname').startswith("APDC"):
-                wlc.append(c)
-                wlc[-1]["dc"] = "APDC"
-    elif dc == "THDC":
-        for c in devices:
-            if c.get('hostname').startswith("TH-NTT"):
-                wlc.append(c)
-                wlc[-1]["dc"] = "THDC"
-    elif dc == "IDDC":
-        for c in devices:
-            if c.get('hostname').startswith("INDO"):
-                wlc.append(c)
-                wlc[-1]["dc"] = "IDDC"
-    elif dc == "HKDC":
-        for c in devices:
-            if c.get('hostname').startswith("HK-NTT"):
-                wlc.append(c)
-                wlc[-1]["dc"] = "HKDC"
-    else:
-        print('dc not found')
+    for c in devices:
+        if c.get('hostname').startswith(dc):
+            wlc.append(c)
+        else:
+            # print('dc not found') WHY THIS STILL PRINT, WHEN IT MATCHES ABOVE IF
+            print(c.get('hostname'))
 
     return wlc
 
@@ -136,24 +120,11 @@ def health_wlc(dc, wlc_ip):
 
     response = requests.get(url, headers = header, verify = False).json().get('response').get('nodes')
 
-    if dc == "APDC":
-        for r in response:
-            if "APDC3S12-WLC" in r["label"]:
-                siteIdWlc = r["additionalInfo"]["siteid"]
-    elif dc == "THDC":
-        for r in response:
-            if "TH-NTT-02F-WLC02" in r["label"]:
-                siteIdWlc = r["additionalInfo"]["siteid"]
-    elif dc == "IDDC":
-        for r in response:
-            if "INDO01B01" in r["label"]:
-                siteIdWlc = r["additionalInfo"]["siteid"]
-    elif dc == "HKDC":
-        for r in response:
-            if "HK-NTT" in r["label"]:
+    for r in response:
+            if dc in r["label"]:
                 siteIdWlc = r["additionalInfo"]["siteid"]
     else:
-        print('dc not found')
+        print('no site')
     # print(siteId)
     url_health = f"{Config.dnac}/intent/api/v1/device-health?siteId={siteIdWlc}" 
         

@@ -5,265 +5,279 @@
 
             <div class="row mb-2 mb-xl-3">
                 <div class="col-auto d-none d-sm-block">
-                    <h3>{{ device.hostname }}</h3>
+                    <h3 class ="mb-0">
+                    Switch Health -
+                    <nobr style="color:#3266bb;">{{ sw.nwDeviceName }}</nobr>
+                    {% if sw.communicationState == "REACHABLE" %}
+                        <span class="badge bg-success ms-2 align-middle">Reachable</span>
+                    {% else %}
+                        <span class="badge bg-danger ms-2 align-middle">Unreachable</span>
+                    {% endif %}
+                    </h3>
+                </div>
+
+                <div class="col-auto ms-auto text-end mt-n1">
+
+                    <div class="dropdown me-2 d-inline-block position-relative">
+                        <a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropDOWN" data-bs-display="static">
+                        <i class="align-middle mt-n1" data-feather="calendar"></i> Today
+                    </a>
+
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <h6 class="dropdown-header">Settings</h6>
+                                                    <a class="dropdown-item" href="#">Action</a>
+                                                    <a class="dropdown-item" href="#">Another action</a>
+                                                    <a class="dropdown-item" href="#">Something else here</a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <a class="dropdown-item" href="#">Separated link</a>
+                            </div>
+                        </div>
+
+                                            <button class="btn btn-primary shadow-sm">
+                    <i class="align-middle" data-feather="filter">&nbsp;</i>
+                    </button>
+                    <button class="btn btn-primary shadow-sm" onclick="location.reload()">
+                        <i class="align-middle" data-feather="refresh-cw" >&nbsp;</i>
+                    </button>
                 </div>
             </div>
-            
-            <div class="row mb-2 mb-xl-3">
-                <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">Brief Information</h3>
-                    <h3 class="mb-0">{{ device.snmpLocation }}</h3>
-                </div>
+            <div class="row">  
+                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h3 class="mb-2">{{ sw.overallHealth }}</h3>
+                                        <p class="mb-2">Overall Health</p>
+                                        {% if 5 > sw.overallHealth %}
+                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                        {% else %}
+                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-success" data-feather="activity"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h3 class="mb-2">{{ sw.cpu }}%</h3>
+                                        <p class="mb-2">CPU Utilization</p>
+                                        {% set cpu_val = sw.cpu|default('0')|replace('%','')|float %}
+                                        {% if cpu_val > 90 %}
+                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                        {% else %}
+                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-success" data-feather="cpu"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h3 class="mb-2">
+                                            {% if sw and sw.memory is not none %}
+                                            {{ "{:,.2f}".format(sw.memory|float) }} %
+                                            {% else %}
+                                            —
+                                            {% endif %}
+                                        </h3>
+                                        <p class="mb-2">Memory</p>
+                                        {% set mem_val = sw.cpu|default('0')|replace('%','')|float %}
+                                        {% if mem_val > 90 %}
+                                            <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                        {% else %}
+                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-danger" data-feather="hard-drive"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        {% set parts = device.upTime.split(',') %}
+                                            <h3 class="mb-2">{{ parts[0] }}</h3>
+                                        <p class="mb-2">Uptime</p>
+                                        <div class="mb-0">
+                                            <!-- <span class="badge badge-soft-success me-2"> +8.65% </span> -->
+                                            <span class="text-muted">At {{ parts[1] }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-info" data-feather="chevrons-up"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
             <div class="row">
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">Model</h5>
-                                </div>
 
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="activity"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">{{ device.type }}</span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-success me-2"> 8.35% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">IP address</h5>
-                                </div>
-
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="shopping-bag"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">{{ device.managementIpAddress }}</span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-success me-2"> 6.25% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">Role</h5>
-                                </div>
-
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="shopping-cart"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">{{ device.role }}</span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-danger me-2"> -4.65% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">OS Version</h5>
-                                </div>
-
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="activity"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">{{ device.softwareVersion }}</span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-success me-2"> 8.35% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-2 mb-xl-3">
-                <div class="col-auto d-none d-sm-block">
-                    <h3>Health Information</h3>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">CPU </h5>
-                                </div>
-
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="shopping-bag"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">
-                                {% if sw_health and sw_cpu is not none %}
-                                {{ "{:,.2f}".format(sw_health.cpu|float) }} %
-                                {% else %}
-                                —
-                                {% endif %}
-                            </span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-success me-2"> 6.25% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">Memory</h5>
-                                </div>
-
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="shopping-cart"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">
-                                {% if sw_health and sw_health.memory is not none %}
-                                {{ "{:,.2f}".format(sw_health.memory|float) }} %
-                                {% else %}
-                                —
-                                {% endif %}
-                            </span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-danger me-2"> -4.65% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">Avg. Temperature</h5>
-                                </div>
-
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="activity"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">{{ sw_health.avgTemperature|float|int }} °F</span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-success me-2"> 8.35% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col mt-0">
-                                    <h5 class="card-title">Up Time</h5>
-                                </div>
-
-                                <div class="col-auto">
-                                    <div class="stat stat-sm">
-                                        <i class="align-middle" data-feather="activity"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="h1 d-inline-block mt-1 mb-3">{{ device.upTime }}</span>
-                            <!-- <div class="mb-0">
-                                <span class="badge badge-soft-success me-2"> 8.35% </span>
-                                <span class="text-muted">Since last week</span>
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-                <!-- <div class="col-md-6 col-xxl-3 d-flex">
-                    <div class="card illustration flex-fill">
-                        <div class="card-body p-0 d-flex flex-fill">
-                            <div class="row g-0 w-100">
-                                <div class="col-6">
-                                    <div class="illustration-text p-3 m-1">
-                                        <h4 class="illustration-text">Welcome Back, Chris!</h4>
-                                        <p class="mb-0">AppStack Dashboard</p>
-                                    </div>
-                                </div>
-                                <div class="col-6 align-self-end text-end">
-                                    <img src="{{ url_for('static', filename='assets/img/illustrations/social.png') }}" alt="Social" class="img-fluid illustration-img">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
-            </div>
-        </div>
-
-        <div class="row mb-2 mb-xl-3">
-            <div class="col-auto d-none d-sm-block">
-                <h3>VLAN Information</h3>
-            </div>
-        </div>
-
-        <div class="row">
-            {% if vlan_count is defined %}
-            <div class="col-md-6 col-xxl-3 d-flex">
                 <div class="card flex-fill">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col mt-0">
-                                <h5 class="card-title">VLAN Counts</h5>
-                            </div>
-
-                            <div class="col-auto">
-                                <div class="stat stat-sm">
-                                    <i class="align-middle" data-feather="shopping-bag"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <span class="h1 d-inline-block mt-1 mb-3"><a href = "/switches/{{device.id}}/vlans">{{ vlan_count | default('-', true)}}</a></span>
-                        <!-- <div class="mb-0">
-                            <span class="badge badge-soft-success me-2"> 6.25% </span>
-                            <span class="text-muted">Since last week</span>
-                        </div> -->
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Switch Details</h5>
                     </div>
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th class="d-none d-xl-table-cell">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Name</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.nwDeviceName }}</td>
+                            </tr>
+                            <tr>
+                                <td>IP Address</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.ip_addr_managementIpAddr }}</td>
+                            </tr>
+                            <tr>
+                                <td>MAC Address</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.macAddress }}</td>
+                            </tr>
+                            <tr>
+                                <td>Series</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.deviceSeries }}</td>
+                            </tr>
+                            <tr>
+                                <td>Software Version</td>
+                                <td class="d-none d-xl-table-cell">{{ sw.softwareVersion }}</td>
+                            </tr>
+                            <tr>
+                                <td>Serial Number</td>
+                                <td class="d-none d-xl-table-cell">{{ device.serialNumber }}</td>
+                            </tr>
+                            <tr>
+                                <td>VLAN Count</td>
+                                <td><a href = "/switches/{{device.id}}/vlans">{{ vlan_count | default('-', true)}}</a></td>
+                            </tr>
+                            <tr>
+                                <td>AP</td>
+                                <td class="d-none d-xl-table-cell">
+                                    <a href="{{ url_for('switch_access_points', device_id=device_id) }}">
+                                    {{ ap_cnt }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Maintenance Mode</td>
+                                <td>{{ sw.maintenanceMode | capitalize }}</td>
+                            </tr>
+                            <tr>
+                                <td>Error Code</td>
+                                {% if device.errorCode == 'null' %}
+                                    <td>N/A</td>
+                                {% else %}
+                                    <td style="color: red;">{{ device.errorCode | capitalize }}</td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Error Description</td>
+                                {% if not device.errorDescription %}
+                                    <td>N/A</td>
+                                {% else %}
+                                    <td style="color: red;">{{ device.errorDescription | capitalize }}</td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Reachability Failure Reason</td>
+                                {% if device.reachabilityFailureReason == '' or 'N/A' %}
+                                    <td>N/A</td>
+                                {% else %}
+                                    <td style="color: red;">{{ device.reachabilityFailureReason | capitalize }}</td>
+                                {% endif %}
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            {% endif %}
+            <div class="row">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Interface Details</h5>
+                    </div>
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                        <thead>
+                            <tr>
+                                <th>Interface Name</th>
+                                <th>Operational Status</th>
+                                <th>Admin Status</th>
+                                <th>Port Channel ID</th>
+                                <th>Type</th>
+                                <th>Allowed VLAN(s)</th>
+                                <th>Link Speed</th>
+                                <th>Duplex</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for intf in sw_interface %}
+                            <tr>
+                                <td>{{ intf.name | default('-', true) }}</td>
+    
+                                {% set oper = (intf.operStatus | default('', true)) %}
+                                {% if not oper or oper == 'DOWN' %}
+                                    <td style="color: red;">{{ oper or 'DOWN' }}</td>
+                                {% else %}
+                                    <td style="color: green;">{{ oper }}</td>
+                                {% endif %}
+           
+                                {% set admin = (intf.adminStatus | default('', true)) %}
+                                {% if not admin or admin == 'DOWN' %}
+                                    <td style="color: red;">{{ admin or 'DOWN' }}</td>
+                                {% else %}
+                                    <td style="color: green;">{{ admin }}</td>
+                                {% endif %}
+    
+                                {% set pcID = (intf.portChannelId | default('', true)) %}
+                                {% if not pcID or pcID == "-1.0" %}
+                                    <td> - </td>
+                                {% else %}
+                                    <td>{{ pcID }}</td>
+                                {% endif %}
+                           
+                                <td>{{ intf.portMode | default('-', true) }}</td>
+                            
+                                <td>{{ intf.vlanId | default('-', true) }}</td>
+                            
+                                <td>{{ intf.speed_fmt | default('-', true) }}</td>
+                            
+                                <td>{{ intf.duplexOper | default('-', true) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -293,7 +307,7 @@
                 </div>
             </div>
         </div>
-    </footer>	
+    </footer>
 
     <script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
 
@@ -418,4 +432,7 @@
     });
     </script>
 
+</body>
+
+</html>
 {% endblock %}
