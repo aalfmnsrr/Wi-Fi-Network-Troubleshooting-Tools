@@ -107,7 +107,11 @@
 															<p><strong>Overall Health: </strong> {{ wh.overallHealth }}</p>
 															<p><strong>Memory Utilization: </strong> {{ wh.memoryUtilization }} % </p>
 															<p><strong>Location: </strong> {{ wh.location }}</p>
-															<p><strong>Reachbility: </strong> {{ wh.reachabilityHealth }}</p>
+															<p><strong>Reachbility: </strong>
+																<span class="badge {% if wh.reachabilityHealth == "REACHABLE" %}bg-success{% else %}bg-danger{% endif %}">
+																	{{ wh.reachabilityHealth }}
+																</span>
+															</p>
 															<p><strong>AP Count (All): </strong>{{ wh.apCount }}</p>
 								
 														</div>

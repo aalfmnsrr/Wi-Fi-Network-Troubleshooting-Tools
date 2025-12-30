@@ -74,6 +74,23 @@ def get_ssid(wlc_id):
 
     return response
 
+def get_physical(wlc_id):
+
+    function.get_token()
+    url_inventory = f'{Config.dnac}/intent/api/v1/network-device/{wlc_id}/equipment'
+
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    response = requests.get(url_inventory, headers=header, verify=False)
+
+    response = response.json().get('response')
+
+    return response
+
+
 def get_AP_in_WLC(wlc_ip):
 
     function.get_token()
