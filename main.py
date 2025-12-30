@@ -201,13 +201,14 @@ def wlc_ssid(dc, id):
     
     ssids = wlcs.get_ssid(id)
     interface = wlcs.wlc_int(id)
-    wlc = wlcs.get_wlc_by_id(id)
+    wlc = wlcs.get_wlc(dc)
     physical = wlcs.get_physical(id)
 
-    hostname = wlc.get('name')
-    series = wlc.get('deviceSeries')
-
-    return render_template("/wlc/wlc_ssid.html", wlcs = wlc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
+    for w in wlc:
+        if id == w.get('id'):
+            hostname = w.get('hostname')
+            series = w.get('series')
+    return render_template("/wlc/wlc_ssid.html", dc = dc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
 
 @app.route('/wlc', methods=['POST', 'GET'])
 @session_check
