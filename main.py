@@ -190,4 +190,10 @@ def switch_vlans(device_id):
 
 if __name__ == '__main__':
     # index()
-    app.run(debug=True, host='0.0.0.0', port=Config.port)
+
+    app.config['DEBUG'] = True
+
+    # error.html will be generated if error 400 or 500 if uncomment below
+    # app.config['PROPAGATE_EXCEPTIONS'] = False 
+
+    app.run(host='0.0.0.0', port=Config.port)

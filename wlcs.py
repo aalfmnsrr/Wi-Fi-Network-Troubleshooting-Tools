@@ -54,7 +54,6 @@ def wlc_id(wlc_ip):
     # print(json.dumps(response.json(), indent=2))
 
     wlc_id = response.json().get('response').get('id')
-    # print(wlc_id)
     return wlc_id
 
 def wlc_int(wlc_id):
