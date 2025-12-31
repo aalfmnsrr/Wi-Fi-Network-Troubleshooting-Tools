@@ -1,778 +1,234 @@
 {% extends 'sidebar.html' %}
 {% block body %}
 
-			<main class="content">
-				<div class="container-fluid p-0">
+<main class="content">
+    <div class="container-fluid p-0">
 
-					<div class="row mb-2 mb-xl-3">
-						<div class="col-auto d-none d-sm-block">
-							<h3 class ="mb-0">Client Health 
-								{% if client.id %}
-								<nobr style="color:#3266bb;"> - {{ client.id }}</nobr>
-								{% endif %}
-								{% if client.connectionStatus == "connected" %}
-									<span class="badge bg-success ms-2 align-middle">Connected</span>
-								{% else %}
-									<span class="badge bg-danger ms-2 align-middle">Disconnected</span>
-								{% endif %}
-								</h3>
-						</div>
+        <div class="row mb-2 mb-xl-3">
+            <div class="col-auto d-none d-sm-block">
+                <h3 class="mb-0">Client Detail Page</h3>
+            </div>
+            <div class="col-auto ms-auto text-end mt-n1">
+                <button class="btn btn-primary shadow-sm">
+                    <i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
+                </button>
+            </div>
+        </div>
 
-						<div class="col-auto ms-auto text-end mt-n1">
+        <div class="row">
+            
+            <div class="col-12 col-lg-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Signal Dashboard</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label text-muted">RSSI History</label>
+                            <div class="progress" style="height: 5px; margin-bottom: 5px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 70%"></div>
+                            </div>
+                            <div class="progress" style="height: 5px; margin-bottom: 5px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 65%"></div>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 75%"></div>
+                            </div>
+                        </div>
 
-							<div class="dropdown me-2 d-inline-block position-relative">
-								<a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
-									<i class="align-middle mt-n1" data-feather="calendar"></i> Today
-								</a>
-								<div class="dropdown-menu dropdown-menu-end">
-									<h6 class="dropdown-header">Settings</h6>
-									<a class="dropdown-item" href="#">Action</a>
-									<a class="dropdown-item" href="#">Another action</a>
-									<a class="dropdown-item" href="#">Something else here</a>
-									<div class="dropdown-divider"></div>
-									<a class="dropdown-item" href="#">Separated link</a>
-								</div>
-							</div>
+                        <div class="mb-4">
+                            <label class="form-label text-muted">Noise Floor</label>
+                            <div class="progress" style="height: 5px; margin-bottom: 5px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 20%"></div>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 25%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <small class="text-muted">Last updated: Just now</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-							<button class="btn btn-primary shadow-sm">
-      <i class="align-middle" data-feather="filter">&nbsp;</i>
-    </button>
-							<button class="btn btn-primary shadow-sm">
-      <i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
-    </button>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-lg-6 col-xl-5 d-flex">
-							<div class="w-100">
+            <div class="col-12 col-lg-9">
+                <div class="card">
+                    <div class="card-body">
+                        
+                        <div class="row mb-5">
+                            <div class="col-md-3 text-center border-end">
+                                <div class="mb-3">
+                                    <span class="rounded-circle d-inline-block bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                                        <i class="align-middle" data-feather="user" style="width: 40px; height: 40px; color: #555;"></i>
+                                    </span>
+                                </div>
+                                
+                                <div class="position-relative d-inline-block">
+                                    {% if client.connectionStatus == "CONNECTED" %}
+                                        <div class="badge bg-success p-2 px-3 position-relative">
+                                            ONLINE
+                                            </div>
+                                    {% else %}
+                                        <div class="badge bg-danger p-2 px-3">
+                                            OFFLINE
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-								<div class="row">
-									<!-- <div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
-										<div class="card illustration flex-fill">
-											<div class="card-body p-0 d-flex flex-fill">
-												<div class="row g-0 w-100">
-													<div class="col-6">
-														<div class="illustration-text p-3 m-1" style="flex: 1; width: auto;">
-															<h5 class="card-title">Username</span>
-															<h4 class="illustration-text" style="max-width: 100%;">{{ client.userId }}</h4>
-															 <span class="text-muted">{{ client.hostName }}</span> 
-														 </div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div> -->
-									<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
-										<div class="card flex-fill">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Username</h5>
-													</div>
+                            <div class="col-md-9 ps-md-4">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <h5 class="fw-bold text-muted text-uppercase small">Hostname</h5>
+                                        <p class="h4 mb-3">{{ client.hostName or 'N/A' }}</p>
 
-													<div class="col-auto">
-														<div class="stat stat-sm">
-															<i class="align-middle" data-feather="user"></i>
-														</div>
-													</div>
-												</div>
-												{% if not client.userId %}
-												<span class="h1 d-inline-block mt-1 mb-4" style="color:#fb0d00;overflow-wrap: break-word; word-break: break-word; white-space: normal; max-width: 100%; display: block;">N/A</span>
-												{% else %}
-												<span class="h1 d-inline-block mt-1 mb-4" style="color:#3f80ea;overflow-wrap: break-word; word-break: break-word; white-space: normal; max-width: 100%; display: block;">
-													{{ client.userId }}
-												</span>
-												{% endif %}
-												{% if not client.hostName %}
-												<div class="mb-0">N/A</div>
-												{% else %}
-													<div class="mb-0">
-														{{ client.hostName }}
-													</div>
-												{% endif %}
-											</div>
-										</div>
-									</div>
-									<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
-										<div class="card flex-fill">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Connected AP</h5>
-													</div>
+                                        <h5 class="fw-bold text-muted text-uppercase small">Username</h5>
+                                        <p class="h4 mb-3">{{ client.userId or 'N/A' }}</p>
+                                        
+                                        <h5 class="fw-bold text-muted text-uppercase small">MAC Address</h5>
+                                        <p class="font-monospace text-dark">{{ client.hostMac }}</p>
+                                    </div>
 
-													<div class="col-auto">
-														<div class="stat stat-sm">
-															<i class="align-middle" data-feather="radio"></i>
-														</div>
-													</div>
-												</div>
-												{% if not connectedAP.hostName %}
-												<span class="h1 d-inline-block mt-1 mb-4" style="color:#fb0d00;overflow-wrap: break-word; word-break: break-word; white-space: normal; max-width: 100%; display: block;">N/A</span>
-												{% else %}
-												<span class="h1 d-inline-block mt-1 mb-4"style="color:#3f80ea">{{ connectedAP.hostname }}</span>
-												{% endif %}
-												{% if not client.location %}
-												<div class="mb-0">
-													N/A
-												</div>
-												{% else %}
-												<div class="mb-0">
-													{{ client.location }}
-												</div>
-												{% endif %}
-											</div>
-										</div>
-									</div>
-								</div>
-								<!-- <div class="row d-lg-none d-xxl-flex">
-									<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
-										<div class="card flex-fill">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Real-Time</h5>
-													</div>
-													
-													<div class="col-auto">
-														<div class="stat stat-sm">
-															<i class="align-middle" data-feather="clock"></i>
-														</div>
-													</div>
-												</div>
-												<span class="h1 d-inline-block mt-1 mb-4">1.856</span>
-												<div class="mb-0">
-													<span class="badge badge-soft-success me-2"> +2.25% </span>
-													<span class="text-muted">Since last week</span>
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
-										<div class="card flex-fill">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Visitors</h5>
-													</div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-6 mb-3">
+                                                <h5 class="fw-bold text-muted text-uppercase small">Floor</h5>
+                                                <span>{{ client.location or '1st Floor' }}</span>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <h5 class="fw-bold text-muted text-uppercase small">Power</h5>
+                                                <span>TX: 18dBm</span> </div>
+                                            <div class="col-6 mb-3">
+                                                <h5 class="fw-bold text-muted text-uppercase small">Signal Strength</h5>
+                                                <span class="{{ 'text-success' if client.rssi and client.rssi|int > -65 else 'text-warning' }}">
+                                                    {{ client.rssi or 'N/A' }}
+                                                </span>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <h5 class="fw-bold text-muted text-uppercase small">Channel</h5>
+                                                <span>{{ client.channel or 'Auto' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-													<div class="col-auto">
-														<div class="stat stat-sm">
-															<i class="align-middle" data-feather="users"></i>
-														</div>
-													</div>
-												</div>
-												<span class="h1 d-inline-block mt-1 mb-4">17.212</span>
-												<div class="mb-0">
-													<span class="badge badge-soft-danger me-2"> -1.25% </span>
-													<span class="text-muted">Since last week</span>
-												</div>
-											</div>
-										</div>
-									</div> -->
-								<!-- </div> -->
+                        <hr>
 
-							</div>
-						</div>
+                        <div class="row mb-5 mt-4">
+                            <div class="col-12">
+                                <h5 class="card-title mb-3">Connected AP</h5>
+                                <div class="d-flex align-items-center p-3 border rounded bg-light">
+                                    <div class="me-3">
+                                        <i class="align-middle text-primary" data-feather="router" style="width: 32px; height: 32px;"></i>
+                                    </div>
+                                    <div>
+                                        {% if connectedAP.name %}
+                                            <h4 class="mb-0">{{ connectedAP.name }}</h4>
+                                            <small class="text-muted">MAC: {{ connectedAP.mac or 'Unknown' }}</small></br>
+                                            <small class="text-muted">IP: {{ connectedAP.mgmtIp or 'Unknown' }}</small>
+                                        {% else %}
+                                            <h4 class="mb-0 text-danger">No AP Connected</h4>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-						<div class="col-lg-6 col-xl-7">
-							<div class="card flex-fill w-100">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-              <i class="align-middle" data-feather="more-horizontal"></i>
-            </a>
+<div class="row">
+                            <div class="col-12">
+                                <h5 class="card-title mb-3">Neighboring Topology (Issue Scope)</h5>
+                                <div class="border rounded p-4 bg-light overflow-auto">
+                                    <div class="d-flex align-items-center justify-content-between text-center" style="min-width: 600px;">
+                                        
+                                        {% for node in neighbor_nodes %}
+                                            
+                                            <div class="card mb-0 shadow-sm border-0 position-relative" style="width: 200px; min-width: 200px;">
+                                                <div class="card-body p-3">
+                                                    
+                                                    <div class="mb-2">
+                                                        {% if node.role == 'CLIENT' %}
+                                                            <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-block">
+                                                                <i class="text-primary" data-feather="monitor"></i>
+                                                            </div>
+                                                        {% elif node.role == 'SSID' %}
+                                                            <div class="bg-info bg-opacity-10 p-2 rounded-circle d-inline-block">
+                                                                <i class="text-info" data-feather="rss"></i>
+                                                            </div>
+                                                        {% elif node.role == 'ACCESS' and node.deviceType and 'Controller' in node.deviceType %}
+                                                            <div class="bg-purple bg-opacity-10 p-2 rounded-circle d-inline-block" style="background-color: rgba(111, 66, 193, 0.1);">
+                                                                <i data-feather="server" style="color: #6f42c1;"></i>
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="bg-success bg-opacity-10 p-2 rounded-circle d-inline-block">
+                                                                <i class="text-success" data-feather="router"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <h6 class="card-title mb-1 text-truncate fw-bold" title="{{ node.name }}">
+                                                        {{ node.name }}
+                                                    </h6>
+                                                    
+                                                    <div class="text-muted small mb-2" style="font-size: 0.75rem;">
+                                                        {% if node.ip %}
+                                                            <div class="font-monospace mb-1">{{ node.ip }}</div>
+                                                        {% endif %}
+                                                        <div class="badge bg-light text-dark border fw-normal">{{ node.role }}</div>
+                                                    </div>
 
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Real-Time</h5>
-								</div>
-								<div class="card-body p-2">
-									<div id="world_map" style="height:279px;"></div>
-								</div>
-							</div>
-						</div>
-					</div>
+                                                    {% if node.healthScore is not none %}
+                                                    <div class="border-top pt-2 mt-2">
+                                                        <div class="d-flex justify-content-between align-items-center small">
+                                                            <span class="text-muted">Health</span>
+                                                            
+                                                            {% if node.healthScore|float >= 8.0 %}
+                                                                <span class="badge bg-success">{{ node.healthScore }}</span>
+                                                            {% elif node.healthScore|float >= 5.0 %}
+                                                                <span class="badge bg-warning text-dark">{{ node.healthScore }}</span>
+                                                            {% else %}
+                                                                <span class="badge bg-danger">{{ node.healthScore }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
 
-					<div class="row">
-						<div class="col-12 col-lg-4 d-flex">
-							<div class="card flex-fill w-100">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-              <i class="align-middle" data-feather="more-horizontal"></i>
-            </a>
+                                            {% if not loop.last %}
+                                                <div class="px-3 text-muted opacity-50">
+                                                    <i data-feather="arrow-right" style="width: 24px; height: 24px;"></i>
+                                                </div>
+                                            {% endif %}
 
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Languages</h5>
-								</div>
-								<table class="table table-striped my-0">
-									<thead>
-										<tr>
-											<th>Language</th>
-											<th class="text-end">Users</th>
-											<th class="d-none d-xl-table-cell w-75">% Users</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td>en-us</td>
-											<td class="text-end">735</td>
-											<td class="d-none d-xl-table-cell">
-												<div class="progress">
-													<div class="progress-bar bg-primary" role="progressbar" style="width: 43%;" aria-valuenow="43" aria-valuemin="0" aria-valuemax="100">43%</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>en-gb</td>
-											<td class="text-end">223</td>
-											<td class="d-none d-xl-table-cell">
-												<div class="progress">
-													<div class="progress-bar bg-primary" role="progressbar" style="width: 27%;" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100">27%</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>fr-fr</td>
-											<td class="text-end">181</td>
-											<td class="d-none d-xl-table-cell">
-												<div class="progress">
-													<div class="progress-bar bg-primary" role="progressbar" style="width: 22%;" aria-valuenow="22" aria-valuemin="0" aria-valuemax="100">22%</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>es-es</td>
-											<td class="text-end">132</td>
-											<td class="d-none d-xl-table-cell">
-												<div class="progress">
-													<div class="progress-bar bg-primary" role="progressbar" style="width: 16%;" aria-valuenow="16" aria-valuemin="0" aria-valuemax="100">16%</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>de-de</td>
-											<td class="text-end">118</td>
-											<td class="d-none d-xl-table-cell">
-												<div class="progress">
-													<div class="progress-bar bg-primary" role="progressbar" style="width: 15%;" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">15%</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>ru-ru</td>
-											<td class="text-end">98</td>
-											<td class="d-none d-xl-table-cell">
-												<div class="progress">
-													<div class="progress-bar bg-primary" role="progressbar" style="width: 13%;" aria-valuenow="13" aria-valuemin="0" aria-valuemax="100">13%</div>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
+                                        {% endfor %}
 
-						<div class="col-12 col-lg-4 d-flex">
-							<div class="card flex-fill w-100">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-              <i class="align-middle" data-feather="more-horizontal"></i>
-            </a>
-
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Mobile / Desktop</h5>
-								</div>
-								<div class="card-body d-flex w-100">
-									<div class="align-self-center chart">
-										<canvas id="chartjs-dashboard-bar-devices"></canvas>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="col-12 col-lg-4 d-flex">
-							<div class="card flex-fill">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-              <i class="align-middle" data-feather="more-horizontal"></i>
-            </a>
-
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Interests</h5>
-								</div>
-								<div class="card-body">
-									<div class="chart">
-										<canvas id="chartjs-dashboard-radar"></canvas>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-12 col-lg-5 col-xl-4 d-flex">
-							<div class="card flex-fill w-100">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-              <i class="align-middle" data-feather="more-horizontal"></i>
-            </a>
-
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Source / Medium</h5>
-								</div>
-								<div class="card-body d-flex">
-									<div class="align-self-center w-100">
-										<div class="py-3">
-											<div class="chart chart-xs">
-												<canvas id="chartjs-dashboard-pie"></canvas>
-											</div>
-										</div>
-
-										<table class="table mb-0">
-											<thead>
-												<tr>
-													<th>Source</th>
-													<th class="text-end">Revenue</th>
-													<th class="text-end">Value</th>
-												</tr>
-											</thead>
-											<tbody>
-												<tr>
-													<td><i class="fas fa-square-full text-primary"></i> Direct</td>
-													<td class="text-end">$ 2602</td>
-													<td class="text-end text-success">+43%</td>
-												</tr>
-												<tr>
-													<td><i class="fas fa-square-full text-warning"></i> Affiliate</td>
-													<td class="text-end">$ 1253</td>
-													<td class="text-end text-success">+13%</td>
-												</tr>
-												<tr>
-													<td><i class="fas fa-square-full text-danger"></i> E-mail</td>
-													<td class="text-end">$ 541</td>
-													<td class="text-end text-success">+24%</td>
-												</tr>
-												<tr>
-													<td><i class="fas fa-square-full text-dark"></i> Other</td>
-													<td class="text-end">$ 1465</td>
-													<td class="text-end text-success">+11%</td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-12 col-lg-7 col-xl-8 d-flex">
-							<div class="card flex-fill">
-								<div class="card-header">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-              <i class="align-middle" data-feather="more-horizontal"></i>
-            </a>
-
-											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Action</a>
-												<a class="dropdown-item" href="#">Another action</a>
-												<a class="dropdown-item" href="#">Something else here</a>
-											</div>
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Traffic</h5>
-								</div>
-								<table id="datatables-dashboard-traffic" class="table table-striped my-0">
-									<thead>
-										<tr>
-											<th>Source</th>
-											<th class="text-end">Users</th>
-											<th class="d-none d-xl-table-cell text-end">Sessions</th>
-											<th class="d-none d-xl-table-cell text-end">Bounce Rate</th>
-											<th class="d-none d-xl-table-cell text-end">Avg. Session Duration</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td>Google</td>
-											<td class="text-end">1023</td>
-											<td class="d-none d-xl-table-cell text-end">1265</td>
-											<td class="d-none d-xl-table-cell text-end text-success">27.23%</td>
-											<td class="d-none d-xl-table-cell text-end">00:06:25</td>
-										</tr>
-										<tr>
-											<td>Bing</td>
-											<td class="text-end">504</td>
-											<td class="d-none d-xl-table-cell text-end">623</td>
-											<td class="d-none d-xl-table-cell text-end text-danger">66.76%</td>
-											<td class="d-none d-xl-table-cell text-end">00:04:42</td>
-										</tr>
-										<tr>
-											<td>Twitter</td>
-											<td class="text-end">462</td>
-											<td class="d-none d-xl-table-cell text-end">571</td>
-											<td class="d-none d-xl-table-cell text-end text-success">31.53%</td>
-											<td class="d-none d-xl-table-cell text-end">00:08:05</td>
-										</tr>
-										<tr>
-											<td>Pinterest</td>
-											<td class="text-end">623</td>
-											<td class="d-none d-xl-table-cell text-end">770</td>
-											<td class="d-none d-xl-table-cell text-end text-danger">52.81%</td>
-											<td class="d-none d-xl-table-cell text-end">00:03:10</td>
-										</tr>
-										<tr>
-											<td>Facebook</td>
-											<td class="text-end">812</td>
-											<td class="d-none d-xl-table-cell text-end">1003</td>
-											<td class="d-none d-xl-table-cell text-end text-success">24.83%</td>
-											<td class="d-none d-xl-table-cell text-end">00:05:56</td>
-										</tr>
-										<tr>
-											<td>DuckDuckGo</td>
-											<td class="text-end">693</td>
-											<td class="d-none d-xl-table-cell text-end">856</td>
-											<td class="d-none d-xl-table-cell text-end text-success">37.36%</td>
-											<td class="d-none d-xl-table-cell text-end">00:09:12</td>
-										</tr>
-										<tr>
-											<td>GitHub</td>
-											<td class="text-end">713</td>
-											<td class="d-none d-xl-table-cell text-end">881</td>
-											<td class="d-none d-xl-table-cell text-end text-success">38.09%</td>
-											<td class="d-none d-xl-table-cell text-end">00:06:19</td>
-										</tr>
-										<tr>
-											<td>Direct</td>
-											<td class="text-end">872</td>
-											<td class="d-none d-xl-table-cell text-end">1077</td>
-											<td class="d-none d-xl-table-cell text-end text-success">32.70%</td>
-											<td class="d-none d-xl-table-cell text-end">00:09:18</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</main>
-
-			<footer class="footer">
-				<div class="container-fluid">
-					<div class="row text-muted">
-						<div class="col-6 text-start">
-							<ul class="list-inline">
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Support</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Help Center</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Privacy</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Terms of Service</a>
-								</li>
-							</ul>
-						</div>
-						<div class="col-6 text-end">
-							<p class="mb-0">
-								&copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
-							</p>
-						</div>
-					</div>
-				</div>
-			</footer>
-		</div>
-	</div>
-
-	<script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
-
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			// Bar chart
-			new Chart(document.getElementById("chartjs-dashboard-bar-devices"), {
-				type: "bar",
-				data: {
-					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-					datasets: [{
-						label: "Mobile",
-						backgroundColor: window.theme.primary,
-						borderColor: window.theme.primary,
-						hoverBackgroundColor: window.theme.primary,
-						hoverBorderColor: window.theme.primary,
-						data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79],
-						barPercentage: .5,
-						categoryPercentage: .5
-					}, {
-						label: "Desktop",
-						backgroundColor: window.theme["primary-light"],
-						borderColor: window.theme["primary-light"],
-						hoverBackgroundColor: window.theme["primary-light"],
-						hoverBorderColor: window.theme["primary-light"],
-						data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68],
-						barPercentage: .5,
-						categoryPercentage: .5
-					}]
-				},
-				options: {
-					maintainAspectRatio: false,
-					cornerRadius: 15,
-					legend: {
-						display: false
-					},
-					scales: {
-						yAxes: [{
-							gridLines: {
-								display: false
-							},
-							ticks: {
-								stepSize: 20
-							},
-							stacked: true,
-						}],
-						xAxes: [{
-							gridLines: {
-								color: "transparent"
-							},
-							stacked: true,
-						}]
-					}
-				}
-			});
-		});
-	</script>
-	<script src="https://cdn.jsdelivr.net/npm/jsvectormap"></script>
-	<script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>	
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			var markers = [{
-					coords: [31.230391, 121.473701],
-					name: "Shanghai"
-				},
-				{
-					coords: [39.904202, 116.407394],
-					name: "Beijing"
-				},
-				{
-					coords: [28.704060, 77.102493],
-					name: "Delhi"
-				},
-				{
-					coords: [6.524379, 3.379206],
-					name: "Lagos"
-				},
-				{
-					coords: [39.343357, 117.361649],
-					name: "Tianjin"
-				},
-				{
-					coords: [24.860735, 67.001137],
-					name: "Karachi"
-				},
-				{
-					coords: [41.008240, 28.978359],
-					name: "Istanbul"
-				},
-				{
-					coords: [35.689487, 139.691711],
-					name: "Tokyo"
-				},
-				{
-					coords: [23.129110, 113.264381],
-					name: "Guangzhou"
-				},
-				{
-					coords: [19.075983, 72.877655],
-					name: "Mumbai"
-				},
-				{
-					coords: [40.7127837, -74.0059413],
-					name: "New York"
-				},
-				{
-					coords: [34.052235, -118.243683],
-					name: "Los Angeles"
-				},
-				{
-					coords: [41.878113, -87.629799],
-					name: "Chicago"
-				},
-				{
-					coords: [29.760427, -95.369804],
-					name: "Houston"
-				},
-				{
-					coords: [33.448376, -112.074036],
-					name: "Phoenix"
-				},
-				{
-					coords: [51.507351, -0.127758],
-					name: "London"
-				},
-				{
-					coords: [48.856613, 2.352222],
-					name: "Paris"
-				},
-				{
-					coords: [55.755825, 37.617298],
-					name: "Moscow"
-				},
-				{
-					coords: [40.416775, -3.703790],
-					name: "Madrid"
-				}
-			];
-			var map = new jsVectorMap({
-				map: "map",
-				selector: "#world_map",
-				zoomButtons: true,
-				markers: markers,
-				markerStyle: {
-					initial: {
-						r: 9,
-						stroke: window.theme.white,
-						strokeWidth: 7,
-						strokeOpacity: .4,
-						fill: window.theme.primary
-					},
-					hover: {
-						fill: window.theme.primary,
-						stroke: window.theme.primary
-					}
-				},
-				regionStyle: {
-					initial: {
-						fill: window.theme["gray-200"]
-					}
-				},
-				zoomOnScroll: false
-			});
-			window.addEventListener("resize", () => {
-				map.updateSize();
-			});
-			setTimeout(function() {
-				map.updateSize();
-			}, 250);
-		});
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			// Pie chart
-			new Chart(document.getElementById("chartjs-dashboard-pie"), {
-				type: "pie",
-				data: {
-					labels: ["Direct", "Affiliate", "E-mail", "Other"],
-					datasets: [{
-						data: [2602, 1253, 541, 1465],
-						backgroundColor: [
-							window.theme.primary,
-							window.theme.warning,
-							window.theme.danger,
-							"#E8EAED"
-						],
-						borderWidth: 5,
-						borderColor: window.theme.white
-					}]
-				},
-				options: {
-					responsive: !window.MSInputMethodContext,
-					maintainAspectRatio: false,
-					cutoutPercentage: 70,
-					legend: {
-						display: false
-					}
-				}
-			});
-		});
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			// Radar chart
-			new Chart(document.getElementById("chartjs-dashboard-radar"), {
-				type: "radar",
-				data: {
-					labels: ["Technology", "Sports", "Media", "Gaming", "Arts"],
-					datasets: [{
-						label: "Interests",
-						backgroundColor: "rgba(0, 123, 255, 0.2)",
-						borderColor: "#2979ff",
-						pointBackgroundColor: "#2979ff",
-						pointBorderColor: "#fff",
-						pointHoverBackgroundColor: "#fff",
-						pointHoverBorderColor: "#2979ff",
-						data: [70, 53, 82, 60, 33]
-					}]
-				},
-				options: {
-					maintainAspectRatio: false,
-					legend: {
-						display: false
-					}
-				}
-			});
-		});
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			$("#datatables-dashboard-traffic").DataTable({
-				pageLength: 8,
-				lengthChange: false,
-				bFilter: false,
-				autoWidth: false,
-				order: [
-					[1, "desc"]
-				]
-			});
-		});
-	</script>
-	<script src="https://unpkg.com/feather-icons"></script>
-	<script>
-		feather.replace();
-	</script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
 
-</body>
 
-</html>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        feather.replace();
+    });
+</script>
+
 {% endblock %}
+

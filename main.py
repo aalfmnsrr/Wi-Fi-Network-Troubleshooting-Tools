@@ -3,7 +3,7 @@ from config import Config
 from markupsafe import Markup
 from functools import wraps
 import json
-import function, access_point, client, wlcs, switch
+import function, access_point, client_function, wlcs, switch
 import bcrypt
 from datetime import timedelta
 
@@ -36,18 +36,40 @@ def dashboard():
 @app.route('/clients', methods=['POST', 'GET'])
 @session_check
 def clients():
-    client_list = client.get_clients()
+
+    country = request.args.get('country')
+    branch = request.args.get('branch')
+    floor = request.args.get('floor')
+    offset = request.args.get('offset')
+
+
+    query_connected_ap = ""
+    if country:
+        query_connected_ap+= country
+    if branch:
+        query_connected_ap= query_connected_ap + "-" + branch
+    if floor:
+        query_connected_ap= query_connected_ap + "-" + floor
+        query_connected_ap = query_connected_ap + "-AP*"
+    else:
+        query_connected_ap = query_connected_ap + "*"
+
+
+    clients = client_function.get_clients(200,offset,f"{query_connected_ap}")
+    branch_database = client_function.get_branch_database()
     # print(clients)
     # print(len(clients))
-    return render_template("clients.html", clients=client_list)
+    return render_template("clients.html", clients=clients, database=branch_database)
+
 
 @app.route('/client-detail/<client_mac>', methods=['POST', 'GET'])
 @session_check
 def device_detail(client_mac):
-    clients = client.get_client_enrichment_detail(client_mac)
-    connectedAP = clients["connectedDevice"][0].get("deviceDetails")
-    clients = clients["userDetails"]
-    return render_template('client-detail.html', client=clients, connectedAP=connectedAP)
+    client = client_function.get_client_enrichment_detail(client_mac)
+    client = client["userDetails"]
+    connectedAP = client["connectedDevice"][0]
+    neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
+    return render_template('client-detail.html', client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
@@ -169,24 +191,77 @@ def switches():
     devices = switch.get_switches(role = role_filter)
     return render_template("switches.html", devices=devices)
 
+
+@app.route('/switches/<device_id>/aps', methods=['GET'])
+@session_check
+def switch_access_points(device_id):
+    # APs connected to this switch only
+    sw = function.get_device(device_id)
+    aps = switch.get_ap_neighbors(device_id)
+    return render_template("access-points.html", access_points=aps, source_switch=device_id, sw=sw)
+
+
 @app.route('/switches/<device_id>', methods=['GET'])
 def switch_detail(device_id):
-    device = switch.get_switch_details(device_id)
+    device = function.get_device(device_id)
 
     device_mac = device.get('macAddress')
-    sw = switch.get_switch_health(device_mac)
+    sw = function.get_device_detail(device_mac)
 
     vlans = switch.get_vlan(device_id)
     vlan_count = len(vlans)
-    
-    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count)
+
+    stack_json = switch.get_stack_info(device_id)
+    stack_info = switch.dict_stack(stack_json)
+
+    poe = switch.get_poe(device_id)
+
+    access_points = []
+    access_points = switch.get_ap_neighbors(device_id)
+    ap_cnt = len(access_points)
+    ap_groups = switch.group_ap_labels_by_floor(access_points)
+
+    sw_interface = switch.get_interface(device_id)
+    # Decorate each interface with a formatted speed string
+    # Ensure sw_interface is a list/dict iterable; adjust if your structure is different
+    if isinstance(sw_interface, list):
+        for intf in sw_interface:
+            intf['speed_fmt'] = switch.format_speed_kbps(intf.get('speed'))
+    elif isinstance(sw_interface, dict):
+        # In some payloads interfaces are under a key like 'interfaces'
+        interfaces = sw_interface.get('interfaces', [])
+        for intf in interfaces:
+            intf['speed_fmt'] = switch.format_speed_kbps(intf.get('speed'))
+        # If you want to render the nested list, reassign:
+        sw_interface = interfaces
+
+
+    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count, stack_json=stack_json, 
+    stack_info=stack_info, poe=poe, access_points=access_points, ap_cnt=ap_cnt, ap_groups=ap_groups, device_id=device_id, 
+    sw_interface=sw_interface)
 
 @app.route('/switches/<device_id>/vlans', methods=['GET'])
 def switch_vlans(device_id):
-    device = switch.get_switch_details(device_id)
+    device = function.get_device(device_id)
     vlans = switch.get_vlan(device_id)
     
     return render_template("sw-vlan.html", device=device, vlans=vlans)
+
+# @app.route('/access-points', methods=["POST", "GET"])
+# @session_check
+# def access_points_neighbor():
+#     aps = access_point.get_ap()
+
+#     ap_neighbor = []
+#     for item in aps:
+#         ap_neighbor = [x for x in aps if x.split('-')[2] == floor]    
+    
+#     return render_template("access-points.html", ap_neighbor = ap_neighbor)
+
+@app.route('/search-client', methods=['GET', 'POST'])
+def search_client():
+    return render_template('search-client-by-mac.html')
+
 
 if __name__ == '__main__':
     # index()
