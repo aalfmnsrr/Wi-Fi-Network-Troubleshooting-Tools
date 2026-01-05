@@ -212,7 +212,9 @@ def switch_detail(device_id):
     vlan_count = len(vlans)
 
     stack_json = switch.get_stack_info(device_id)
-    stack_info = switch.dict_stack(stack_json)
+    stack_info = switch.dict_stack_summary(stack_json)
+    svl_info = switch.dict_svl_summary(stack_json)
+    use_svl = bool(stack_json.get('svlSwitchInfo')) and bool(svl_info)
 
     poe = switch.get_poe(device_id)
 
@@ -237,8 +239,8 @@ def switch_detail(device_id):
 
 
     return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count, stack_json=stack_json, 
-    stack_info=stack_info, poe=poe, access_points=access_points, ap_cnt=ap_cnt, ap_groups=ap_groups, device_id=device_id, 
-    sw_interface=sw_interface)
+    stack_info=stack_info, svl_info=svl_info, use_svl=use_svl, poe=poe, access_points=access_points, ap_cnt=ap_cnt, 
+    ap_groups=ap_groups, device_id=device_id, sw_interface=sw_interface)
 
 @app.route('/switches/<device_id>/vlans', methods=['GET'])
 def switch_vlans(device_id):

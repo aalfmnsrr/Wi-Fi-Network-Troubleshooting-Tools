@@ -1,5 +1,5 @@
 # switch.py
-import requests, function, access_point
+import requests, function, access_point, re
 from config import Config
 from collections import defaultdict
 
@@ -59,55 +59,211 @@ def get_stack_info(device_id):
     stack = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return stack
 
-def dict_stack(stack):
-    # this function will return list of dict of stack
-    stack_dict = []
-    sws = stack.get('stackSwitchInfo')
-    ports = stack.get('stackPortInfo')
-
-    neighbors = {}
-    for p in ports:
-        sp = p.get('switchPort') 
-        np = p.get('neighborPort')     
-        if sp and np and '/' in sp and '/' in np:
-            neighbors[sp] = np
-    
-    def neighbor_member_num(port_str):
+def _parse_member_from_stack_port(port_str):
+    """StackWise style 'X/Y' -> member int X."""
+    if not port_str or '/' not in port_str:
+        return None
+    try:
         member_str, _ = port_str.split('/', 1)
         return int(member_str)
-    
-    
+    except Exception:
+        return None
+
+def _parse_member_from_interface_name(if_name):
+    """
+    SVL interface style 'TenGigabitEthernet2/0/5' -> member int 2.
+    Works with common Catalyst names (GigabitEthernet, TenGigabitEthernet, etc.).
+    """
+    if not if_name:
+        return None
+    # Try to find digits right after the interface family
+    m = re.search(r'(?:[A-Za-z]*GigabitEthernet|HundredGigE)(\d+)', if_name)
+    if m:
+        return int(m.group(1))
+    # Fallback: trailing digits before first slash (e.g., 'Te2/0/5' patterns)
+    first = if_name.split('/', 1)[0]
+    m2 = re.search(r'(\d+)$', first)
+    return int(m2.group(1)) if m2 else None
+
+
+def dict_stack_summary(stack):
+    """
+    Classic StackWise summary (one row per switch member).
+    Uses stackPortInfo when available; otherwise sets '-' for neighbors.
+    Returns list of dict rows:
+      {
+        'switch_num', 'serial', 'pID', 'mac', 'role', 'state', 'priority',
+        'port1_neighbor_sw', 'port2_neighbor_sw'
+      }
+    """
+    resp = stack or {}
+    sws = resp.get('stackSwitchInfo') or []
+    ports = resp.get('stackPortInfo') or []
+
+    # Per-member metadata
+    members_meta = {}
     for s in sws:
         member_num = s.get('stackMemberNumber')
-        if member_num is None:
+        try:
+            member_num = int(member_num)
+        except Exception:
             continue
-
-        member_num = int(member_num)
-
-        # Local ports: 1/1 and 1/2, 2/1 and 2/2, etc.
-        local_p1 = f"{member_num}/1"
-        local_p2 = f"{member_num}/2"
-
-        # Resolve neighbor switch numbers
-        p1_neighbor_sw = neighbor_member_num(neighbors.get(local_p1))
-        p2_neighbor_sw = neighbor_member_num(neighbors.get(local_p2))
-
-        stack_dict.append({
-            'switch_num': member_num,
+        members_meta[member_num] = {
             'serial': s.get('serialNumber') or '-',
             'pID': s.get('platformId') or '-',
             'mac': s.get('macAddress') or '-',
             'role': s.get('role') or '-',
             'state': s.get('state') or '-',
             'priority': s.get('switchPriority') or '-',
-            # Display-friendly: convert None to '-' so Jinja shows a dash instead of blank
-            'port1_neighbor_sw': p1_neighbor_sw if p1_neighbor_sw is not None else '-',
-            'port2_neighbor_sw': p2_neighbor_sw if p2_neighbor_sw is not None else '-',
+        }
+
+    # Map 'X/Y' -> 'A/B'
+    neighbors = {}
+    for p in ports or []:
+        sp = (p or {}).get('switchPort')
+        np = (p or {}).get('neighborPort')
+        if sp and np and '/' in sp and '/' in np:
+            neighbors[sp] = np
+
+    rows = []
+    for member_num, meta in members_meta.items():
+        local_p1 = f"{member_num}/1"
+        local_p2 = f"{member_num}/2"
+        p1_neighbor = _parse_member_from_stack_port(neighbors.get(local_p1))
+        p2_neighbor = _parse_member_from_stack_port(neighbors.get(local_p2))
+
+        rows.append({
+            'switch_num': member_num,
+            'serial': meta['serial'],
+            'pID': meta['pID'],
+            'mac': meta['mac'],
+            'role': meta['role'],
+            'state': meta['state'],
+            'priority': meta['priority'],
+            'port1_neighbor_sw': p1_neighbor if p1_neighbor is not None else '-',
+            'port2_neighbor_sw': p2_neighbor if p2_neighbor is not None else '-',
         })
 
-    # Sort rows by switch number ascending
-    stack_dict.sort(key=lambda r: r['switch_num'])
-    return stack_dict
+    rows.sort(key=lambda r: r['switch_num'])
+    return rows
+
+# switch.py
+
+def dict_svl_summary(stack):
+    """
+    SVL summary (one row per SVL member), aggregating multiple links.
+    Returns a list of dict rows:
+      {
+        'switch_num': 1,
+        'serial': 'FCW...',
+        'pID': 'C9500-16X',
+        'mac': 'a4:b4:...',
+        'role': 'ACTIVE',
+        'state': 'READY',
+        'priority': 15,
+        'src_ports': ['TenGigabitEthernet1/0/5', 'TenGigabitEthernet1/0/6'],
+        'dest_ports': ['TenGigabitEthernet2/0/5', 'TenGigabitEthernet2/0/6'],
+        'dad': 'TenGigabitEthernet1/0/4'  # or '-' if not present
+      }
+    """
+    resp = stack or {}
+    sws = resp.get('stackSwitchInfo') or []
+    svls = resp.get('svlSwitchInfo') or []
+
+    # Per-member metadata from stackSwitchInfo (fallbacks to '-' if missing)
+    members_meta = {}
+    for s in sws:
+        member_num = s.get('stackMemberNumber')
+        try:
+            member_num = int(member_num)
+        except Exception:
+            continue
+        members_meta[member_num] = {
+            'serial': s.get('serialNumber') or '-',
+            'pID': s.get('platformId') or '-',
+            'mac': s.get('macAddress') or '-',
+            'role': s.get('role') or '-',
+            'state': s.get('state') or '-',
+            'priority': s.get('switchPriority') or '-',
+        }
+
+    # Helper: ordered unique
+    def uniq(seq):
+        seen = set()
+        ordered = []
+        for x in seq:
+            if x and x not in seen:
+                seen.add(x)
+                ordered.append(x)
+        return ordered
+
+    # Aggregate rows per member
+    agg = {}  # member -> row dict
+
+    for domain in svls or []:
+        switch_members = domain.get('switchMembers') or []
+
+        # DAD per member (if enabled)
+        dad_per_member = {}
+        for sm in switch_members:
+            local_member = sm.get('svlMemberNumber')
+            try:
+                local_member = int(local_member)
+            except Exception:
+                continue
+            pep = sm.get('svlMemberPepSettings') or []
+            dad_name = None
+            for item in pep:
+                # prefer enabled DAD interface if present
+                if item.get('dadEnabled'):
+                    dad_name = item.get('dadInterfaceName') or dad_name
+            if dad_name:
+                dad_per_member[local_member] = dad_name
+
+        for sm in switch_members:
+            local_member = sm.get('svlMemberNumber')
+            try:
+                local_member = int(local_member)
+            except Exception:
+                continue
+
+            # Seed row with metadata (or defaults if absent in stackSwitchInfo)
+            row = agg.setdefault(local_member, {
+                'switch_num': local_member,
+                'serial': members_meta.get(local_member, {}).get('serial', '-'),
+                'pID': members_meta.get(local_member, {}).get('pID', '-'),
+                'mac': members_meta.get(local_member, {}).get('mac', '-'),
+                'role': members_meta.get(local_member, {}).get('role', '-'),
+                'state': members_meta.get(local_member, {}).get('state', '-'),
+                'priority': members_meta.get(local_member, {}).get('priority', '-'),
+                'src_ports': [],
+                'dest_ports': [],
+                'dad': dad_per_member.get(local_member, '-'),
+            })
+
+            # Collect all endpoint links for this member
+            endpoints = sm.get('svlMemberEndPoints') or []
+            for ep in endpoints:
+                ports_list = ep.get('svlMemberEndPointPorts') or []
+                for link in ports_list:
+                    src = link.get('swLocalInterface') or None
+                    dst = link.get('swRemoteInterface') or None
+                    if src:
+                        row['src_ports'].append(src)
+                    if dst:
+                        row['dest_ports'].append(dst)
+
+    # Finalize: uniq + sort rows
+    rows = []
+    for member, r in agg.items():
+        r['src_ports'] = uniq(r['src_ports'])
+        r['dest_ports'] = uniq(r['dest_ports'])
+        rows.append(r)
+
+    rows.sort(key=lambda r: r['switch_num'])
+    return rows
+
+
 
 def get_poe(device_id): 
     function.get_token()

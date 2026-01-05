@@ -164,13 +164,23 @@
                         Interface Details
                     </button>
                     </li>
+                    {% if use_svl %}
                     <li class="nav-item" role="presentation">
                     <button class="nav-link" id="stack-tab" data-bs-toggle="tab"
                             data-bs-target="#stack-pane" type="button" role="tab"
                             aria-controls="stack-pane" aria-selected="false">
-                        Stack Details
+                        StackWise Virtual Details
                     </button>
                     </li>
+                    {% else %}
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="stack-tab" data-bs-toggle="tab"
+                            data-bs-target="#stack-pane" type="button" role="tab"
+                            aria-controls="stack-pane" aria-selected="false">
+                        StackWise Details
+                    </button>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
 
@@ -317,12 +327,14 @@
                 </div>
                 <div class="tab-pane fade" id="stack-pane" role="tabpanel" aria-labelledby="stack-tab">
                     <div class="card flex-fill">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Stack Details</h5>
-                        </div>
-                        <table id="datatables-dashboard-modi-projects" class="table table-striped my-0 text-center">
-                            <thead>
-                                <tr>
+                        <div class="table-responsive">
+                            {% if use_svl %}
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">StackWise Virtual Details</h5>
+                            </div>
+                            <table id="datatables-dashboard-modi-projects" class="table table-striped my-0 text-center w-100">
+                                <thead>
+                                    <tr>
                                     <th>Switch Num</th>
                                     <th>Serial Number</th>
                                     <th>Product ID</th>
@@ -330,26 +342,75 @@
                                     <th>Role</th>
                                     <th>State</th>
                                     <th>Priority</th>
-                                    <th>Port 1</th>
-                                    <th>Port 2</th>                                   
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for s in stack_info %}
-                                <tr>
+                                    <th>Source Port(s)</th>
+                                    <th>Destination Port(s)</th>
+                                    <th>DAD Port</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in svl_info %}
+                                    <tr>
                                     <td>{{ s.switch_num }}</td>
                                     <td>{{ s.serial }}</td>
                                     <td>{{ s.pID }}</td>
-                                    <td>{{ s.mac | capitalize }}</td>
+                                    <td>{{ s.mac }}</td>
+                                    <td>{{ s.role }}</td>
+                                    <td>{{ s.state }}</td>
+                                    <td>{{ s.priority }}</td>
+    
+                                    <!-- Show multiple ports neatly -->
+                                    <td>
+                                        {% for sp in s.src_ports %}
+                                        {{ sp }}{% if not loop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for dp in s.dest_ports %}
+                                        {{ dp }}{% if not loop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    </td>
+    
+                                    <td>{{ s.dad }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">StackWise Details</h5>
+                            </div>
+                            <table id="datatables-dashboard-modi-projects" class="table table-striped my-0 text-center w-100">
+                                <thead>
+                                    <tr>
+                                    <th>Switch Num</th>
+                                    <th>Serial Number</th>
+                                    <th>Product ID</th>
+                                    <th>MAC Address</th>
+                                    <th>Role</th>
+                                    <th>State</th>
+                                    <th>Priority</th>
+                                    <th>Port 1 → Switch</th>
+                                    <th>Port 2 → Switch</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in stack_info %}
+                                    <tr>
+                                    <td>{{ s.switch_num }}</td>
+                                    <td>{{ s.serial }}</td>
+                                    <td>{{ s.pID }}</td>
+                                    <td>{{ s.mac }}</td>
                                     <td>{{ s.role }}</td>
                                     <td>{{ s.state }}</td>
                                     <td>{{ s.priority }}</td>
                                     <td>{{ s.port1_neighbor_sw }}</td>
-                                    <td>{{ s.port2_neighbor_sw }}</td> 
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                    <td>{{ s.port2_neighbor_sw }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
