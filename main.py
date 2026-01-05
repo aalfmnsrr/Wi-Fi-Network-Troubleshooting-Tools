@@ -60,7 +60,7 @@ def clients():
     for c in response:
         if c.get('connectionStatus') == 'connected':
             clients.append(c)
-    # TO BE REMOVED IF CONNECTED IS OKAY
+    # TO BE REMOVED IF 'CONNECTED' device IS OKAY
     clients = response 
             
     branch_database = client_function.get_branch_database()
@@ -76,6 +76,7 @@ def device_detail(client_mac):
     client = client["userDetails"]
     connectedAP = client["connectedDevice"][0]
     neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
+    #TO BE DELETED
     import json
     print(json.dumps(neighbor_topology, indent=2))
     aps = access_point.get_ap()
