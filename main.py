@@ -3,7 +3,7 @@ from config import Config
 from markupsafe import Markup
 from functools import wraps
 import json
-import function, access_point, client_function, wlcs, switch
+import function, access_point, client_function, wlcs, switch, dashboard_page
 import bcrypt
 from datetime import timedelta
 
@@ -30,7 +30,24 @@ def session_check(func):
 def dashboard():
     # function.get_devices()
     # print('dashboard called')
-    return render_template("dashboard.html")
+    overall = dashboard_page.get_overall()
+    access = dashboard_page.get_access()
+    core = dashboard_page.get_core()
+    distribution = dashboard_page.get_distribution()
+    router = dashboard_page.get_router()
+    wlc = dashboard_page.get_wlc()
+    ap = dashboard_page.get_AP()
+    site_health = dashboard_page.get_site_health()
+    return render_template("dashboard.html", 
+                           overall=overall,
+                           access=access,
+                           core=core,
+                           distribution=distribution,
+                           router=router,
+                           wlc=wlc,
+                           ap=ap,
+                           site_health=site_health
+                           )
 
 
 @app.route('/clients', methods=['POST', 'GET'])
