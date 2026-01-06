@@ -50,7 +50,7 @@
 										<tr>
 											<td><a href="{{ url_for('ap_detail', ap_mac=ap.additionalInfo.macAddress, site_id=ap.additionalInfo.siteid) }}">{{ ap.label }}</a></td>
 											<td>{{ ap.ip }}</td>
-											<td>{{ ap.additionalInfo.macAddress }}</td>
+											<td>{{ ap.additionalInfo.macAddress | upper }}</td>
 											<td>{{ ap.softwareVersion }}</td>
 											<td>{{ ap.deviceType }}</td>
 											<td>{{ ap.location }}</td>
