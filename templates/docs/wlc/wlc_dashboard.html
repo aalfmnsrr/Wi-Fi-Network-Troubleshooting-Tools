@@ -134,14 +134,14 @@
 											{% if wlc.hostname.startswith('APDC') %}
 											
 											<div class="row justify-content-center mt-3 mb-2">
-											  <div class="col-auto">
-												<nav class="nav btn-group" id="office-filter-nav">
+											  <div class="col-auto" id="office-filter-nav">
+												<!-- <nav class="nav btn-group" id="office-filter-nav"> -->
 								
 													<button class="btn btn-outline-primary filter-btn" data-wlc="{{ loop.index0 }}" data-office="MY">Malaysia</button>
 													<button class="btn btn-outline-primary filter-btn" data-wlc="{{ loop.index0 }}" data-office="PH">Philippines</button>
 													<button class="btn btn-outline-primary filter-btn" data-wlc="{{ loop.index0 }}" data-office="SG">Singapore</button>
 													<button class="btn btn-outline-primary reset-btn" data-wlc="{{ loop.index0 }}">ALL</button>
-												</nav>
+												<!-- </nav> -->
 											  </div>
 											</div>
 											{% endif %}
@@ -264,7 +264,7 @@
 
 			});
 		});
-		</script>
+	</script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 			$("#datatables-dashboard-traffic").DataTable({

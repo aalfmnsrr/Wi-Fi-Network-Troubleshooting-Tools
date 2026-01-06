@@ -157,33 +157,63 @@ def signout():
     else:
         return render_template("sign-in.html")
 
+@app.route('/wlc/id=<id>', methods=['POST', 'GET'])
+@session_check
+def wlc_details(id):
+    
+    ssids = wlcs.get_ssid(id)
+    interface = wlcs.wlc_int(id)
+    wlc = wlcs.get_wlc_by_id(id)
+    physical = wlcs.get_physical(id)
+    ap_wlc = {}
+    ap_wlc = wlcs.get_AP_in_WLC(wlc.get("managementIpAddress"))
+    site = wlc.get('siteHierarchyId').strip("/").split("/")[-1]
+    health = wlcs.health(site, id)
+
+    aps = access_point.get_ap()
+    device = function.get_device(id)
+
+    for i in interface:
+        i['formattedSpeed'] = switch.format_speed_kbps(i.get('speed'))
+
+    return render_template("/wlc/wlc_details.html", d = device, aps = aps, wlc = wlc, ap_wlc = ap_wlc, health = health, ssids = ssids, int = interface, physical = physical)
+
 @app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
 @session_check
 def wlc_ssid(dc, id):
     
     ssids = wlcs.get_ssid(id)
     interface = wlcs.wlc_int(id)
-    wlc = wlcs.get_wlc(dc)
+    wlc = wlcs.get_wlc_by_id(id)
     physical = wlcs.get_physical(id)
 
-    for w in wlc:
-        if id == w.get('id'):
-            hostname = w.get('hostname')
-            series = w.get('series')
-    return render_template("/wlc/wlc_ssid.html", dc = dc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
+    hostname = wlc.get('name')
+    series = wlc.get('deviceSeries')
+
+    return render_template("/wlc/wlc_ssid.html", wlcs = wlc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
 
 @app.route('/wlc', methods=['POST', 'GET'])
 @session_check
 def wlc_home():
     return render_template("/wlc/wlc_homepage.html")
 
+@app.route('/wlc/list', methods=['POST', 'GET'])
+@session_check
+def wlc_list():
+    wlc = wlcs.get_wlc()
+    return render_template("/wlc/wlc_list.html", wlc = wlc)
+
 @app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
 @session_check
 def wlc(dc):
     
     ap_wlc = {}
-    wlc = wlcs.get_wlc(dc)
+    wlc = []
+    all_wlc= wlcs.get_wlc()
 
+    for w in all_wlc:
+        if w.get('hostname').startswith(dc):
+            wlc.append(w)
     for w in wlc:
         ip = w['managementIpAddress']
         ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
