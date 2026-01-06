@@ -8,10 +8,10 @@ class Config:
     password = 'TACACS_PASSWORD'
     token = ''
     port = 5004
+    SECRET_KEY = 'SECRET_KEY'
 
     # initial values
-    floor10id = ''
-    floor13aid = ''
+    floor_id =[]
 
     # list of users
     users = {

@@ -62,8 +62,8 @@ def get_stack_info(device_id):
 def dict_stack(stack):
     # this function will return list of dict of stack
     stack_dict = []
-    sws = stack.get('stackSwitchInfo')
-    ports = stack.get('stackPortInfo')
+    sws = stack.get('stackSwitchInfo') or []
+    ports = stack.get('stackPortInfo') or []
 
     neighbors = {}
     for p in ports:
