@@ -214,7 +214,7 @@
                                 </tr>
                                 <tr>
                                     <td class="d-none d-xl-table-cell">MAC Address</td>
-                                    <td class="d-none d-xl-table-cell">{{ wlc.macAddress }}</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.macAddress | upper }}</td>
                                 </tr>
                                 <tr>
                                     <td class="d-none d-xl-table-cell">Series</td>
@@ -307,7 +307,7 @@
                                         <td style="color: green;"  class="d-none d-xl-table-cell">{{ admin }}</td>
                                     {% endif %}
         
-                                    <td  class="d-none d-xl-table-cell">{{i.macAddress}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.macAddress | upper}}</td>
 
                                     <td  class="d-none d-xl-table-cell">{{i.duplex}}</td>
                                     <td  class="d-none d-xl-table-cell">{{i.mtu}}</td>

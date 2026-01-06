@@ -62,7 +62,7 @@
 																	<strong>IP Address:</strong>
 																	<a href="https://{{ wlc.managementIpAddress }}" target="_blank">{{ wlc.managementIpAddress }}</a>
 																</p>
-																<p><strong>MAC Address:</strong> {{ wlc.macAddress }}</p>
+																<p><strong>MAC Address:</strong> {{ wlc.macAddress | upper}}</p>
 																<p><strong>Model:</strong> {{ wlc.type }}</p>
 																<p><strong>Software Version:</strong> {{ wlc.softwareType }} : {{ wlc.softwareVersion }} </p>
 																<p><strong>Serial Number:</strong> {{ wlc.serialNumber }}</p>
