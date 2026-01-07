@@ -65,6 +65,29 @@ def get_AP():
         if h["category"] == "AP":
             return h
         
+def get_clients():
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url = f"{Config.dnac}/intent/api/v1/site-health"
+    response = requests.get(url, headers=header, verify=False)
+    site_health = response.json().get("response")
+    for h in site_health:
+        if h["siteName"] == " All Sites":
+            site_health = h
+    # print(health)
+    clients = {
+        "wired": site_health.get("numberOfWiredClients"),
+        "wireless": site_health.get("numberOfWirelessClients"),
+        "wiredHealth": site_health.get("clientHealthWired"),
+        "wirelessHealth": site_health.get("clientHealthWireless")
+    }
+    # print(clients.get("wired"))
+    return clients
+        
 def get_site_health():
     function.get_token()
     site_list = []
