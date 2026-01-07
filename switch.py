@@ -1,5 +1,5 @@
 # switch.py
-import requests, function, access_point
+import requests, function, access_point, re
 from config import Config
 from collections import defaultdict
 
