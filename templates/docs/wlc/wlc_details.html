@@ -1,0 +1,653 @@
+{% extends 'sidebar.html' %}
+{% block body %}
+    <main class="content">
+        <div class="container-fluid p-0">
+
+            <div class="row mb-2 mb-xl-3">
+                <div class="col-auto d-none d-sm-block">
+                    <h3 class ="mb-0">
+                    WLC Health -
+                    <nobr style="color:#3266bb;">{{ wlc.name }}</nobr>
+                    {% if wlc.communicationState == "REACHABLE" %}
+                        <span class="badge bg-success ms-2 align-middle">Reachable</span>
+                    {% else %}
+                        <span class="badge bg-danger ms-2 align-middle">Unreachable</span>
+                    {% endif %}
+                    </h3>
+                </div>
+
+                <div class="col-auto ms-auto text-end mt-n1">
+
+                    <div class="dropdown me-2 d-inline-block position-relative">
+                        <a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropDOWN" data-bs-display="static">
+                        <i class="align-middle mt-n1" data-feather="calendar"></i> Today
+                    </a>
+
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <h6 class="dropdown-header">Settings</h6>
+                                                    <a class="dropdown-item" href="#">Action</a>
+                                                    <a class="dropdown-item" href="#">Another action</a>
+                                                    <a class="dropdown-item" href="#">Something else here</a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <a class="dropdown-item" href="#">Separated link</a>
+                            </div>
+                        </div>
+
+                                            <button class="btn btn-primary shadow-sm">
+                    <i class="align-middle" data-feather="filter">&nbsp;</i>
+                    </button>
+                    <button class="btn btn-primary shadow-sm" onclick="location.reload()">
+                        <i class="align-middle" data-feather="refresh-cw" >&nbsp;</i>
+                    </button>
+                </div>
+            </div>
+            <div class="row">  
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <h3 class="mb-2">{{ wlc.metricsDetails.overallHealthScore }}</h3>
+                                    <p class="mb-2">Overall Health</p>
+                                    {% if 5 > wlc.metricsDetails.overallHealthScore %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-success" data-feather="activity"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <h3 class="mb-2">
+                                        {% if sw and wlc.cpuHealth is not none %}
+                                        {{ "{:,.2f}".format(wlc.cpuHealthfloat) }} %
+                                        {% else %}
+                                        —
+                                        {% endif %}
+                                    </h3>
+                                    <p class="mb-2">CPU Utilization</p>
+                                    {% set cpu_val = wlc.cpuHealth|default('0')|replace('%','')|float %}
+                                    {% if cpu_val > 90 %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-success" data-feather="cpu"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <h3 class="mb-2">
+                                        {% if health.memoryUtilization is not none %}
+                                        {{ "{:,.2f}".format(health.memoryUtilization|float) }} %
+                                        {% else %}
+                                        —
+                                        {% endif %}
+                                    </h3>
+                                    <p class="mb-2">Memory</p>
+                                    {% set mem_val = health.memoryUtilization|default('0')|replace('%','')|float %}
+                                    {% if mem_val > 90 %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-danger" data-feather="hard-drive"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-body py-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    {% set parts = d.upTime.split(',') %}
+                                        <h3 class="mb-2">{{ parts[0] }}</h3>
+                                    <p class="mb-2">Uptime</p>
+                                    <div class="mb-0">
+                                        <!-- <span class="badge badge-soft-success me-2"> +8.65% </span> -->
+                                        <span class="text-muted">At {{ parts[1] }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-inline-block ms-3">
+                                    <div class="stat">
+                                        <i class="align-middle text-info" data-feather="chevrons-up"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-auto d-none d-sm-block">
+                <h3 class ="mb-3"> Detail Information </h3>
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs mb-3" id="switchTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="details-tab" data-bs-toggle="tab"
+                            data-bs-target="#details-pane" type="button" role="tab"
+                            aria-controls="details-pane" aria-selected="true">
+                        WLC Details
+                    </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="interfaces-tab" data-bs-toggle="tab"
+                            data-bs-target="#interfaces-pane" type="button" role="tab"
+                            aria-controls="interfaces-pane" aria-selected="false">
+                        Interface Details
+                    </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="hardware-tab" data-bs-toggle="tab"
+                            data-bs-target="#hardware-pane" type="button" role="tab"
+                            aria-controls="hardware-pane" aria-selected="false">
+                        Hardware Details
+                    </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ssid-tab" data-bs-toggle="tab"
+                                data-bs-target="#ssid-pane" type="button" role="tab"
+                                aria-controls="ssid-pane" aria-selected="false">
+                            SSID Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ap-tab" data-bs-toggle="tab"
+                                data-bs-target="#ap-pane" type="button" role="tab"
+                                aria-controls="ap-pane" aria-selected="false">
+                            Associate APs
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            
+            <div class="tab-content" id="switchTabContent">
+                <!-- Switch Details Pane -->
+                <div class="tab-pane fade show active" id="details-pane" role="tabpanel" aria-labelledby="details-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">WLC Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th class="d-none d-xl-table-cell">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Name</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">IP Address</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.managementIpAddress}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">MAC Address</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.macAddress | upper }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Series</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.deviceSeries}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Software Version</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.softwareVersion }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Serial Number</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.serialNumber}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Platform ID:</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.platformId }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Role:</td>
+                                    <td class="d-none d-xl-table-cell"> {{ wlc.deviceRole }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Last Update</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.lastUpdated  }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">Location</td>
+                                    <td class="d-none d-xl-table-cell">{{  health.location  }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="d-none d-xl-table-cell">AP Count</td>
+                                    <td class="d-none d-xl-table-cell">{{ health.apCount| default('NA', true) }}</td>
+                                </tr>
+                             
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="interfaces-pane" role="tabpanel" aria-labelledby="interfaces-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Interface Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-interface" class="table table-striped my-0 ">
+                            <thead>
+                                <tr>
+                                    <th  class="d-none d-xl-table-cell">ID</th>
+                                    <th  class="d-none d-xl-table-cell">Interface Name</th>
+                                    <th  class="d-none d-xl-table-cell">IP Address</th>
+                                    <th  class="d-none d-xl-table-cell">Operational Status</th>
+                                    <th  class="d-none d-xl-table-cell">Admin Status</th>
+                                    <th  class="d-none d-xl-table-cell">MAC Address</th>
+                                    <th  class="d-none d-xl-table-cell">Duplex</th>
+                                    <th  class="d-none d-xl-table-cell">MTU</th>
+                                    <th  class="d-none d-xl-table-cell">Port Mode</th>
+                                    <th  class="d-none d-xl-table-cell">Speed</th>
+                                    <th  class="d-none d-xl-table-cell">Type</th>
+                                    <th  class="d-none d-xl-table-cell">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in int %}
+                                <tr>
+                                    <td  class="d-none d-xl-table-cell">{{ i.ifIndex }}</td>
+                                    <td  class="d-none d-xl-table-cell">{{ i.portName | default('-', true) }}</td>
+        
+                                    {% set oper = (i.status | default('', true)) %}
+                                    {% if not oper or oper == 'DOWN' %}
+                                        <td style="color: red;"  class="d-none d-xl-table-cell">{{ oper or 'DOWN' }}</td>
+                                    {% else %}
+                                        <td style="color: green;"  class="d-none d-xl-table-cell">{{ oper }}</td>
+                                    {% endif %}
+
+                                    <td  class="d-none d-xl-table-cell">
+                                        {% if i.addresses is defined and i.addresses and i.addresses|length > 0 %}
+                                        {% for a in i.addresses %}
+                                            {% if a.address.ipAddress.address is defined and a.address.ipAddress.address %}
+                                            {{ a.address.ipAddress.address }}{% if not loop.last %}<br>{% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% else %}
+                                        NA
+                                        {% endif %}
+                                    </td>
+                
+                                    {% set admin = (i.adminStatus| default('', true)) %}
+                                    {% if not admin or admin == 'DOWN' %}
+                                        <td style="color: red;"  class="d-none d-xl-table-cell">{{ admin or 'DOWN' }}</td>
+                                    {% else %}
+                                        <td style="color: green;"  class="d-none d-xl-table-cell">{{ admin }}</td>
+                                    {% endif %}
+        
+                                    <td  class="d-none d-xl-table-cell">{{i.macAddress | upper}}</td>
+
+                                    <td  class="d-none d-xl-table-cell">{{i.duplex}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.mtu}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.portMode}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{ i.formattedSpeed | default('-', true) }}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.portType}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.description}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="hardware-pane" role="tabpanel" aria-labelledby="hardware-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Hardware Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-hardware" class="table table-striped my-0 ">
+                            <thead>
+                                <tr>
+                                    <th class="d-none d-xl-table-cell">Name</th>
+                                    <th class="d-none d-xl-table-cell">Serial Number</th>
+                                    <th class="d-none d-xl-table-cell ">Status</th>
+                                    <th class="d-none d-xl-table-cell ">Product ID</th>
+                                    <th class="d-none d-xl-table-cell ">Type</th>
+                                    <th class="d-none d-xl-table-cell ">Description</th>                               
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in physical %}
+                                <tr>
+                                    <td class="d-none d-xl-table-cell"><strong>{{p.name}}</strong></td>
+                                    <td class="d-none d-xl-table-cell">{{p.serialNumber}}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.operationalStateCode}}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.productId}}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.vendorEquipmentType}}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.description}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="ssid-pane" role="tabpanel" aria-labelledby="ssid-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">SSID Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-traffic" class="table table-striped my-0 ">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th class="d-none d-xl-table-cell">SSID</th>
+                                    <th class="d-none d-xl-table-cell ">Profile Name</th>
+                                    <th class="d-none d-xl-table-cell ">L2 Security</th>
+                                    <th class="d-none d-xl-table-cell ">L3 Security</th>
+                                    <th class="d-none d-xl-table-cell ">Admin Status</th>
+                                    <th class="d-none d-xl-table-cell ">Frequency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ssid in ssids %}
+                                    <tr>
+                                        <td>{{ ssid.wlanId }}</td>
+                                        <td class="d-none d-xl-table-cell"><strong>{{ssid.ssidName}}</strong></td>
+                                        <td class="d-none d-xl-table-cell ">{{ssid.wlanProfileName}}</td>
+                                        <td class="d-none d-xl-table-cell ">{{ssid.l2Security}}</td>
+                                        <td class="d-none d-xl-table-cell ">{{ssid.l3Security}}</td>
+                                        <td class="d-none d-xl-table-cell ">{{ssid.adminStatus}}</td>
+                                        <td class="d-none d-xl-table-cell ">{{ssid.radioPolicy}}</td>
+                                    </tr>
+								{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="ap-pane" role="tabpanel" aria-labelledby="ap-tab">
+                    <div class="card flex-fill">
+                        <div > 
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Associate APs</h5>
+
+                                {% if wlc.name.startswith('APDC') %}
+                                                
+                                <div class="row justify-content-center mt-3 mb-2">
+                                    <div class="col-auto" id="office-filter-nav">
+                                        <!-- <nav class="nav btn-group" id="office-filter-nav"> -->
+                                            <button class="btn btn-outline-primary reset-btn" >All</button>
+                                            <button class="btn btn-outline-primary filter-btn" data-office="MY">Malaysia</button>
+                                            <button class="btn btn-outline-primary filter-btn" data-office="PH">Philippines</button>
+                                            <button class="btn btn-outline-primary filter-btn" data-office="SG">Singapore</button>
+                                        <!-- </nav> -->
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                            </div>
+
+                            <table id="table-ap" class="display table table-striped my-0" style="width:100%;">
+                            {% if ap_wlc %}
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left: 100px;">AP Name</th>
+                                        <th class="hide-column">Associated WLC IP</th>
+                                        <th class="hide-column">Office</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for ap in ap_wlc%}
+                                            <tr> 
+                                                {% for a in aps %}
+                                                    {% if ap.hostname == a.label%}
+                                                        <td style="padding-left: 100px;"><a href="{{ url_for('ap_detail', ap_mac = ap.macAddress, site_id=a.additionalInfo.siteid) }}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
+                                                            {{ ap.hostname if ap.hostname else 'N/A' }}</td> 
+                                                        <td  class="hide-column">{{ ap.associatedWlcIp }}</td>
+                                                        <td  class="hide-column">{{ ap.office }}</td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    
+                                </tbody>
+                                {% else %}
+                                    <p style="padding-left: 100px;">No AP associate with current WLC</p>
+                                {% endif %}
+                            </table>
+                        </div>
+                       
+                        </div>
+                    </div>
+        </div>
+            <div class="row">
+            
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row text-muted">
+                <div class="col-6 text-start">
+                    <ul class="list-inline">
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="#">Support</a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="#">Help Center</a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="#">Privacy</a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="#">Terms of Service</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-6 text-end">
+                    <p class="mb-0">
+                        &copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+
+    <script>
+        $(document).ready(function () {
+          $('#table-ap').DataTable({
+            lengthChange: false,
+            dom: 'lrtip',
+            pageLength: 8,
+          });
+        
+          $('.filter-btn').on('click', function () {
+            const office   = $(this).data('office'); 
+        
+            const table = $('#table-ap').DataTable();
+        
+            // Apply filter on Office column (index 2).
+            table.column(2).search(office).draw();
+        
+            // Reset to the first page
+            table.page(0).draw('page');
+        
+            // Hide columns (col 1 and 2)
+            table.columns([1, 2]).visible(false);
+          });
+        
+          $('.reset-btn').on('click', function () {
+            // const wlcIndex = $(this).data('wlc');
+            const table = $('#table-ap').DataTable();
+        
+            // Clear column searches (1 and 2) and redraw
+            table.columns([1, 2]).search('').draw();
+        
+            // Optionally re-show the columns you hid
+            table.columns([1, 2]).visible(true);
+        
+            // Back to first page (optional)
+            table.page(0).draw('page');
+          });
+        });
+        </script>
+        
+
+    <script>
+    // DataTables with Column Search by Text Inputs
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // Setup - add a text input to each footer cell
+        $('#datatables-column-search-text-inputs tfoot th').each(function() {
+            var title = $(this).text();
+            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+        });
+        // DataTables
+        var table = $('#datatables-column-search-text-inputs').DataTable();
+        
+        // Apply the search
+        table.columns().every(function() {
+            var that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+                if (that.search() !== this.value) {
+                    that
+                        .search(this.value)
+                        .draw();
+                }
+            });
+        });
+    });
+    // DataTables with Column Search by Select Inputs
+    document.addEventListener("DOMContentLoaded", function() {
+        $('#datatables-column-search-select-inputs').DataTable({
+            initComplete: function() {
+                this.api().columns().every(function() {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function() {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+                    column.data().unique().sort().each(function(d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+    });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            $("#datatables-dashboard-projects").DataTable({
+                lengthChange: false,
+                bFilter: false,
+                autoWidth: false,
+                ordering: false,
+                pageLength: 12,
+            });
+        });
+    </script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        $("#datatables-dashboard-modi-projects").DataTable({
+            paging: true,        // enable pagination
+            pageLength: 12,      // show 10 rows per page
+            lengthChange: false,  // allow user to change rows/page via a dropdown (optional)
+            autoWidth: false,
+            ordering: false,
+            bFilter: false,      // keep search disabled (optional)
+            info: true           // show "Showing X to Y of Z entries"
+        });
+        });
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        $("#datatables-dashboard-traffic").DataTable({
+            pageLength: 8,
+            lengthChange: false,
+            bFilter: false,
+            autoWidth: false,
+            order: [
+                [1, "desc"]
+            ]
+        });
+    });
+
+    
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        $("#datatables-dashboard-interface").DataTable({
+            pageLength: 8,
+            lengthChange: false,
+            bFilter: false,
+            autoWidth: false,
+            order: [
+                [1, "desc"]
+            ],
+            // scrollX: true,        /
+            // scrollY: '400px',     
+            // scrollCollapse: true, 
+            paging: true 
+
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        $("#datatables-dashboard-hardware").DataTable({
+            pageLength: 8,
+            lengthChange: false,
+            bFilter: false,
+            autoWidth: false,
+            ordering:true,
+            order: [
+                [1, "desc"]
+            ],
+            // scrollX: true,        
+            // scrollY: '400px',     
+            // scrollCollapse: true, 
+            paging: true 
+
+        });
+    });
+</script>
+
+    
+    
+    
+    
+    
+    
+    
+{% endblock %}

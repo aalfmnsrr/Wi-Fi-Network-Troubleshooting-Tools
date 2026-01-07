@@ -72,7 +72,14 @@ def clients():
         query_connected_ap = query_connected_ap + "*"
 
 
-    clients = client_function.get_clients(200,offset,f"{query_connected_ap}")
+    response = client_function.get_clients(200,offset,f"{query_connected_ap}")
+    clients = []
+    for c in response:
+        if c.get('connectionStatus') == 'connected':
+            clients.append(c)
+    # TO BE REMOVED IF 'CONNECTED' device IS OKAY
+    clients = response 
+            
     branch_database = client_function.get_branch_database()
     # print(clients)
     # print(len(clients))
@@ -86,7 +93,11 @@ def device_detail(client_mac):
     client = client["userDetails"]
     connectedAP = client["connectedDevice"][0]
     neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
-    return render_template('client-detail.html', client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
+    #TO BE DELETED
+    import json
+    print(json.dumps(neighbor_topology, indent=2))
+    aps = access_point.get_ap()
+    return render_template('client-detail.html', aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
@@ -103,6 +114,9 @@ def ap_detail(ap_mac, site_id):
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
     wlc_dc = function.get_dc(wlc_id)
+    print(wlcName)
+    print(wlc_dc)
+
     ap_details = function.get_device(ap.get("nwDeviceId"))
     radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio)
@@ -160,37 +174,63 @@ def signout():
     else:
         return render_template("sign-in.html")
 
+@app.route('/wlc/id=<id>', methods=['POST', 'GET'])
+@session_check
+def wlc_details(id):
+    
+    ssids = wlcs.get_ssid(id)
+    interface = wlcs.wlc_int(id)
+    wlc = wlcs.get_wlc_by_id(id)
+    physical = wlcs.get_physical(id)
+    ap_wlc = {}
+    ap_wlc = wlcs.get_AP_in_WLC(wlc.get("managementIpAddress"))
+    site = wlc.get('siteHierarchyId').strip("/").split("/")[-1]
+    health = wlcs.health(site, id)
+
+    aps = access_point.get_ap()
+    device = function.get_device(id)
+
+    for i in interface:
+        i['formattedSpeed'] = switch.format_speed_kbps(i.get('speed'))
+
+    return render_template("/wlc/wlc_details.html", d = device, aps = aps, wlc = wlc, ap_wlc = ap_wlc, health = health, ssids = ssids, int = interface, physical = physical)
+
 @app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
 @session_check
 def wlc_ssid(dc, id):
     
     ssids = wlcs.get_ssid(id)
-
     interface = wlcs.wlc_int(id)
-    wlc = wlcs.get_wlc(dc)
+    wlc = wlcs.get_wlc_by_id(id)
+    physical = wlcs.get_physical(id)
 
-    for w in wlc:
-        if id == w.get('id'):
-            hostname = w.get('hostname')
+    hostname = wlc.get('name')
+    series = wlc.get('deviceSeries')
 
-    # print(hostname)
-  
-    return render_template("/wlc/wlc_ssid.html", hostname=hostname, ssids = ssids, int = interface)
+    return render_template("/wlc/wlc_ssid.html", wlcs = wlc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
 
 @app.route('/wlc', methods=['POST', 'GET'])
 @session_check
 def wlc_home():
     return render_template("/wlc/wlc_homepage.html")
 
+@app.route('/wlc/list', methods=['POST', 'GET'])
+@session_check
+def wlc_list():
+    wlc = wlcs.get_wlc()
+    return render_template("/wlc/wlc_list.html", wlc = wlc)
+
 @app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
 @session_check
 def wlc(dc):
     
     ap_wlc = {}
-    wlc = wlcs.get_wlc(dc)
-    for item in wlc:
-        item["dc"] = dc        
+    wlc = []
+    all_wlc= wlcs.get_wlc()
 
+    for w in all_wlc:
+        if w.get('hostname').startswith(dc):
+            wlc.append(w)
     for w in wlc:
         ip = w['managementIpAddress']
         ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
@@ -199,7 +239,7 @@ def wlc(dc):
 
     aps = access_point.get_ap()
 
-    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc, aps = aps)
+    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc, aps = aps, dc = dc)
 
 # Alif
 @app.route('/switches', methods=['POST', 'GET'])
@@ -282,4 +322,10 @@ def search_client():
 
 if __name__ == '__main__':
     # index()
-    app.run(debug=True, host='0.0.0.0', port=Config.port)
+
+    app.config['DEBUG'] = True
+
+    # error.html will be generated if error 400 or 500 if uncomment below
+    # app.config['PROPAGATE_EXCEPTIONS'] = False 
+
+    app.run(host='0.0.0.0', port=Config.port)

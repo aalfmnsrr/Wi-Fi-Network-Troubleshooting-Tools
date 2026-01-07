@@ -1,0 +1,154 @@
+{% extends 'sidebar.html' %}
+{% block body %}
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<h1 class="h3 mb-3">Wireless LAN Controllers</h1>
+<!-- 
+					<div class="alert alert-warning alert-dismissible" role="alert">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
+						<!-- <div class="alert-message">
+							<p class="mb-0">
+								<strong>jQuery required!</strong> This plugin requires jQuery to be functional. If you want to remove jQuery from your application, please check out <a href="docs-installation.html#drop-jquery">these docs</a>.
+							</p>
+						</div> -->
+					<!-- </div> -->
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<!-- <div class="card-header">
+									<h5 class="card-title">DataTables with Column Search by Text Inputs</h5>
+									<h6 class="card-subtitle text-muted">The searching functionality provided by DataTables is useful for quickly search through the information in the table. See official documentation <a href="https://datatables.net/examples/api/multi_filter.html"
+										 target="_blank" rel="noopener noreferrer nofollow">here</a>.</h6>
+								</div> -->
+								<div class="card-body">
+									<!-- <div class="card-body text-center">
+										<div class="mb-3">
+											<button class="btn btn-secondary ms-2 country-filter" id="clear-filter">All</button>
+											<button class="btn btn-outline-primary country-filter" data-country="Malaysia">MY</button>
+											<button class="btn btn-outline-secondary country-filter" data-country="Thailand">TH</button>
+											<button class="btn btn-outline-success country-filter" data-country="Indonesia">ID</button>
+											<button class="btn btn-outline-danger country-filter" data-country="Hong Kong">HK</button>
+											<button class="btn btn-outline-warning country-filter" data-country="Philippines">PH</button>
+											<button class="btn btn-outline-info country-filter" data-country="Singapore">SG</button>
+											<button class="btn btn-outline-dark country-filter" data-country="Macao">MO</button>
+										</div>
+									</div> -->
+									<table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
+										<thead>
+											<tr>
+												<th>Hostname</th>
+												<th>Location</th>
+												<th>IP Address</th>
+												<th>MAC Address</th>
+												<th>Software Version</th>
+												<th>Device Type</th>
+											</tr>
+										</thead>
+										<tbody>
+										{% for w in wlc %}
+										<tr>
+											<td><a href = "{{url_for('wlc_details', id = w.id) }} " target="_blank">{{ w.hostname }}</a></td>
+											<td>{{ w.dc }}</td>
+											<td>{{ w.managementIpAddress }}</td>
+											<td>{{ w.macAddress | upper }}</td>
+											<td>{{ w.softwareVersion }}</td>
+											<td>{{ w.type }}</td>
+										</tr>
+										{% endfor %}
+										</tbody>
+										<tfoot>
+											<tr>
+												<th>Hostname</th>
+												<th>IP Address</th>
+												<th>MAC Address</th>
+												<th>Software Version</th>
+												<th>Device Type</th>
+												<th>Location</th>
+											</tr>
+										</tfoot>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</main>
+
+			<footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-start">
+							<ul class="list-inline">
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Support</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Help Center</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Privacy</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Terms of Service</a>
+								</li>
+							</ul>
+						</div>
+						<div class="col-6 text-end">
+							<p class="mb-0">
+								&copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+
+	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+	
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+		$('#datatables-column-search-text-inputs tfoot th').each(function() {
+			var title = $(this).text();
+			$(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+		});
+	
+		var table = $('#datatables-column-search-text-inputs').DataTable({
+			columnDefs: [
+			{ searchable: true } 
+			]
+		});
+	
+		table.columns().every(function() {
+			var that = this;
+			$('input', this.footer()).on('keyup change clear', function() {
+			if (that.search() !== this.value) {
+				that.search(this.value).draw();
+			}
+			});
+		});
+	
+		// Button filtering on Country column
+		const COUNTRY_COL = 5; 
+		$('.country-filter').on('click', function() {
+			const code = $(this).data('country');
+			table.column(COUNTRY_COL).search('^' + code + '$', true, false).draw();
+		});
+	
+		// Clear all filters
+		$('#clear-filter').on('click', function() {
+			table.columns().search('');
+			$('#datatables-column-search-text-inputs tfoot input').val('');
+			table.search(''); 
+			table.draw();
+		});
+		});
+	</script>
+	
+	
+</body>
+
+</html>
+{% endblock %}

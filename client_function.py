@@ -162,3 +162,10 @@ def get_neighbor_topology(client_mac):
     response = requests.get(url, headers=header, params=params, verify=False)
     response.raise_for_status() 
     return response.json().get("response", [])
+
+# a = get_client_enrichment_detail("88:F4:DA:2A:04:13")
+# b = get_neighbor_topology("88:9C:AD:E6:6E:A0")
+
+import json
+
+# print(json.dumps(b, indent=2))
