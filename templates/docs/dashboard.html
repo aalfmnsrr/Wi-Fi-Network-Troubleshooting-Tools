@@ -176,6 +176,32 @@
 											</div>
 										</div>
 									</div>
+									<h5 class="card-title mb-0">Device Distribution</h5>
+								</div>
+								<div class="card-body d-flex w-100">
+									<div class="align-self-center chart">
+										<canvas id="chartjs-bar-health"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12 col-lg-6 d-flex">
+							<div class="card flex-fill w-100">
+								<div class="card-header">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Action</a>
+												<a class="dropdown-item" href="#">Another action</a>
+												<a class="dropdown-item" href="#">Something else here</a>
+											</div>
+										</div>
+									</div>
 									<h5 class="card-title mb-0">Health Distribution</h5>
 								</div>
 								<div class="card-body d-flex w-100">
@@ -185,8 +211,20 @@
 								</div>
 							</div>
 						</div>
+						<div class="col-12 col-lg-6">
+							<div class="card">
+								<div class="card-header">
+									<h5 class="card-title">Pie Chart</h5>
+									<h6 class="card-subtitle text-muted">Device Distribution by Region</h6>
+								</div>
+								<div class="card-body text-center">
+									<div class="chart w-100">
+										<div id="apexcharts-pie" style="max-width: 440px;margin:auto;"></div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
-
 					<div class="card flex-fill">
 						<div class="card-header">
 							<div class="card-actions float-end">
@@ -431,7 +469,7 @@
 			const data = JSON.parse(raw);
 			const { access, core, distribution, router, wlc, ap } = data;
 			// Bar chart
-			new Chart(document.getElementById("chartjs-bar"), {
+			new Chart(document.getElementById("chartjs-bar-health"), {
 				type: "bar",
 				data: {
 					labels: ["Core", "Access", "Distribution", "Router", "WLC", "AP"],
@@ -460,6 +498,177 @@
 						hoverBackgroundColor: "#dc3545",
 						hoverBorderColor: "#dc3545",
 						data: [core.badCount, access.badCount, distribution.badCount, router.badCount, wlc.badCount, ap.badCount],
+						barPercentage: .75,
+						categoryPercentage: .5
+					}]
+				},
+				options: {
+					maintainAspectRatio: false,
+					legend: {
+						display: false
+					},
+					scales: {
+						yAxes: [{
+							gridLines: {
+								display: false
+							},
+							stacked: false,
+							ticks: {
+								stepSize: 20
+							}
+						}],
+						xAxes: [{
+							stacked: false,
+							gridLines: {
+								color: "transparent"
+							}
+						}]
+					}
+				}
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			// Pie chart
+
+			var options = {
+				chart: {
+					height: 350,
+					type: "donut",
+				},
+				dataLabels: {
+					enabled: false
+				},
+				series: [44, 55, 13, 33]
+			}
+			var chart = new ApexCharts(
+				document.querySelector("#apexcharts-pie"),
+				options
+			);
+			chart.render();
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			const el = document.getElementById('site-health');
+			const jsonText = el.textContent || el.innerText;
+			let siteHealth = [];
+			let coreMY, coreSG, coreHK, corePH, coreTH, coreID = 0
+			let accessMY, accessSG, accessHK, accessPH, accessTH, accessID = 0
+			let distMY, distSG, distHK, distPH, distTH, distID = 0
+			let routerMY, routerSG, routerHK, routerPH, routerTH, routerID = 0
+			let wlcMY, wlcSG, wlcHK, wlcPH, wlcTH, wlcID = 0
+			let apMY, apSG, apHK, apPH, apTH, apID = 0
+			siteHealth = JSON.parse(jsonText);
+			siteHealth.forEach(item => {
+			const site = item.site;
+			const core = item.coreTotalCount - item.coreGoodCount; 
+			const access = item.accessTotalCount - item.accessGoodCount; 
+			const dist = item.distributionTotalCount - item.distributionGoodCount; 
+			const router = item.routerTotalCount - item.routerGoodCount; 
+			const wlc = item.wlcDeviceTotalCount - item.wlcDeviceGoodCount; 
+			const ap = item.apDeviceTotalCount - item.apDeviceGoodCount; 
+			if(site == "MY"){
+				coreMY = core
+				accessMY = access
+				distMY = dist
+				routerMY = router
+				wlcMY = wlc
+				apMY = ap
+			} else if (site == "SG"){
+				coreSG = core
+				accessSG = access
+				distSG = dist
+				routerSG = router
+				wlcSG = wlc
+				apSG = ap
+			} else if (site == "HK"){
+				coreHK = core
+				accessHK = access
+				distHK = dist
+				routerHK = router
+				wlcHK = wlc
+				apHK = ap
+			} else if (site == "PH"){
+				corePH = core
+				accessPH = access
+				distPH = dist
+				routerPH = router
+				wlcPH = wlc
+				apPH = ap
+			} else if (site == "TH"){
+				coreTH = core
+				accessTH = access
+				distTH = dist
+				routerTH = router
+				wlcTH = wlc
+				apTH = ap
+			} else if (site == "ID"){
+				coreID = core
+				accessID = access
+				distID = dist
+				routerID = router
+				wlcID = wlc
+				apID = ap
+			}})
+			// Bar chart
+			new Chart(document.getElementById("chartjs-bar"), {
+				type: "bar",
+				data: {
+					labels: ["MY", "HK", "ID", "TH", "SG", "PH"],
+					datasets: [{
+						label: "Core",
+						backgroundColor: "#28a745",
+						borderColor: "#28a745",
+						hoverBackgroundColor: "#28a745",
+						hoverBorderColor: "#28a745",
+						data: [coreMY, coreHK, coreID, coreTH, coreSG, corePH],
+						barPercentage: .75,
+						categoryPercentage: .5
+					}, {
+						label: "Access",
+						backgroundColor: "#fd7e14",
+						borderColor: "#fd7e14",
+						hoverBackgroundColor: "#fd7e14",
+						hoverBorderColor: "#fd7e14",
+						data: [accessMY, accessHK, accessID, accessTH, accessSG, accessPH],
+						barPercentage: .75,
+						categoryPercentage: .5
+					}, {
+						label: "Distribution",
+						backgroundColor: "#dc3545",
+						borderColor: "#dc3545",
+						hoverBackgroundColor: "#dc3545",
+						hoverBorderColor: "#dc3545",
+						data: [distMY, distHK, distID, distTH, distSG, distPH],
+						barPercentage: .75,
+						categoryPercentage: .5
+					}, {
+						label: "Router",
+						backgroundColor: "#dc3545",
+						borderColor: "#dc3545",
+						hoverBackgroundColor: "#dc3545",
+						hoverBorderColor: "#dc3545",
+						data: [routerMY, routerHK, routerID, routerTH, routerSG, routerPH],
+						barPercentage: .75,
+						categoryPercentage: .5
+					}, {
+						label: "WLC",
+						backgroundColor: "#dc3545",
+						borderColor: "#dc3545",
+						hoverBackgroundColor: "#dc3545",
+						hoverBorderColor: "#dc3545",
+						data: [wlcMY, wlcHK, wlcID, wlcTH, wlcSG, wlcPH],
+						barPercentage: .75,
+						categoryPercentage: .5
+					}, {
+						label: "AP",
+						backgroundColor: "#dc3545",
+						borderColor: "#dc3545",
+						hoverBackgroundColor: "#dc3545",
+						hoverBorderColor: "#dc3545",
+						data: [apMY, apHK, apID, apTH, apSG, apPH],
 						barPercentage: .75,
 						categoryPercentage: .5
 					}]
