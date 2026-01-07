@@ -189,17 +189,8 @@ def wlc(dc):
 def switches():
     role_filter = request.args.get('role')
     devices = switch.get_switches(role = role_filter)
-    return render_template("switches.html", devices=devices)
-
-
-@app.route('/switches/<device_id>/aps', methods=['GET'])
-@session_check
-def switch_access_points(device_id):
-    # APs connected to this switch only
-    sw = function.get_device(device_id)
-    aps = switch.get_ap_neighbors(device_id)
-    return render_template("access-points.html", access_points=aps, source_switch=device_id, sw=sw)
-
+    sw_locations = switch.get_swLocation()
+    return render_template("switches.html", devices=devices, sw_locations=sw_locations)
 
 @app.route('/switches/<device_id>', methods=['GET'])
 def switch_detail(device_id):
@@ -208,6 +199,11 @@ def switch_detail(device_id):
     device_mac = device.get('macAddress')
     sw = function.get_device_detail(device_mac)
 
+    access_points = []
+    access_points = switch.get_ap_neighbors(device_id)
+    ap_cnt = len(access_points)
+    ap_groups = switch.group_ap_labels_by_floor(access_points)
+
     vlans = switch.get_vlan(device_id)
     vlan_count = len(vlans)
 
@@ -215,13 +211,6 @@ def switch_detail(device_id):
     stack_info = switch.dict_stack_summary(stack_json)
     svl_info = switch.dict_svl_summary(stack_json)
     use_svl = bool(stack_json.get('svlSwitchInfo')) and bool(svl_info)
-
-    poe = switch.get_poe(device_id)
-
-    access_points = []
-    access_points = switch.get_ap_neighbors(device_id)
-    ap_cnt = len(access_points)
-    ap_groups = switch.group_ap_labels_by_floor(access_points)
 
     sw_interface = switch.get_interface(device_id)
     # Decorate each interface with a formatted speed string
@@ -237,10 +226,21 @@ def switch_detail(device_id):
         # If you want to render the nested list, reassign:
         sw_interface = interfaces
 
+    poe = switch.get_poe(device_id)
 
-    return render_template("sw-details.html", device=device, sw=sw, vlan_count=vlan_count, stack_json=stack_json, 
-    stack_info=stack_info, svl_info=svl_info, use_svl=use_svl, poe=poe, access_points=access_points, ap_cnt=ap_cnt, 
-    ap_groups=ap_groups, device_id=device_id, sw_interface=sw_interface)
+    issues = switch.get_switchIssues(device_id)
+
+    return render_template("sw-details.html", device=device, sw=sw, access_points=access_points, ap_cnt=ap_cnt, 
+    ap_groups=ap_groups, vlan_count=vlan_count, stack_json=stack_json, stack_info=stack_info, svl_info=svl_info, 
+    use_svl=use_svl, device_id=device_id, sw_interface=sw_interface, poe=poe, issues=issues)
+
+@app.route('/switches/<device_id>/aps', methods=['GET'])
+@session_check
+def switch_access_points(device_id):
+    # APs connected to this switch only
+    sw = function.get_device(device_id)
+    aps = switch.get_ap_neighbors(device_id)
+    return render_template("access-points.html", access_points=aps, source_switch=device_id, sw=sw)
 
 @app.route('/switches/<device_id>/vlans', methods=['GET'])
 def switch_vlans(device_id):
@@ -248,17 +248,6 @@ def switch_vlans(device_id):
     vlans = switch.get_vlan(device_id)
     
     return render_template("sw-vlan.html", device=device, vlans=vlans)
-
-# @app.route('/access-points', methods=["POST", "GET"])
-# @session_check
-# def access_points_neighbor():
-#     aps = access_point.get_ap()
-
-#     ap_neighbor = []
-#     for item in aps:
-#         ap_neighbor = [x for x in aps if x.split('-')[2] == floor]    
-    
-#     return render_template("access-points.html", ap_neighbor = ap_neighbor)
 
 @app.route('/search-client', methods=['GET', 'POST'])
 def search_client():

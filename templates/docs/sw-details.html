@@ -145,6 +145,39 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <h3 class ="mb-3"> Issues</h3>
+                <div class="col-12">
+                    <div class="card">                       
+                        <div class="card-body">
+                            <table id="datatables-column-search-text-inputs" class="table table-striped " style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Issue</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for iss in issues %}
+                                    <tr>
+                                        <td>{{ iss.name | default('-', true) }}</td>
+                                        
+                                        <td>{{ iss.priority | default('-', true) }}</td>
+                                        
+                                        <td>{{ iss.status | default('-', true) }}</td>
+                                        
+                                        <td>{{ iss.category | default('-', true) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="col-auto d-none d-sm-block">
                 <h3 class ="mb-3"> Detail Information </h3>
@@ -183,8 +216,6 @@
                     {% endif %}
                 </ul>
             </div>
-
-            
             <div class="tab-content" id="switchTabContent">
                 <!-- Switch Details Pane -->
                 <div class="tab-pane fade show active" id="details-pane" role="tabpanel" aria-labelledby="details-tab">
@@ -273,7 +304,7 @@
                         <div class="card-header">
                             <h5 class="card-title mb-0">Interface Details</h5>
                         </div>
-                        <table id="datatables-dashboard-modi-projects" class="table table-striped my-0 text-center">
+                        <table id="datatables-dashboard-modi-projects" class="table table-striped">
                             <thead>
                                 <tr>
                                     <th>Interface Name</th>
@@ -332,7 +363,7 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">StackWise Virtual Details</h5>
                             </div>
-                            <table id="datatables-dashboard-modi-projects" class="table table-striped my-0 text-center w-100">
+                            <table id="datatables-dashboard-modi-projects" class="table table-striped">
                                 <thead>
                                     <tr>
                                     <th>Switch Num</th>
@@ -379,7 +410,7 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">StackWise Details</h5>
                             </div>
-                            <table id="datatables-dashboard-modi-projects" class="table table-striped my-0 text-center w-100">
+                            <table id="datatables-dashboard-modi-projects" class="table table-striped">
                                 <thead>
                                     <tr>
                                     <th>Switch Num</th>
@@ -475,52 +506,36 @@
     <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
 
     <script>
-    // DataTables with Column Search by Text Inputs
-    document.addEventListener("DOMContentLoaded", function() {
-        
-        // Setup - add a text input to each footer cell
-        $('#datatables-column-search-text-inputs tfoot th').each(function() {
-            var title = $(this).text();
-            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+        // DataTables with Column Search by Text Inputs
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // DataTables
+            var table = $('#datatables-column-search-text-inputs').DataTable();
+            
         });
-        // DataTables
-        var table = $('#datatables-column-search-text-inputs').DataTable();
-        
-        // Apply the search
-        table.columns().every(function() {
-            var that = this;
-            $('input', this.footer()).on('keyup change clear', function() {
-                if (that.search() !== this.value) {
-                    that
-                        .search(this.value)
-                        .draw();
+        // DataTables with Column Search by Select Inputs
+        document.addEventListener("DOMContentLoaded", function() {
+            $('#datatables-column-search-select-inputs').DataTable({
+                initComplete: function() {
+                    this.api().columns().every(function() {
+                        var column = this;
+                        var select = $('<select class="form-control"><option value=""></option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function() {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+                        column.data().unique().sort().each(function(d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
                 }
             });
         });
-    });
-    // DataTables with Column Search by Select Inputs
-    document.addEventListener("DOMContentLoaded", function() {
-        $('#datatables-column-search-select-inputs').DataTable({
-            initComplete: function() {
-                this.api().columns().every(function() {
-                    var column = this;
-                    var select = $('<select class="form-control"><option value=""></option></select>')
-                        .appendTo($(column.footer()).empty())
-                        .on('change', function() {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search(val ? '^' + val + '$' : '', true, false)
-                                .draw();
-                        });
-                    column.data().unique().sort().each(function(d, j) {
-                        select.append('<option value="' + d + '">' + d + '</option>')
-                    });
-                });
-            }
-        });
-    });
     </script>
 
     <script>
@@ -536,97 +551,169 @@
     
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-        $("#datatables-dashboard-modi-projects").DataTable({
-            paging: true,        // enable pagination
-            pageLength: 10,      // show 10 rows per page
-            lengthChange: false,  // allow user to change rows/page via a dropdown (optional)
-            autoWidth: false,
-            ordering: false,
-            bFilter: false,      // keep search disabled (optional)
-            info: true           // show "Showing X to Y of Z entries"
-        });
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Jinja renders inside quotes; Number() ensures a numeric value
-            const cpu = Number('{{ sw.cpuScore | default(0) }}');
-            const mem = Number('{{ sw.memoryScore | default(0) }}');
-            
-            const primaryColor = (window.theme && window.theme.primary) ? window.theme.primary : "#4e73df";
-            
-            const el = document.getElementById("chartjs-bar");
-            if (!el) return;
-            
-            new Chart(el, {
-                type: "bar",
-                data: {
-                labels: ["CPU", "Memory"],
-                datasets: [{
-                    label: "",
-                    backgroundColor: [primaryColor, "#E8EAED"],
-                    borderColor: [primaryColor, "#E8EAED"],
-                    hoverBackgroundColor: [primaryColor, "#E8EAED"],
-                    hoverBorderColor: [primaryColor, "#E8EAED"],
-                    data: [cpu, mem],
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.8
-                }]
-                },
-                options: {
-                maintainAspectRatio: false,
-                legend: { display: false },
-                // If you're on Chart.js v2.x, keep yAxes/xAxes; if on v3/v4, switch to scales.y / scales.x
-                scales: {
-                    yAxes: [{
-                    gridLines: { display: false },
-                    ticks: {
-                        min: 0,
-                        max: 10,
-                        stepSize: 2,
-                        callback: function(value) { return value; }
-                    }
-                    }],
-                    xAxes: [{ gridLines: { color: "transparent" } }]
-                },
-                tooltips: {
-                    callbacks: { label: function(tooltipItem) { return tooltipItem.yLabel; } }
-                }
+            $("#datatables-dashboard-modi-projects").DataTable({
+                paging: true,        // enable pagination
+                pageLength: 10,      // show 10 rows per page
+                lengthChange: false,  // allow user to change rows/page via a dropdown (optional)
+                autoWidth: false,
+                ordering: false,
+                bFilter: false,      // keep search disabled (optional)
+                info: true,           // show "Showing X to Y of Z entries"
+                language: {
+                    emptyTable: "No project data available.",
+                    zeroRecords: "No matching records found.",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    infoEmpty: "Showing 0 to 0 of 0 entries"
                 }
             });
         });
     </script>
+    
+    <!-- Charts -->
+    <style>
+        .chart-error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 220px;
+        color: #b00020;            /* error red */
+        background: #fff3f3;       /* light red background */
+        border: 1px solid #ffc3c3;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        text-align: center;
+        padding: 12px;
+        }
+    </style>
+    
     <script>
-		document.addEventListener("DOMContentLoaded", function() {
-			const pbud = Number('{{ poe.powerAllocated | default(0) }}');
-            const pallo = Number('{{ poe.powerConsumed | default(0) }}');
-            const prem = Number('{{ poe.powerRemaining | default(0) }}');
-            
-            // Pie chart
-			var options = {
-				chart: {
-					height: 350,
-					type: "donut",
-				},
-				dataLabels: {
-					enabled: false
-				},
-				series: [pbud, pallo, prem],
+        // Renders a friendly error message inside a container
+        function renderError(containerSelector, message) {
+        const container = document.querySelector(containerSelector);
+        if (!container) return;
+        container.innerHTML = "";
+        const div = document.createElement("div");
+        div.className = "chart-error";
+        div.textContent = message || "No data available.";
+        container.appendChild(div);
+        }
+    
+        document.addEventListener("DOMContentLoaded", function () {
+    
+            // Use tojson so None -> null and numbers stay numbers
+            const cpuRaw = {{ (sw.get('cpuScore') if sw is defined else None) | tojson }};
+            const memRaw = {{ (sw.get('memoryScore') if sw is defined else None) | tojson }};
+        
+            const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+        
+            // Container that wraps the canvas for the bar chart
+            const barContainerSelector = ".col-12.col-lg-6:nth-of-type(1) .card-body .chart";
+            const barCanvas = document.getElementById("chartjs-bar");
+        
+            if (!isNum(cpuRaw) && !isNum(memRaw)) {
+                renderError(barContainerSelector, "Health Scores data is unavailable.");
+            } else if (!barCanvas) {
+                renderError(barContainerSelector, "Chart element not found.");
+            } else {
+                // Fallback to 0 when one value is missing
+                const cpu = isNum(cpuRaw) ? cpuRaw : 0;
+                const mem = isNum(memRaw) ? memRaw : 0;
+        
+                // Theme primary fallback
+                const primaryColor = (window.theme && window.theme.primary) ? window.theme.primary : "#4e73df";
+        
+                try {
+                // If you're on Chart.js v3/v4, use the 'scales: { y: { ... }, x: { ... } }' config below.
+                new Chart(barCanvas, {
+                    type: "bar",
+                    data: {
+                    labels: ["CPU", "Memory"],
+                    datasets: [{
+                        label: "",
+                        backgroundColor: [primaryColor, "#E8EAED"],
+                        borderColor: [primaryColor, "#E8EAED"],
+                        hoverBackgroundColor: [primaryColor, "#E8EAED"],
+                        hoverBorderColor: [primaryColor, "#E8EAED"],
+                        data: [cpu, mem],
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8
+                    }]
+                    },
+                    options: {
+                    maintainAspectRatio: false,
+                    legend: { display: false },
+        
+                    // ==== Chart.js v2 syntax ====
+                    scales: {
+                        yAxes: [{
+                        gridLines: { display: false },
+                        ticks: { min: 0, max: 10, stepSize: 2 }
+                        }],
+                        xAxes: [{ gridLines: { color: "transparent" } }]
+                    },
+                    tooltips: {
+                        callbacks: { label: function (tooltipItem) { return tooltipItem.yLabel; } }
+                    }
+        
+                    // ==== If you're on Chart.js v3/v4, replace the 'scales' above with this: ====
+                    // scales: {
+                    //   y: { min: 0, max: 10, ticks: { stepSize: 2 }, grid: { display: false } },
+                    //   x: { grid: { display: false } }
+                    // },
+                    // plugins: { legend: { display: false }, tooltip: { enabled: true } }
+                    }
+                });
+                } catch (e) {
+                console.error("Chart.js error:", e);
+                renderError(barContainerSelector, "Failed to render Health Scores chart.");
+                }
+            }
+        
+            // Use tojson to keep nulls as null
+            const pbudRaw = {{ (poe.get('powerAllocated') if poe is defined else None) | tojson }};
+            const palloRaw = {{ (poe.get('powerConsumed')  if poe is defined else None) | tojson }};
+            const premRaw  = {{ (poe.get('powerRemaining') if poe is defined else None) | tojson }};
+        
+            const pieContainerSelector = "#apexcharts-pie";
+            const pieHost = document.querySelector(pieContainerSelector);
+        
+            // If container missing, do nothing (or show a page-level error)
+            if (!pieHost) return;
+        
+            // Validate raw values before we convert anything
+            const poeRawValues = [pbudRaw, palloRaw, premRaw];
+            const poeValidValues = poeRawValues.filter(isNum);
+        
+            if (poeValidValues.length === 0) {
+                renderError(pieContainerSelector, "POE Statistics data is unavailable.");
+                return;
+            }
+        
+            // Use 0 for any invalid/missing value
+            const poeSeries = poeRawValues.map(v => isNum(v) ? v : 0);
+        
+            // If all zeros, tell the user
+            const poeAllZero = poeSeries.every(v => v === 0);
+            if (poeAllZero) {
+                renderError(pieContainerSelector, "POE Statistics are currently zero or unavailable.");
+                return;
+            }
+        
+            try {
+                const options = {
+                chart: { height: 350, type: "donut" },
+                dataLabels: { enabled: false },
+                series: poeSeries,
                 labels: ["Power Budgeted", "Power Consumed", "Power Remaining"],
-			}
-			var chart = new ApexCharts(
-				document.querySelector("#apexcharts-pie"),
-				options
-			);
-			chart.render();
-
-		});
-	</script>
-    
-    
-    
-    
-    
-    
+                legend: { position: "bottom" }
+                };
+                const chart = new ApexCharts(pieHost, options);
+                chart.render();
+            } catch (e) {
+                console.error("ApexCharts error:", e);
+                renderError(pieContainerSelector, "Failed to render POE Statistics chart.");
+            }
+        });
+    </script>
+  
 {% endblock %}

@@ -3,6 +3,7 @@ import requests, function, access_point, re
 from config import Config
 from collections import defaultdict
 
+# Retrieving switches based on their role
 def get_switches(role = None): # get switch by role
     function.get_token()
     header = {
@@ -20,6 +21,170 @@ def get_switches(role = None): # get switch by role
     devices = response.json().get("response", [])
     return devices
 
+# Retrieving location of the switches
+def _extract_clean_location(raw: str) -> str | None:
+    """
+    Robust cleaner to turn 'AXA GO Hong Kong' or 'AXA GO Operations Hong Kong'
+    into 'Hong Kong'. Adjust patterns as needed.
+    """
+    if not raw:
+        return None
+
+    loc = raw.strip()
+
+    # If some locations have an 'Operations' section before the actual city
+    # e.g., 'Something Operations Hong Kong' -> take the right-hand side.
+    # We do this first so that the 'AXA GO' prefix removal still works even if it's repeated.
+    parts = re.split(r'\bOperations\b', loc, maxsplit=1, flags=re.IGNORECASE)
+    if len(parts) == 2:
+        loc = parts[1].strip()
+
+    # Remove known org prefix like 'AXA GO' at the beginning (case-insensitive, extra spaces ok)
+    loc = re.sub(r'^\s*AXA\s*GO\s*', '', loc, flags=re.IGNORECASE).strip()
+
+    # If you only want the **last token** (e.g., 'Hong Kong' stays as 'Hong Kong' because it's two words),
+    # we keep as-is. If sometimes you get 'Hong Kong Building 12', consider more rules here.
+
+    return loc or None
+
+def get_swLocation():
+    function.get_token()
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Auth-Token': Config.token
+    }
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Switches and Hubs"
+
+    resp = requests.get(url_inventory, headers=headers, verify=False)
+    resp.raise_for_status()
+    response_list = resp.json().get("response", [])
+
+    sw_location = {}
+    for dev in response_list:
+        dev_id = dev.get('id')
+        raw = dev.get('snmpLocation')
+        clean = _extract_clean_location(raw)
+        if dev_id:
+            sw_location[dev_id] = clean
+
+    return sw_location
+
+# Retrieving AP that connected to the switch
+def _is_ap_node(node: dict) -> bool:
+    """
+    Decide if a topology node is an AP using reliable fields first (family/type),
+    and fall back to name pattern.
+    """
+    family = (node.get("family") or "").lower()
+    node_type = (node.get("deviceType") or node.get("nodeType") or "").lower()
+    label = (node.get("label") or "").upper()
+
+    # Prefer DNA Center normalized fields
+    if "ap" in family or "access point" in family or "unified ap" in family:
+        return True
+    if "ap" in node_type:
+        return True
+
+    # Fallback: name convention
+    # Adjust to your naming e.g., MY-PCH-10F-AP01, MY-PCH-13AF-AP02, etc.
+    if "-AP" in label:
+        return True
+
+    return False
+
+def get_ap_neighbors(switch_device_id):
+    """
+    Return a list of AP node dicts directly connected to the given switch device_id.
+    Uses the physical topology: nodes + links.
+    """
+    function.get_token()
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Auth-Token': Config.token
+    }
+
+    url = f"{Config.dnac}/intent/api/v1/topology/physical-topology"
+    topo = requests.get(url, headers=headers, verify=False).json().get("response", {})
+    nodes = topo.get("nodes", []) or []
+    links = topo.get("links", []) or []
+
+    # Build an index of nodes by id
+    node_by_id = {n.get("id"): n for n in nodes if n.get("id")}
+
+    # DNA Center's node id for devices should match the network-device id
+    if switch_device_id not in node_by_id:
+        # Some tenants use 'physicalTopology' nodes with different id fields.
+        # Try to find by 'deviceId' field if present, as a fallback.
+        fallback = next((n for n in nodes if n.get("deviceId") == switch_device_id), None)
+        if fallback:
+            switch_node_id = fallback.get("id")
+        else:
+            # Try match by label/hostname as a last resort
+            dev = function.get_device(switch_device_id) or {}
+            hostname = (dev.get("hostname") or dev.get("name") or "").upper()
+            match = next((n for n in nodes if (n.get("label") or "").upper() == hostname), None)
+            if match:
+                switch_node_id = match.get("id")
+            else:
+                # Return empty to avoid 500; you can log for troubleshooting
+                return []
+    else:
+        switch_node_id = switch_device_id
+
+    # Collect direct neighbor node IDs from links touching the switch node
+    neighbor_ids = set()
+    for lk in links:
+        src = lk.get("source")
+        tgt = lk.get("target")
+        if src == switch_node_id and tgt:
+            neighbor_ids.add(tgt)
+        elif tgt == switch_node_id and src:
+            neighbor_ids.add(src)
+
+    # Filter only AP nodes
+    ap_neighbors = []
+    for nid in neighbor_ids:
+        node = node_by_id.get(nid)
+        if not node:
+            continue
+        if _is_ap_node(node):
+            ap_neighbors.append(node)
+
+    # Optional: de-duplicate by label
+    seen = set()
+    deduped = []
+    for n in ap_neighbors:
+        label = n.get("label")
+        if label in seen:
+            continue
+        seen.add(label)
+        deduped.append(n)
+
+    return deduped
+
+def parse_ap_name(ap_label: str):
+    parts = (ap_label or "").split('-')
+    if len(parts) >= 4:
+        return {
+            "country": parts[0],
+            "site": parts[1],
+            "floor": parts[2],
+            "device": parts[3],
+        }
+    return {"country": None, "site": None, "floor": None, "device": ap_label}
+
+def group_ap_labels_by_floor(ap_nodes):
+    groups = {}
+    for n in ap_nodes:
+        label = n.get("label", "")
+        info = parse_ap_name(label)
+        floor = info["floor"] or "UNKNOWN"
+        groups.setdefault(floor, []).append(label)
+    return groups
+
+# Retriving VLAN information
 def get_vlan(device_id):
     function.get_token()
     header = {
@@ -33,6 +198,7 @@ def get_vlan(device_id):
     vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return vlan
 
+# Retrieving interfaces from the switch
 def get_interface(device_id):
     function.get_token()
     header = {
@@ -46,6 +212,34 @@ def get_interface(device_id):
     interfaces = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return interfaces
 
+# Converting interface speed 
+def format_speed_kbps(value):
+    """
+    Convert numeric speed from Kbps to a human-friendly string:
+    - 1,000,000 Kbps => 1.00 Gbps
+    - 100,000 Kbps   => 100 Mbps
+    - 500 Kbps       => 500 Kbps
+    Handles None/empty gracefully.
+    """
+    if value is None:
+        return '-'
+    try:
+        s = str(value).strip()
+        if not s:
+            return '-'
+        n = int(s)  # n is Kbps (as per DNAC)
+    except Exception:
+        # Non-numeric strings pass through
+        return str(value)
+
+    if n >= 1_000_000:
+        return f"{n / 1_000_000:.0f} Gbps"
+    elif n >= 1_000:
+        return f"{n / 1_000:.0f} Mbps"
+    else:
+        return f"{n} Kbps"
+
+# Retrieving stacking switch information (stack/svl)
 def get_stack_info(device_id):
     function.get_token()
     header = {
@@ -84,7 +278,6 @@ def _parse_member_from_interface_name(if_name):
     first = if_name.split('/', 1)[0]
     m2 = re.search(r'(\d+)$', first)
     return int(m2.group(1)) if m2 else None
-
 
 def dict_stack_summary(stack):
     """
@@ -146,8 +339,6 @@ def dict_stack_summary(stack):
 
     rows.sort(key=lambda r: r['switch_num'])
     return rows
-
-# switch.py
 
 def dict_svl_summary(stack):
     """
@@ -263,8 +454,7 @@ def dict_svl_summary(stack):
     rows.sort(key=lambda r: r['switch_num'])
     return rows
 
-
-
+# Retrieving POE from switch
 def get_poe(device_id): 
     function.get_token()
     header = {
@@ -278,145 +468,18 @@ def get_poe(device_id):
     poe = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return poe
 
-
-def _is_ap_node(node: dict) -> bool:
-    """
-    Decide if a topology node is an AP using reliable fields first (family/type),
-    and fall back to name pattern.
-    """
-    family = (node.get("family") or "").lower()
-    node_type = (node.get("deviceType") or node.get("nodeType") or "").lower()
-    label = (node.get("label") or "").upper()
-
-    # Prefer DNA Center normalized fields
-    if "ap" in family or "access point" in family or "unified ap" in family:
-        return True
-    if "ap" in node_type:
-        return True
-
-    # Fallback: name convention
-    # Adjust to your naming e.g., MY-PCH-10F-AP01, MY-PCH-13AF-AP02, etc.
-    if "-AP" in label:
-        return True
-
-    return False
-
-def get_ap_neighbors(switch_device_id):
-    """
-    Return a list of AP node dicts directly connected to the given switch device_id.
-    Uses the physical topology: nodes + links.
-    """
+def get_switchIssues(device_id):
     function.get_token()
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Auth-Token': Config.token
-    }
-
-    url = f"{Config.dnac}/intent/api/v1/topology/physical-topology"
-    topo = requests.get(url, headers=headers, verify=False).json().get("response", {})
-    nodes = topo.get("nodes", []) or []
-    links = topo.get("links", []) or []
-
-    # Build an index of nodes by id
-    node_by_id = {n.get("id"): n for n in nodes if n.get("id")}
-
-    # DNA Center's node id for devices should match the network-device id
-    if switch_device_id not in node_by_id:
-        # Some tenants use 'physicalTopology' nodes with different id fields.
-        # Try to find by 'deviceId' field if present, as a fallback.
-        fallback = next((n for n in nodes if n.get("deviceId") == switch_device_id), None)
-        if fallback:
-            switch_node_id = fallback.get("id")
-        else:
-            # Try match by label/hostname as a last resort
-            dev = function.get_device(switch_device_id) or {}
-            hostname = (dev.get("hostname") or dev.get("name") or "").upper()
-            match = next((n for n in nodes if (n.get("label") or "").upper() == hostname), None)
-            if match:
-                switch_node_id = match.get("id")
-            else:
-                # Return empty to avoid 500; you can log for troubleshooting
-                return []
-    else:
-        switch_node_id = switch_device_id
-
-    # Collect direct neighbor node IDs from links touching the switch node
-    neighbor_ids = set()
-    for lk in links:
-        src = lk.get("source")
-        tgt = lk.get("target")
-        if src == switch_node_id and tgt:
-            neighbor_ids.add(tgt)
-        elif tgt == switch_node_id and src:
-            neighbor_ids.add(src)
-
-    # Filter only AP nodes
-    ap_neighbors = []
-    for nid in neighbor_ids:
-        node = node_by_id.get(nid)
-        if not node:
-            continue
-        if _is_ap_node(node):
-            ap_neighbors.append(node)
-
-    # Optional: de-duplicate by label
-    seen = set()
-    deduped = []
-    for n in ap_neighbors:
-        label = n.get("label")
-        if label in seen:
-            continue
-        seen.add(label)
-        deduped.append(n)
-
-    return deduped
-
-def parse_ap_name(ap_label: str):
-    parts = (ap_label or "").split('-')
-    if len(parts) >= 4:
-        return {
-            "country": parts[0],
-            "site": parts[1],
-            "floor": parts[2],
-            "device": parts[3],
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
         }
-    return {"country": None, "site": None, "floor": None, "device": ap_label}
-
-def group_ap_labels_by_floor(ap_nodes):
-    groups = {}
-    for n in ap_nodes:
-        label = n.get("label", "")
-        info = parse_ap_name(label)
-        floor = info["floor"] or "UNKNOWN"
-        groups.setdefault(floor, []).append(label)
-    return groups
-
-def format_speed_kbps(value):
-    """
-    Convert numeric speed from Kbps to a human-friendly string:
-    - 1,000,000 Kbps => 1.00 Gbps
-    - 100,000 Kbps   => 100 Mbps
-    - 500 Kbps       => 500 Kbps
-    Handles None/empty gracefully.
-    """
-    if value is None:
-        return '-'
-    try:
-        s = str(value).strip()
-        if not s:
-            return '-'
-        n = int(s)  # n is Kbps (as per DNAC)
-    except Exception:
-        # Non-numeric strings pass through
-        return str(value)
-
-    if n >= 1_000_000:
-        return f"{n / 1_000_000:.0f} Gbps"
-    elif n >= 1_000:
-        return f"{n / 1_000:.0f} Mbps"
-    else:
-        return f"{n} Kbps"
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/issues?deviceId={device_id}"
+   
+    issues = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return issues
 
 # def get_switch_details(device_id):
 #     function.get_token()
