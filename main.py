@@ -39,6 +39,8 @@ def dashboard():
     ap = dashboard_page.get_AP()
     site_health = dashboard_page.get_site_health()
     clients = dashboard_page.get_clients()
+    system = dashboard_page.get_sys_performance()
+    print(system)
     return render_template("dashboard.html", 
                            overall=overall,
                            access=access,
@@ -48,7 +50,8 @@ def dashboard():
                            wlc=wlc,
                            ap=ap,
                            site_health=site_health,
-                           clients=clients
+                           clients=clients,
+                           system=system
                            )
 
 

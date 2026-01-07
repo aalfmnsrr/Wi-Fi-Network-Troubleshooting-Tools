@@ -15,6 +15,18 @@ def network_health():
     # print(health)
     return health
 
+def get_sys_performance():
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url = f"{Config.dnac}/intent/api/v1/diagnostics/system/performance"
+    response = requests.get(url, headers=header, verify=False).json()
+    # print(response)
+    return response
+
 def get_overall():
     health = network_health()
     health = health.get("response")[0]
