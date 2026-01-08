@@ -657,51 +657,61 @@
                 renderError(barContainerSelector, "Failed to render Health Scores chart.");
                 }
             }
-        
-            // Use tojson to keep nulls as null
-            const pbudRaw = {{ (poe.get('powerAllocated') if poe is defined else None) | tojson }};
-            const palloRaw = {{ (poe.get('powerConsumed')  if poe is defined else None) | tojson }};
-            const premRaw  = {{ (poe.get('powerRemaining') if poe is defined else None) | tojson }};
-        
-            const pieContainerSelector = "#apexcharts-pie";
-            const pieHost = document.querySelector(pieContainerSelector);
-        
-            // If container missing, do nothing (or show a page-level error)
-            if (!pieHost) return;
-        
-            // Validate raw values before we convert anything
-            const poeRawValues = [pbudRaw, palloRaw, premRaw];
-            const poeValidValues = poeRawValues.filter(isNum);
-        
-            if (poeValidValues.length === 0) {
+    
+            // Helper: convert numeric strings to numbers
+                const toNum = (v) => {
+                if (typeof v === "number" && Number.isFinite(v)) return v;
+                if (typeof v === "string") {
+                    const n = Number(v.trim());
+                    return Number.isFinite(n) ? n : NaN;
+                }
+                return NaN;
+                };
+                const isFiniteNum = (v) => Number.isFinite(v);
+
+                const pbudRaw = {{ (poe.get('powerAllocated') if poe is defined else None) | tojson }};
+                const palloRaw = {{ (poe.get('powerConsumed')  if poe is defined else None) | tojson }};
+                const premRaw  = {{ (poe.get('powerRemaining') if poe is defined else None) | tojson }};
+
+                const pieContainerSelector = "#apexcharts-pie";
+                const pieHost = document.querySelector(pieContainerSelector);
+                if (!pieHost) return;
+
+                // Normalize
+                const poeRawValues = [pbudRaw, palloRaw, premRaw];
+                const poeSeries = poeRawValues.map(toNum);
+
+                // If none are valid numbers, show error
+                if (!poeSeries.some(isFiniteNum)) {
                 renderError(pieContainerSelector, "POE Statistics data is unavailable.");
                 return;
-            }
-        
-            // Use 0 for any invalid/missing value
-            const poeSeries = poeRawValues.map(v => isNum(v) ? v : 0);
-        
-            // If all zeros, tell the user
-            const poeAllZero = poeSeries.every(v => v === 0);
-            if (poeAllZero) {
-                renderError(pieContainerSelector, "POE Statistics are currently zero or unavailable.");
-                return;
-            }
-        
-            try {
+                }
+
+                // Replace NaN with 0 to avoid ApexCharts errors
+                const poeSeriesSafe = poeSeries.map(v => isFiniteNum(v) ? v : 0);
+
+                // Optional: if you want to render even when all are zero, REMOVE this block
+                const poeAllZero = poeSeriesSafe.every(v => v === 0);
+                if (poeAllZero) {
+                // You can choose to render the donut with zeros or show a message.
+                // renderError(pieContainerSelector, "POE Statistics are currently zero or unavailable.");
+                // return;
+                }
+
+                try {
                 const options = {
-                chart: { height: 350, type: "donut" },
-                dataLabels: { enabled: false },
-                series: poeSeries,
-                labels: ["Power Budgeted", "Power Consumed", "Power Remaining"],
-                legend: { position: "bottom" }
+                    chart: { height: 350, type: "donut" },
+                    dataLabels: { enabled: false },
+                    series: poeSeriesSafe,
+                    labels: ["Power Budgeted", "Power Consumed", "Power Remaining"],
+                    legend: { position: "bottom" }
                 };
                 const chart = new ApexCharts(pieHost, options);
                 chart.render();
-            } catch (e) {
+                } catch (e) {
                 console.error("ApexCharts error:", e);
                 renderError(pieContainerSelector, "Failed to render POE Statistics chart.");
-            }
+                }
         });
     </script>
   
