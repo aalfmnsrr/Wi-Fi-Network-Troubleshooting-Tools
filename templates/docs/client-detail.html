@@ -6,12 +6,25 @@
 
         <div class="row mb-2 mb-xl-3">
             <div class="col-auto d-none d-sm-block">
-                <h3 class="mb-0">Client Detail Page</h3>
-            </div>
+                <h3 class="mb-0">Client Detail - 
+                    <nobr style="color:#3266bb;">{{ client.userId or 'N/A' }}  </nobr>
+                    {% if client.connectionStatus == "CONNECTED" %}
+                        <span class="badge bg-success p-2 px-3 position-relative">
+                            {{ client.connectionStatus  | capitalize }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger ms-2 align-middle">
+                            {{ client.connectionStatus  | capitalize }}
+                        </span>
+                    {% endif %}
+                </h3>
+                </div>
+            </nobr>
             <div class="col-auto ms-auto text-end mt-n1">
                 <button class="btn btn-primary shadow-sm">
                     <i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
                 </button>
+            </div>
             </div>
         </div>
 
@@ -58,7 +71,7 @@
                     <div class="card-body">
                         
                         <div class="row mb-5">
-                            <div class="col-md-3 text-center border-end">
+                            <!-- <div class="col-md-3 text-center border-end">
                                 <div class="mb-3">
                                     <span class="rounded-circle d-inline-block bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
                                         <i class="align-middle" data-feather="user" style="width: 40px; height: 40px; color: #555;"></i>
@@ -76,7 +89,7 @@
                                         </div>
                                     {% endif %}
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div class="col-md-9 ps-md-4">
                                 <div class="row g-3">
@@ -88,29 +101,32 @@
                                         <p class="h4 mb-3">{{ client.userId or 'N/A' }}</p>
                                         
                                         <h5 class="fw-bold text-muted text-uppercase small">MAC Address</h5>
-                                        <p class="font-monospace text-dark">{{ client.hostMac }}</p>
+                                        <p class="h4 mb-3">{{ client.hostMac }}</p>
+
+                                        <h5 class="fw-bold text-muted text-uppercase small">Connection Type</h5>
+                                        <p class="h4 mb-3">{{ client.hostType | capitalize }}</p>
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <div class="row">
+                                    <div class="col-md-6 ps-md-12">
+                                        <!-- <div class="row"> -->
                                             <div class="col-6 mb-3">
-                                                <h5 class="fw-bold text-muted text-uppercase small">Floor</h5>
-                                                <span>{{ client.location or '1st Floor' }}</span>
+                                                <h5 class="fw-bold text-muted text-uppercase small">Location</h5>
+                                                <p class="h4 mb-3">{{ client.location or '1st Floor' }}</p>
                                             </div>
                                             <div class="col-6 mb-3">
                                                 <h5 class="fw-bold text-muted text-uppercase small">Power</h5>
-                                                <span>TX: 18dBm</span> </div>
+                                                <p class="h4 mb-3">TX: {{  client.txBytes  }} dBm</p> </div>
                                             <div class="col-6 mb-3">
                                                 <h5 class="fw-bold text-muted text-uppercase small">Signal Strength</h5>
-                                                <span class="{{ 'text-success' if client.rssi and client.rssi|int > -65 else 'text-warning' }}">
+                                                <p class="h4 mb-3 {{ 'text-success' if client.rssi and client.rssi|int > -65 else 'text-warning' }}">
                                                     {{ client.rssi or 'N/A' }}
-                                                </span>
+                                                </p>
                                             </div>
                                             <div class="col-6 mb-3">
                                                 <h5 class="fw-bold text-muted text-uppercase small">Channel</h5>
-                                                <span>{{ client.channel or 'Auto' }}</span>
+                                                <p class="h4 mb-3">{{ client.channel or 'Auto' }}</p>
                                             </div>
-                                        </div>
+                                        <!-- </div> -->
                                     </div>
                                 </div>
                             </div>
@@ -118,7 +134,7 @@
 
                         <hr>
 
-                        <div class="row mb-5 mt-4">
+                        <!-- <div class="row mb-5 mt-4">
                             <div class="col-12">
                                 <h5 class="card-title mb-3">Connected AP</h5>
                                 <div class="d-flex align-items-center p-3 border rounded bg-light">
@@ -140,7 +156,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
 <div class="row">
                             <div class="col-12">
