@@ -40,7 +40,7 @@ def dashboard():
     site_health = dashboard_page.get_site_health()
     clients = dashboard_page.get_clients()
     system = dashboard_page.get_sys_performance()
-    print(system)
+    # print(system)
     return render_template("dashboard.html", 
                            overall=overall,
                            access=access,
@@ -100,7 +100,7 @@ def device_detail(client_mac):
     neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
     #TO BE DELETED
     import json
-    print(json.dumps(neighbor_topology, indent=2))
+    # print(json.dumps(neighbor_topology, indent=2))
     aps = access_point.get_ap()
     return render_template('client-detail.html', aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
 
@@ -119,8 +119,8 @@ def ap_detail(ap_mac, site_id):
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
     wlc_dc = function.get_dc(wlc_id)
-    print(wlcName)
-    print(wlc_dc)
+    # print(wlcName)
+    # print(wlc_dc)
 
     ap_details = function.get_device(ap.get("nwDeviceId"))
     radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
