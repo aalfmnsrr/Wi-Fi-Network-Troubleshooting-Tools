@@ -76,14 +76,7 @@ def clients():
     else:
         query_connected_ap = query_connected_ap + "*"
 
-
-    response = client_function.get_clients(200,offset,f"{query_connected_ap}")
-    clients = []
-    for c in response:
-        if c.get('connectionStatus') == 'connected':
-            clients.append(c)
-    # TO BE REMOVED IF 'CONNECTED' device IS OKAY
-    clients = response 
+    clients = client_function.get_clients(200,offset,f"{query_connected_ap}")
             
     branch_database = client_function.get_branch_database()
     # print(clients)
@@ -152,7 +145,6 @@ def ap_detail(ap_mac, site_id):
     print(wlc_dc)
     ap_details = function.get_device(ap.get("nwDeviceId"))
     radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
-    print(radio)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio)
 
 @app.route('/network-devices', methods=['POST', 'GET'])
