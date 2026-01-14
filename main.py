@@ -76,14 +76,7 @@ def clients():
     else:
         query_connected_ap = query_connected_ap + "*"
 
-
-    response = client_function.get_clients(200,offset,f"{query_connected_ap}")
-    clients = []
-    for c in response:
-        if c.get('connectionStatus') == 'connected':
-            clients.append(c)
-    # TO BE REMOVED IF 'CONNECTED' device IS OKAY
-    clients = response 
+    clients = client_function.get_clients(200,offset,f"{query_connected_ap}")
             
     branch_database = client_function.get_branch_database()
     # print(clients)
@@ -96,13 +89,53 @@ def clients():
 def device_detail(client_mac):
     client = client_function.get_client_enrichment_detail(client_mac)
     client = client["userDetails"]
+    health = client.get("healthScore")
+    overallScore = 0
+    onboardedScore = 0
+    connectedScore = 0
+    for h in health:
+        if h["healthType"] == "OVERALL":
+            overallScore = h["score"]
+        elif h["healthType"] == "ONBOARDED":
+            onboardedScore = h["score"]
+        elif h["healthType"] == "CONNECTED":
+            connectedScore = h["score"]
     connectedAP = client["connectedDevice"][0]
     neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
-    #TO BE DELETED
-    import json
-    # print(json.dumps(neighbor_topology, indent=2))
+    tx = []
+    rx = []
     aps = access_point.get_ap()
-    return render_template('client-detail.html', aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
+    client_links = client_function.get_client_enrichment_detail(client_mac)
+
+    client_details = client_links.get('userDetails')
+    client_connected = client_links.get('connectedDevice')[0].get('deviceDetails').get('neighborTopology')[0].get('nodes')
+    phy_link = client_links.get('connectedDevice')[0].get('deviceDetails').get('neighborTopology')[0].get('links')
+
+    #for the pysical int between ap and sw
+    for p in phy_link:
+        if p.get('sourceLinkStatus') == 'UP':
+            phy_link = p
+
+    #to clean the array to be used in topology
+    for n in client_connected[:]:
+        if n.get('id') == 'client5ghz' or n.get('name') == '2.4GHz Clients':
+            client_connected.remove(n)
+
+    # to insert topology following the order of the topology
+    for n in neighbor_topology:
+        if n.get('role') == 'CLIENT':
+            client_connected.insert(0,n)
+        
+        elif n.get('role') == 'SSID' :
+            client_connected.insert(1,n)
+
+    txbyte = float(client_details.get('txBytes')) / (1024 * 1024)
+    rxbyte = float(client_details.get('rxBytes')) / (1024 * 1024)
+
+    tx.append(txbyte)
+    rx.append(rxbyte)
+    dataRate = client_details.get("dataRate")
+    return render_template('client-detail.html', tx = tx, rx =rx, link = phy_link, details = client_details, connected = client_connected, aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology, overallScore=overallScore, onboardedScore=onboardedScore, connectedScore=connectedScore, dataRate=dataRate)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
