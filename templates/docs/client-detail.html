@@ -30,7 +30,7 @@
                 </h3>
                 </div>
                 <div class="row">  
-                    <div class="col-12 col-lg-4">
+                    <div class="col-12 col-lg-3">
                         <div class="card flex-fill">
                             <div class="card-body py-4">
                                 <div class="d-flex align-items-start">
@@ -54,7 +54,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-4">
+                    <div class="col-12 col-lg-3">
                         <div class="card flex-fill">
                             <div class="card-body py-4">
                                 <div class="d-flex align-items-start">
@@ -78,7 +78,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-4">
+                    <div class="col-12 col-lg-3">
                         <div class="card flex-fill">
                             <div class="card-body py-4">
                                 <div class="d-flex align-items-start">
@@ -102,6 +102,76 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-12 col-lg-3">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h3 class="mb-2">{{ client.issueCount }}</h3>
+                                        <p class="mb-2">Issue Count</p>
+                                        {% if client.issueCount > 0 %}
+                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                        {% else %}
+                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-danger" data-feather="alert-triangle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">     
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Issues</h5>
+                        </div>                  
+                        <div class="card-body">
+                            <table id="datatables-column-search-text-inputs" class="table table-striped " style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Description</th>
+                                        <th>Entity</th>
+                                        <th>Priority</th>
+                                        <th>Severity</th>
+                                        <th>Summary</th>
+                                        <th>Source</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for iss in issues %}
+                                    <tr>
+                                        <td>{{ iss.issueId | default('-', true) }}</td>
+                                        <td>{{ iss.issueDescription | default('-', true) }}</td>
+                                        <td>{{ iss.issueEntityValue | default('-', true) }}</td>
+                                        <td>{{ iss.issuePriority | default('-', true) }}</td>
+                                        <td>{{ iss.issueSeverity | default('-', true) }}</td>
+                                        <td>{{ iss.issueSource | default('-', true) | capitalize }}</td>
+                                        <td>{{ iss.issueTimestamp | default('-', true) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% if not issues %}
+                                    <td>-</td>
+                                    <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-12 mb-0">

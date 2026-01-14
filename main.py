@@ -88,6 +88,7 @@ def clients():
 @session_check
 def device_detail(client_mac):
     client = client_function.get_client_enrichment_detail(client_mac)
+    issues = client["issueDetails"]
     client = client["userDetails"]
     health = client.get("healthScore")
     overallScore = 0
@@ -135,7 +136,7 @@ def device_detail(client_mac):
     tx.append(txbyte)
     rx.append(rxbyte)
     dataRate = client_details.get("dataRate")
-    return render_template('client-detail.html', tx = tx, rx =rx, link = phy_link, details = client_details, connected = client_connected, aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology, overallScore=overallScore, onboardedScore=onboardedScore, connectedScore=connectedScore, dataRate=dataRate)
+    return render_template('client-detail.html', tx = tx, rx =rx, link = phy_link, details = client_details, connected = client_connected, aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology, overallScore=overallScore, onboardedScore=onboardedScore, connectedScore=connectedScore, dataRate=dataRate,issues=issues)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
