@@ -152,12 +152,13 @@ def ap_detail(ap_mac, site_id):
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
     wlc_dc = function.get_dc(wlc_id)
+    issues = access_point.get_Issues(ap.get("nwDeviceId"))
     # print(wlcName)
     # print(wlc_dc)
 
     ap_details = function.get_device(ap.get("nwDeviceId"))
     radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
-    return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio)
+    return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio, issues=issues)
 
 @app.route('/network-devices', methods=['POST', 'GET'])
 @session_check

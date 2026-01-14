@@ -55,6 +55,19 @@ def get_ap():
         ind += 1
     return access_points
 
+def get_Issues(device_id):
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/issues?deviceId={device_id}"
+   
+    issues = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return issues
+
 def get_ap_radio(ap_name, site_id):
     # print(ap_name)
     function.get_token()
