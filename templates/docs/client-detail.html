@@ -3,167 +3,278 @@
 
 <main class="content">
     <div class="container-fluid p-0">
-
-        <div class="row mb-2 mb-xl-3">
-            <div class="col-auto d-none d-sm-block">
-                <h3 class="mb-0">Client Details</h3>
-            </div>
-            <div class="col-auto ms-auto text-end mt-n1">
-                <button class="btn btn-primary shadow-sm">
-                    <i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
-                </button>
-            </div>
-        </div>
-
-        <div class="row " >
-            
-            <div class="col-12 col-lg-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Signal Dashboard</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-4">
-                            <label class="form-label text-muted">RSSI History</label>
-                            <div class="progress" style="height: 5px; margin-bottom: 5px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 70%"></div>
-                            </div>
-                            <div class="progress" style="height: 5px; margin-bottom: 5px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 65%"></div>
-                            </div>
-                            <div class="progress" style="height: 5px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 75%"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label text-muted">Noise Floor</label>
-                            <div class="progress" style="height: 5px; margin-bottom: 5px;">
-                                <div class="progress-bar bg-warning" role="progressbar" style="width: 20%"></div>
-                            </div>
-                            <div class="progress" style="height: 5px;">
-                                <div class="progress-bar bg-warning" role="progressbar" style="width: 25%"></div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <small class="text-muted">Last updated: Just now</small>
-                        </div>
-                    </div>
+        <div class="row" >
+            <!-- <div class="col-md-3 text-center mb-3"> -->
+                <div class="mb-3">
+                    <span class="rounded-circle d-inline-block bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                        <i class="align-middle" data-feather="user" style="width: 110px; height: 110px; color: #555;"></i>
+                    </span>
                 </div>
-            </div>
-
-            <div class="col-12 col-lg-9">
-                <div class="card">
-                    <div class="card-body">
-                        
-                        <div class="row mb-5">
-                            <div class="col-md-3 text-center border-end">
-                                <div class="mb-3">
-                                    <span class="rounded-circle d-inline-block bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
-                                        <i class="align-middle" data-feather="user" style="width: 40px; height: 40px; color: #555;"></i>
-                                    </span>
-                                </div>
-                    
-                                <div class="position-relative d-inline-block">
-                                    {% if client.connectionStatus == "CONNECTED" %}
-                                        <div class="badge bg-success p-2 px-3 position-relative">
-                                            ONLINE
-                                            </div>
-                                    {% else %}
-                                        <div class="badge bg-danger p-2 px-3">
-                                            OFFLINE
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                
-                            </div>
-
-                            <div class="col-md-9 ps-md-4">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <h5 class="fw-bold text-muted text-uppercase small">Hostname</h5>
-                                        <p class="h4 mb-3">{{ client.hostName or 'N/A' }}</p>
-
-                                        <h5 class="fw-bold text-muted text-uppercase small">Username</h5>
-                                        <p class="h4 mb-3">{{ client.userId or 'N/A' }}</p>
-                                        
-                                        <h5 class="fw-bold text-muted text-uppercase small">MAC Address</h5>
-                                        <p class="font-monospace text-dark">{{ client.hostMac }}</p>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <h5 class="fw-bold text-muted text-uppercase small">IP Address</h5>
-                                                <span>{{ details.hostIpV4 }}</span>
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <h5 class="fw-bold text-muted text-uppercase small">Floor</h5>
-                                                <span>{{ client.location or '1st Floor' }}</span>
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <h5 class="fw-bold text-muted text-uppercase small">AAA Server</h5>
-                                                <span>{{ details.onboarding.aaaServerIp or 'N/A' }}</span> 
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <h5 class="fw-bold text-muted text-uppercase small">Device Type</h5>
-                                                <span>{{ details.subType  or 'N/A' }}</span> 
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <h5 class="fw-bold text-muted text-uppercase small">Signal Strength</h5>
-                                                <span class="{{ 'text-success' if client.rssi and client.rssi|int > -65 else 'text-warning' }}">
-                                                    {{ client.rssi or 'N/A' }}
-                                                </span>
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <h5 class="fw-bold text-muted text-uppercase small">Channel</h5>
-                                                <span>{{ client.channel or 'Auto' }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        
-                        </div>
+    
+                <h3 class="mb-0 text-center">
+                    <nobr style="color:#3266bb;">{{ client.userId or 'N/A' }}  </nobr>
+                    {% if client.connectionStatus == "CONNECTED" %}
+                        <span class="badge bg-success p-2 px-3 position-relative">
+                            {{ client.connectionStatus  | capitalize }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger ms-2 align-middle">
+                            {{ client.connectionStatus  | capitalize }}
+                        </span>
+                    {% endif %}
+                    <div class="col-auto ms-auto text-end mt-n1 mb-3">
+                        <button class="btn btn-primary shadow-sm">
+                            <i class="align-middle" data-feather="refresh-cw" onclick="location.reload()">&nbsp;</i>
+                        </button>
                     </div>
+                </h3>
                 </div>
-            </div>
-                        <hr>
-
-                        <div class="row mb-5 mt-4">
-                            <div class="col-12">
-                                <h5 class="card-title mb-3">Connected AP</h5>
-                                <div class="d-flex align-items-center p-3 border rounded bg-light">
-                                    <div class="me-3">
-                                        <i class="align-middle text-primary" data-feather="router" style="width: 32px; height: 32px;"></i>
-                                    </div>
-                                    <div>
-                                        {% if connectedAP.name%}
-                                            {% for a in aps %}
-                                                {% if connectedAP.name == a.label%}
-                                                    <h4 class="mb-0"><a href= {{ url_for('ap_detail', ap_mac = connectedAP.mac, site_id=a.additionalInfo.siteid) }}>{{ connectedAP.name }}</a></h4>
-                                                    <small class="text-muted">IP: {{ connectedAP.mgmtIp or 'Unknown' }}</small></br>
-                                                    <small class="text-muted">Band: {{ details.frequency or 'Unknown' }} GHz</small></br>
-                                                    <small class="text-muted">Mode: {{ connectedAP.mode or 'Unknown' }}</small></br>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {%else%}
-                                        <h4 class="mb-0 text-danger">No AP Connected</h4>
+                <div class="row">  
+                    <div class="col-12 col-lg-4">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h3 class="mb-2">{{ overallScore }}</h3>
+                                        <p class="mb-2">Overall Health</p>
+                                        {% if 4 > overallScore %}
+                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                        {% elif 7 > overallScore %}
+                                            <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
+                                        {% else %}
+                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
                                         {% endif %}
                                     </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-success" data-feather="activity"></i>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
-                                <h5 class="card-title mb-3">Neighboring Topology</h5>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h3 class="mb-2">{{ onboardedScore }}</h3>
+                                        <p class="mb-2">Onboarded Health</p>
+                                        {% if 4 > onboardedScore %}
+                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                        {% elif 7 > onboardedScore %}
+                                            <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
+                                        {% else %}
+                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-success" data-feather="loader"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card flex-fill">
+                            <div class="card-body py-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h3 class="mb-2">{{ connectedScore }}</h3>
+                                        <p class="mb-2">Connected Health</p>
+                                        {% if 4 > connectedScore %}
+                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                        {% elif 7 > connectedScore %}
+                                            <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
+                                        {% else %}
+                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                            {% endif %}
+                                    </div>
+                                    <div class="d-inline-block ms-3">
+                                        <div class="stat">
+                                            <i class="align-middle text-danger" data-feather="wifi"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-0">
+                    <div class="card flex-fill mb-0">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Details</h3>
+                            </div>
+                <div class="col-auto d-none d-sm-block">
+                <ul class="nav nav-tabs mb-3" id="clientTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab"
+                            data-bs-target="#inventory-pane" type="button" role="tab"
+                            aria-controls="inventory-pane" aria-selected="true">
+                        Inventory
+                    </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="conn-tab" data-bs-toggle="tab"
+                            data-bs-target="#conn-pane" type="button" role="tab"
+                            aria-controls="conn-pane" aria-selected="false">
+                        Connection
+                    </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-content mb-0" id="clientTabContent">
+                <div class="tab-pane fade show active" id="inventory-pane" role="tabpanel" aria-labelledby="inventory-tab">
+                <div class="card flex-fill mb-0">
+                        <div class="card-header mb-0">
+                            <h5 class="card-title mb-0">Inventory</h5>
+                        </div>
+                            <table id="datatables-dashboard-projects" class="table table-striped my-0 mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th class="d-none d-xl-table-cell">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Username</td>
+									    <td class="d-none d-xl-table-cell">{{ client.userId or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Device Hostname</td>
+									    <td class="d-none d-xl-table-cell">{{ client.hostName or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>MAC Address</td>
+									    <td class="d-none d-xl-table-cell">{{ client.hostMac }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>IP Address</td>
+									    <td class="d-none d-xl-table-cell">{{ details.hostIpV4 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Location</td>
+									    <td class="d-none d-xl-table-cell">{{ client.location or '1st Floor' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Device Type</td>
+									    <td class="d-none d-xl-table-cell">{{ details.subType  or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Device OS</td>
+									    <td class="d-none d-xl-table-cell">{{ client.hostOs  or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hardware Manufacturer</td>
+									    <td class="d-none d-xl-table-cell">{{ client.deviceVendor  or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tracked</td>
+									    <td class="d-none d-xl-table-cell">{{ client.tracked | capitalize or 'N/A' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade mb-0" id="conn-pane" role="tabpanel" aria-labelledby="conn-tab">
+                <div class="card flex-fill mb-0">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Connection Details</h5>
+                    </div>
+                            <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th class="d-none d-xl-table-cell">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Connection Type</td>
+									    <td class="d-none d-xl-table-cell">{{ client.hostType | capitalize or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Authentication Type</td>
+									    <td class="d-none d-xl-table-cell">{{ client.authType or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>VLAN ID</td>
+									    <td class="d-none d-xl-table-cell">{{ client.vlanId or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>SSID</td>
+									    <td class="d-none d-xl-table-cell">{{ client.ssid or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Channel</td>
+									    <td class="d-none d-xl-table-cell">{{ client.channel or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Frequency</td>
+									    <td class="d-none d-xl-table-cell">{{ client.frequencyList or 'N/A' }} GHz</td>
+                                    </tr>
+                                    <tr>
+                                        <td>AAA Server</td>
+									    <td class="d-none d-xl-table-cell">{{ client.aaaServerIp or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>DHCP Server</td>
+									    <td class="d-none d-xl-table-cell">{{ client.dhcpServerIp | capitalize or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Signal Strength</td>
+									    <td class="d-none d-xl-table-cell">{{ client.rssi or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Port</td>
+									    <td class="d-none d-xl-table-cell">{{ client.port or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Slot ID</td>
+									    <td class="d-none d-xl-table-cell">{{ client.slotId or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dot 11 Protocol</td>
+									    <td class="d-none d-xl-table-cell">{{ client.dot11Protocol or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dot 11 Capability</td>
+									    <td class="d-none d-xl-table-cell">{{ client.dot11ProtocolCapability or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L2 Virtual Network</td>
+									    <td class="d-none d-xl-table-cell">{{ client.l2VirtualNetwork or 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L3 Virtual Network</td>
+									    <td class="d-none d-xl-table-cell">{{ client.l3VirtualNetwork or 'N/A' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                </div>
+            </div>
+    </div></div></div></div></div>
+    <div class = "row">
+        <div class="col-12">
+            <div class="card flex-fill">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Neighboring Topology</h3>
+                    </div>
+                        <div class="card-body">
                                 <div class="border rounded p-4 bg-light overflow-auto">
                                     <div class="d-flex align-items-center justify-content-between text-center" style="min-width: 600px;">
                                         
                                         {% for node in connected %}
                                             
                                             <div class="card mb-0 shadow-sm border-0 position-relative" style="width: 200px; min-width: 200px;">
-                                                <div class="card-body p-3">
+                                                <div class="card-body p-3 ps-md-4">
                                                     
                                                         {% if node.role == 'CLIENT' %}
                                                             {% if node.name  %}
@@ -204,7 +315,7 @@
                                                         {% elif node.description == 'AP'  %}
                                                         <div class="mb-2">
                                                             <div class="bg-info bg-opacity-10 p-2 rounded-circle d-inline-block">
-                                                                <i class="text-info" data-feather="rss"></i>
+                                                                <i class="text-info" data-feather="radio"></i>
                                                             </div>
                                                         </div>
                                                         <h6 class="card-title mb-1 text-truncate fw-bold" title="{{ node.name }}">
@@ -232,7 +343,7 @@
                                                         {% elif node.description == 'SWITCH' %}
                                                             <div class="mb-2">
                                                                 <div class="bg-success bg-opacity-10 p-2 rounded-circle d-inline-block">
-                                                                    <i class="text-success" data-feather="router"></i>
+                                                                    <i class="text-success" data-feather="hard-drive"></i>
                                                                 </div>
                                                             </div>
                                                             <h6 class="card-title mb-1 text-truncate fw-bold" title="{{ node.name }}">
@@ -273,7 +384,8 @@
 
                                             {% if not loop.last %}
                                                 <div class="px-3 text-muted opacity-50">
-                                                    <i data-feather="arrow-right" style="width: 24px; height: 24px;"></i>
+                                                    <i data-feather="arrow-right" style="width: 24px; height: 24px;" aria-describedby="arrowTip" tabindex="0"></i>
+                                                    <div class="tooltip" role="tooltip" id="arrowTip">Navigate to neighbor topology</div>
                                                 </div>
                                             {% endif %}
 
@@ -286,45 +398,65 @@
 
                                     </div>
                                 </div>
-                           
-
+                        </div>
+                            </div>
+                        </div></div></div>
                         <div class="row">
                             <div class="col-12 col-lg-6">
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title">Radio Tx Power</h5>
-                                        <!-- <h6 class="card-subtitle text-muted">Line charts are a typical pictorial representation that depicts trends and behaviors over time.</h6> -->
                                     </div>
                                     <div class="card-body">
                                         <div class="chart w-100">
                                             <div id="apexcharts-line"></div>
-                                            <!-- <p>{{tx}}</p> -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12 col-lg-6">
-                                <!-- <div class="card" style="height: 464px;">
+                                <div class="card">
                                     <div class="card-header">
-                                        <h5 class="card-title">Health Scores</h5>
-                                        <h6 class="card-subtitle text-muted">Polar area charts are similar to pie charts, but each segment has the same angle.</h6>
+                                        <h5 class="card-title">Data Rate</h5>
                                     </div>
                                     <div class="card-body">
-                                        <div class="chart">
-                                            <canvas id="chartjs-polar-area"></canvas>
+                                        <div class="chart w-100">
+                                            <div id="apexcharts-line-data"></div>
                                         </div>
                                     </div>
-                                </div> -->
+                                </div>
                             </div>
                         </div>
 
-            
-            
-         </div>
-
-       
-    </div>
-</main>
+                    </main>
+                        <footer class="footer">
+                            <div class="container-fluid">
+                                <div class="row text-muted">
+                                    <div class="col-6 text-start">
+                                        <ul class="list-inline">
+                                            <li class="list-inline-item">
+                                                <a class="text-muted" href="#">Support</a>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <a class="text-muted" href="#">Help Center</a>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <a class="text-muted" href="#">Privacy</a>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <a class="text-muted" href="#">Terms of Service</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <p class="mb-0">
+                                            &copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </footer>  
+    </div></div>
 
 <script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
 <script src="https://unpkg.com/feather-icons"></script>
@@ -334,31 +466,102 @@
     });
 </script>
 
-
-  
+<script id="tx-val" type="application/json">
+    {{ tx | tojson }}
+</script>
+<script id="rx-val" type="application/json">
+    {{ rx | tojson }}
+</script>
+<script id="data-val" type="application/json">
+    {{ dataRate | tojson }}
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const tx = {{ tx | tojson }};
-      const rx = {{ rx  | tojson }};
+      function safeParse(json, fallback = null) {
+        try {
+          return JSON.parse(json);
+        } catch (_) {
+          return fallback;
+        }
+      }
   
-      const txData = tx.map(v => {
+      function normalizeLocalDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+  
+      function formatDayLabel(yyyy_mm_dd) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(yyyy_mm_dd)) return yyyy_mm_dd || "";
+        const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        const fmt = new Intl.DateTimeFormat(undefined, { day: "2-digit", month: "short" });
+        return fmt.format(dt);
+      }
+  
+      function toNumberFixed2(v) {
         const n = Number(v);
-        return Number.isFinite(n) ? Number(n.toFixed(2)) : null;
-      });
-      const rxData = rx.map(v => {
-        const n = Number(v);
-        return Number.isFinite(n) ? Number(n.toFixed(2)) : null;
-      });
+        if (!Number.isFinite(n)) return null;
+        return Number(n.toFixed(2));
+      }
   
-      const len = Math.min(txData.length, rxData.length);
-      const seriesTx = txData.slice(0, len);
-      const seriesRx = rxData.slice(0, len);
+      const txNode = document.getElementById("tx-val");
+      const rxNode = document.getElementById("rx-val");
   
-      const categories = Array.from({ length: len }, (_, i) => 0 - i * 5);
+      if (!txNode || !rxNode) {
+        console.error("Elements #tx-val or #rx-val not found.");
+        return;
+      }
+  
+      const tx_raw = (txNode.textContent || "").trim();
+      const rx_raw = (rxNode.textContent || "").trim();
+  
+      const txArray = safeParse(tx_raw, []);
+      const rxArray = safeParse(rx_raw, []);
+  
+      if (!Array.isArray(txArray) || !Array.isArray(rxArray)) {
+        console.error("Tx/Rx values are not valid JSON arrays.");
+        return;
+      }
+  
+      const len = Math.min(txArray.length, rxArray.length);
+      const txData = txArray.slice(0, len).map(toNumberFixed2);
+      const rxData = rxArray.slice(0, len).map(toNumberFixed2);
+      const latestTx = len > 0 ? txData[len - 1] : null;
+      const latestRx = len > 0 ? rxData[len - 1] : null;
+      const snapshot = { tx_latest_mb: latestTx, rx_latest_mb: latestRx };
+  
+      const STORAGE_KEY = "radio_daily_history";
+      const today = normalizeLocalDate(new Date());
+      const history = safeParse(localStorage.getItem(STORAGE_KEY), []) || [];
+  
+      const byDate = new Map(
+        Array.isArray(history)
+          ? history
+              .filter(h => h && typeof h.date === "string")
+              .map(h => [h.date, h])
+          : []
+      );
+      byDate.set(today, { date: today, radios: snapshot });
+  
+      const final = Array.from(byDate.values())
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(-30); // keep last 30 days
+  
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(final));
+  
+      const categories = final.map(h => formatDayLabel(h.date));
   
       const mount = document.querySelector("#apexcharts-line");
-      if (!mount) { console.error("Container #apexcharts-line not found."); return; }
-      if (typeof ApexCharts === "undefined") { console.error("ApexCharts is not loaded."); return; }
+      if (!mount) {
+        console.error("Container #apexcharts-line not found.");
+        return;
+      }
+      if (typeof ApexCharts === "undefined") {
+        console.error("ApexCharts is not loaded.");
+        return;
+      }
   
       const options = {
         chart: {
@@ -371,18 +574,23 @@
         stroke: { width: 3, curve: "straight" },
         markers: { size: 3 },
         series: [
-          { name: "Tx Bytes", data: seriesTx },
-          { name: "Rx Bytes", data: seriesRx }
+          { name: "Tx Bytes", data: txData },
+          { name: "Rx Bytes", data: rxData }
         ],
         xaxis: {
-          categories, // with len=1 => [0]
-          title: { text: "Time" }
+          categories,
+          title: { text: "Date" }
         },
         yaxis: {
-          title: { text: "Bytes (MB)" }
+            markers:{size: 3},
+          title: { text: "Bytes (MB)" },
+          labels: {
+            formatter: (val) => (Number.isFinite(val) ? `${val}` : "")
+          }
         },
         tooltip: {
           shared: true,
+          intersect: false,
           y: {
             formatter: (val) => (val == null ? "No data" : `${val} MB`)
           }
@@ -395,6 +603,336 @@
     });
   </script>
   
+
+  <!-- <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // ---------- Helpers ----------
+      const SAFE_JSON = (s, fb = null) => { try { return JSON.parse(s); } catch { return fb; } };
+    
+      function floorTo30Min(date) {
+        const d = new Date(date);
+        d.setSeconds(0, 0);
+        const m = d.getMinutes();
+        d.setMinutes(m < 30 ? 0 : 30);
+        return d; // keep Date; format separately
+      }
+    
+      function hhmmLocalLabel(d) {
+        const h = String(d.getHours()).padStart(2, "0");
+        const m = String(d.getMinutes()).padStart(2, "0");
+        return `${h}:${m}`;
+      }
+    
+      function toNumberFixed2(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? Number(n.toFixed(2)) : null;
+      }
+    
+      function aggregate(values, mode = "latest") {
+        const nums = values.filter(Number.isFinite);
+        if (!nums.length) return null;
+        if (mode === "avg") {
+          const avg = nums.reduce((a, b) => a + b, 0) / nums.length;
+          return Number(avg.toFixed(2));
+        }
+        if (mode === "max") return Math.max(...nums);
+        return nums[nums.length - 1]; // latest
+      }
+    
+      function normalizeLocalDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+    
+      // ---------- Read data ----------
+      const node = document.getElementById("data-val");
+      if (!node) { console.error("#data-val not found"); return; }
+    
+      const rawText = (node.textContent || "").trim();
+    
+      // Accept: number, array of numbers, array of {t, v}
+      let parsed = SAFE_JSON(rawText, null);
+      // If SAFE_JSON failed (e.g., raw "574.0" without JSON context), try Number()
+      if (parsed === null && rawText && !isNaN(Number(rawText))) {
+        parsed = Number(rawText);
+      }
+    
+      if (parsed == null) {
+        console.error("No usable data in #data-val");
+        return;
+      }
+    
+      // ---------- Normalize to a common internal shape ----------
+      // We want an array of samples with time (Date) and value (number|null)
+      let samples = [];
+    
+      if (typeof parsed === "number") {
+        // Case 1: single number
+        const now = new Date();
+        samples = [{ t: now, v: toNumberFixed2(parsed) }];
+      } else if (Array.isArray(parsed)) {
+        if (parsed.length === 0) {
+          console.warn("Empty array in #data-val"); 
+          return;
+        }
+    
+        // Detect element shape
+        const first = parsed[0];
+    
+        if (typeof first === "number") {
+          // Case 2: array of numbers -> require a sampling interval to build 30-min buckets
+          const SAMPLE_MINUTES = 5;  // <-- adjust this if your sampling cadence differs
+          const start = new Date();  // assume the last sample is 'now', build backward
+          // Build timestamps for each sample by stepping back SAMPLE_MINUTES
+          samples = parsed.map((v, idxFromStart) => {
+            const i = parsed.length - 1 - idxFromStart; // i decreases from last to first
+            const d = new Date(start.getTime() - (parsed.length - 1 - i) * SAMPLE_MINUTES * 60 * 1000);
+            return { t: d, v: toNumberFixed2(parsed[i]) };
+          }).reverse();
+        } else if (typeof first === "object" && first) {
+          // Case 3: array of {t, v}
+          samples = parsed
+            .filter(o => o && o.t != null && o.v != null)
+            .map(o => ({ t: new Date(o.t), v: toNumberFixed2(o.v) }))
+            .filter(o => !isNaN(o.t.getTime()));
+          if (!samples.length) {
+            console.error("No valid timestamped datapoints found.");
+            return;
+          }
+        } else {
+          console.error("Unsupported array format in #data-val.");
+          return;
+        }
+      } else {
+        console.error("Unsupported data format in #data-val.");
+        return;
+      }
+    
+      // ---------- Bucket into 30-min intervals ----------
+      const MODE = "latest"; // "latest" | "avg" | "max"
+      const bucketsMap = new Map(); // key: floor Date (time), val: number[]
+    
+      for (const { t, v } of samples) {
+        const floor = floorTo30Min(t);
+        const key = floor.getTime(); // numeric key for Map
+        if (!bucketsMap.has(key)) bucketsMap.set(key, []);
+        bucketsMap.get(key).push(v);
+      }
+    
+      // Sort buckets by time
+      const sortedKeys = Array.from(bucketsMap.keys()).sort((a, b) => a - b);
+      const categories = [];
+      const data30 = [];
+      for (const k of sortedKeys) {
+        const d = new Date(k);
+        categories.push(hhmmLocalLabel(d));
+        data30.push(aggregate(bucketsMap.get(k), MODE));
+      }
+    
+      // If we only had a single number and want at least one bucket label:
+      if (data30.length === 0 && samples.length === 1) {
+        const slot = floorTo30Min(samples[0].t);
+        categories.push(hhmmLocalLabel(slot));
+        data30.push(samples[0].v);
+      }
+    
+      // ---------- Persist latest 30‑min value as daily snapshot (optional) ----------
+      const today = normalizeLocalDate(new Date());
+      const STORAGE_KEY = "data_daily_history";
+      const history = SAFE_JSON(localStorage.getItem(STORAGE_KEY), []) || [];
+      const byDate = new Map(
+        Array.isArray(history) ? history.filter(h => h && typeof h.date === "string").map(h => [h.date, h]) : []
+      );
+    
+      const latestVal = data30.length ? data30[data30.length - 1] : (samples.length ? samples[samples.length - 1].v : null);
+      byDate.set(today, { date: today, radios: { data_latest_mbps_30min: latestVal, mode: MODE } });
+    
+      const final = Array.from(byDate.values())
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(-30);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(final));
+    
+      // ---------- Render ApexCharts ----------
+      const mount = document.querySelector("#apexcharts-line-data");
+      if (!mount) { console.error("#apexcharts-line-data not found"); return; }
+      if (typeof ApexCharts === "undefined") { console.error("ApexCharts is not loaded"); return; }
+    
+      const options = {
+        chart: { height: 350, type: "line", zoom: { enabled: false }, toolbar: { show: false } },
+        dataLabels: { enabled: false },
+        stroke: { width: 3, curve: "straight" },
+        markers: { size: 3 },
+        series: [{ name: `Mbps (30‑min ${MODE})`, data: data30 }],
+        xaxis: { categories, title: { text: "Time (30‑min buckets)" } },
+        yaxis: {
+          title: { text: "Data Rate (Mbps)" },
+          labels: { formatter: val => (Number.isFinite(val) ? `${val}` : "") }
+        },
+        tooltip: {
+          shared: true,
+          intersect: false,
+          y: { formatter: val => (val == null ? "No data" : `${val} Mbps`) }
+        },
+        grid: { borderColor: "#f1f1f1" },
+        legend: { position: "top" }
+      };
+    
+      new ApexCharts(mount, options).render();
+    });
+    </script> -->
+    
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function safeParse(json, fallback = null) {
+        try { return JSON.parse(json); } catch (_) { return fallback; }
+      }
+  
+      function normalizeLocalDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+  
+      function formatDayLabel(yyyy_mm_dd) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(yyyy_mm_dd)) return yyyy_mm_dd || "";
+        const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        const fmt = new Intl.DateTimeFormat(undefined, { day: "2-digit", month: "short" });
+        return fmt.format(dt);
+      }
+  
+      function toNumberFixed2(v) {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return null;
+        return Number(n.toFixed(2));
+      }
+  
+      // --- Make sure we always end up with an array ---
+      const raw = (document.getElementById("data-val")?.textContent || "").trim();
+      let dataArray;
+      try {
+        // JSON.parse("574.0") returns a number (valid JSON), not an array
+        const parsed = JSON.parse(raw);
+        dataArray = Array.isArray(parsed) ? parsed : [Number(raw)];
+      } catch {
+        dataArray = [Number(raw)]; // fallback
+      }
+  
+      if (!Array.isArray(dataArray)) {
+        console.error("Data values are not valid JSON arrays.");
+        return;
+      }
+  
+      // Map to numbers with 2 decimals and drop invalids
+      let data = dataArray.map(toNumberFixed2).filter(v => v != null && Number.isFinite(v));
+      const len = data.length;
+      const latestData = len > 0 ? data[len - 1] : null;
+      const snapshot = { data_latest_mb: latestData };
+  
+      // --- Persist "latest of the day" into localStorage history ---
+      const STORAGE_KEY = "data_daily_history";
+      const today = normalizeLocalDate(new Date());
+      const history = safeParse(localStorage.getItem(STORAGE_KEY), []) || [];
+  
+      const byDate = new Map(
+        Array.isArray(history)
+          ? history
+              .filter(h => h && typeof h.date === "string")
+              .map(h => [h.date, h])
+          : []
+      );
+      byDate.set(today, { date: today, radios: snapshot });
+  
+      const final = Array.from(byDate.values())
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(-30);
+  
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(final));
+      const categories = final.map(h => formatDayLabel(h.date));
+  
+      // --- Mount checks ---
+      const mount = document.querySelector("#apexcharts-line-data");
+      if (!mount) {
+        console.error("Container #apexcharts-line-data not found.");
+        return;
+      }
+      if (typeof ApexCharts === "undefined") {
+        console.error("ApexCharts is not loaded.");
+        return;
+      }
+  
+      // If you want the series to align with history categories, build it from history
+      // Otherwise, just use the current data array
+      const seriesFromHistory = final.map(h => {
+        const v = h?.radios?.data_latest_mb;
+        return Number.isFinite(Number(v)) ? Number(Number(v).toFixed(2)) : null;
+      }).filter(v => v != null);
+  
+      const seriesData = seriesFromHistory.length ? seriesFromHistory : data;
+      const xCategories = seriesFromHistory.length
+        ? categories
+        : (data.length ? ["Today"] : []);
+  
+      // Tooltip behavior: for a single point, use intersect:true, shared:false
+      const isSinglePoint = seriesData.length === 1;
+  
+      const options = {
+        chart: {
+          height: 350,
+          type: "line",
+          zoom: { enabled: false },
+          toolbar: { show: false }
+        },
+        dataLabels: { enabled: false },
+        stroke: { width: 3, curve: "straight" },
+        markers: { size: 4 },
+        series: [
+          { name: "Data Rate", data: seriesData },
+        ],
+        xaxis: {
+          categories: xCategories,
+          title: { text: "Date" }
+        },
+        yaxis: {
+          title: { text: "Mbps" },
+          labels: { formatter: (val) => (Number.isFinite(val) ? `${val}` : "") }
+        },
+        tooltip: {
+          shared: !isSinglePoint,
+          intersect: isSinglePoint,
+          y: {
+            // More robust: read from the actual series point to avoid 'undefined'
+            formatter: (val, { seriesIndex, dataPointIndex, w }) => {
+              const pointVal = w?.config?.series?.[seriesIndex]?.data?.[dataPointIndex];
+              return (pointVal == null || !Number.isFinite(pointVal)) ? "No data" : `${pointVal} Mbps`;
+            }
+          }
+        },
+        grid: { borderColor: "#f1f1f1" },
+        legend: { position: "top" },
+        noData: { text: "No data" }
+      };
+  
+      new ApexCharts(mount, options).render();
+    });
+  </script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        $("#datatables-dashboard-projects").DataTable({
+            lengthChange: false,
+            bFilter: false,
+            autoWidth: false,
+            ordering: false,
+            paging: false,
+            bInfo: false
+        });
+    });
+</script>
 
 
 {% endblock %}

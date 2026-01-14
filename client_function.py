@@ -140,7 +140,11 @@ def get_clients(limit, offset, connectedAP):
     }
     response = requests.get(url, headers=header, params=params, verify=False)
     response.raise_for_status() 
-    return response.json().get("response", [])
+    response = response.json().get("response")
+    # for r in response[:]:
+    #     if r["connectionStatus"] == "disconnected":
+    #         response.remove(r)
+    return response
 
 
 def get_neighbor_topology(client_mac):

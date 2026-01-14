@@ -45,6 +45,21 @@ def get_dc(wlc_id):
         return "TH-NTT"
     elif device["snmpLocation"] == "AXA Group Operations Indonesia" or  device["hostname"].startswith('ID'):
         return "INDO"
+    
+def get_site_id(location):
+    get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url = f"{Config.dnac}/intent/api/v1/site"
+    response = requests.get(url, headers=header, verify=False).json().get("response")
+    # print(response)
+    for r in response:
+        if r["siteNameHierarchy"] == location:
+            # print(r.get("id"))
+            return r.get("id")
 
 def get_device(dev_id):
     get_token()

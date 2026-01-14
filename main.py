@@ -40,7 +40,7 @@ def dashboard():
     site_health = dashboard_page.get_site_health()
     clients = dashboard_page.get_clients()
     system = dashboard_page.get_sys_performance()
-    print(system)
+    # print(system)
     return render_template("dashboard.html", 
                            overall=overall,
                            access=access,
@@ -89,6 +89,17 @@ def clients():
 def device_detail(client_mac):
     client = client_function.get_client_enrichment_detail(client_mac)
     client = client["userDetails"]
+    health = client.get("healthScore")
+    overallScore = 0
+    onboardedScore = 0
+    connectedScore = 0
+    for h in health:
+        if h["healthType"] == "OVERALL":
+            overallScore = h["score"]
+        elif h["healthType"] == "ONBOARDED":
+            onboardedScore = h["score"]
+        elif h["healthType"] == "CONNECTED":
+            connectedScore = h["score"]
     connectedAP = client["connectedDevice"][0]
     neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
     tx = []
@@ -123,8 +134,8 @@ def device_detail(client_mac):
 
     tx.append(txbyte)
     rx.append(rxbyte)
-
-    return render_template('client-detail.html', tx = tx, rx =rx, link = phy_link, details = client_details, connected = client_connected, aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology)
+    dataRate = client_details.get("dataRate")
+    return render_template('client-detail.html', tx = tx, rx =rx, link = phy_link, details = client_details, connected = client_connected, aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology, overallScore=overallScore, onboardedScore=onboardedScore, connectedScore=connectedScore, dataRate=dataRate)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
@@ -141,8 +152,9 @@ def ap_detail(ap_mac, site_id):
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
     wlc_dc = function.get_dc(wlc_id)
-    print(wlcName)
-    print(wlc_dc)
+    # print(wlcName)
+    # print(wlc_dc)
+
     ap_details = function.get_device(ap.get("nwDeviceId"))
     radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio)
