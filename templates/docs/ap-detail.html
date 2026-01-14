@@ -131,6 +131,41 @@
 								</div>
 							</div>
 					</div>
+					<div class="row">
+						<div class="col-12">
+							<div class="card">     
+								<div class="card-header">
+									<h5 class="card-title mb-0">Issues</h5>
+								</div>                  
+								<div class="card-body">
+									<table id="datatables-column-search-text-inputs" class="table table-striped " style="width:100%">
+										<thead>
+											<tr>
+												<th>Description</th>
+												<th>Priority</th>
+												<th>Occurence Count</th>
+												<th>Status</th>
+												<th>Category</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for iss in issues %}
+											<tr>
+												<td>{{ iss.name | default('-', true) }}</td>
+												
+												<td>{{ iss.priority | default('-', true) }}</td>
+												<td>{{ iss.issue_occurence_count | default('-', true) }}</td>
+												<td>{{ iss.status | default('-', true) | capitalize }}</td>
+												
+												<td>{{ iss.category | default('-', true) }}</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
 
 					<div class="card flex-fill">
 						<div class="card-header">
