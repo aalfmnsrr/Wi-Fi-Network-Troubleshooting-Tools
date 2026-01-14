@@ -294,27 +294,27 @@
                         <div class="card-header">
                             <h5 class="card-title mb-0">Interface Details</h5>
                         </div>
-                        <table id="datatables-dashboard-modi-projects" class="table table-striped">
+                        <table id="datatables-dashboard-modi-projects" class="table table-striped text-center">
                             <thead>
                                 <tr>
-                                    <th>Interface Name</th>
-                                    <th>Operational Status</th>
-                                    <th>Admin Status</th>
-                                    <th>Port Channel ID</th>
-                                    <th>Type</th>
-                                    <th>Allowed VLAN(s)</th>
-                                    <th>Link Speed</th>
-                                    <th>Duplex</th>
+                                    <th class="text-center">Interface Name</th>
+                                    <th class="text-center">Operational Status</th>
+                                    <th class="text-center">Admin Status</th>
+                                    <th class="text-center">Port Channel ID</th>
+                                    <th class="text-center">Type</th>
+                                    <th class="text-center">Allowed VLAN(s)</th>
+                                    <th class="text-center">Link Speed</th>
+                                    <th class="text-center">Duplex</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for intf in sw_interface %}
                                 <tr>
-                                    <td>{{ intf.name | default('-', true) }}</td>
+                                    <td class="text-start">{{ intf.name | default('-', true) }}</td>
         
                                     {% set oper = (intf.operStatus | default('', true)) %}
                                     {% if not oper or oper == 'DOWN' %}
-                                        <td style="color: red;">{{ oper or 'DOWN' }}</td>
+                                        <td style="color: red ">{{ oper or 'DOWN' }}</td>
                                     {% else %}
                                         <td style="color: green;">{{ oper }}</td>
                                     {% endif %}
@@ -325,12 +325,13 @@
                                     {% else %}
                                         <td style="color: green;">{{ admin }}</td>
                                     {% endif %}
-        
-                                    {% set pcID = (intf.portChannelId | default('', true)) %}
-                                    {% if not pcID or pcID == "-1.0" %}
+                                    
+                                    {% set pcID_raw = intf.portChannelId | default('', true) %}
+                                    {% set pcID_num = pcID_raw|float if pcID_raw else none %}                   
+                                    {% if pcID_num is none or pcID_num == -1 %}
                                         <td> - </td>
                                     {% else %}
-                                        <td>{{ pcID }}</td>
+                                        <td>{{ pcID_num|int }}</td>
                                     {% endif %}
                                 
                                     <td>{{ intf.portMode | default('-', true) }}</td>
@@ -343,6 +344,18 @@
                                 </tr>
                                 {% endfor %}
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Interface Name</th>
+                                    <th>Operational Status</th>
+                                    <th>Admin Status</th>
+                                    <th>Port Channel ID</th>
+                                    <th>Type</th>
+                                    <th>Allowed VLAN(s)</th>
+                                    <th>Link Speed</th>
+                                    <th>Duplex</th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -353,45 +366,45 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">StackWise Virtual Details</h5>
                             </div>
-                            <table id="datatables-dashboard-modi-projects" class="table table-striped">
+                            <table id="datatables-dashboard-modi-projects" class="table table-striped text-center">
                                 <thead>
                                     <tr>
-                                    <th>Switch Num</th>
-                                    <th>Serial Number</th>
-                                    <th>Product ID</th>
-                                    <th>MAC Address</th>
-                                    <th>Role</th>
-                                    <th>State</th>
-                                    <th>Priority</th>
-                                    <th>Source Port(s)</th>
-                                    <th>Destination Port(s)</th>
-                                    <th>DAD Port</th>
+                                        <th>Switch Num</th>
+                                        <th>Serial Number</th>
+                                        <th>Product ID</th>
+                                        <th>MAC Address</th>
+                                        <th>Role</th>
+                                        <th>State</th>
+                                        <th>Priority</th>
+                                        <th>Source Port(s)</th>
+                                        <th>Destination Port(s)</th>
+                                        <th>DAD Port</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for s in svl_info %}
                                     <tr>
-                                    <td>{{ s.switch_num }}</td>
-                                    <td>{{ s.serial }}</td>
-                                    <td>{{ s.pID }}</td>
-                                    <td>{{ s.mac }}</td>
-                                    <td>{{ s.role }}</td>
-                                    <td>{{ s.state }}</td>
-                                    <td>{{ s.priority }}</td>
-    
-                                    <!-- Show multiple ports neatly -->
-                                    <td>
-                                        {% for sp in s.src_ports %}
-                                        {{ sp }}{% if not loop.last %}<br>{% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    <td>
-                                        {% for dp in s.dest_ports %}
-                                        {{ dp }}{% if not loop.last %}<br>{% endif %}
-                                        {% endfor %}
-                                    </td>
-    
-                                    <td>{{ s.dad }}</td>
+                                        <td>{{ s.switch_num }}</td>
+                                        <td>{{ s.serial }}</td>
+                                        <td>{{ s.pID }}</td>
+                                        <td>{{ s.mac }}</td>
+                                        <td>{{ s.role }}</td>
+                                        <td>{{ s.state }}</td>
+                                        <td>{{ s.priority }}</td>
+        
+                                        <!-- Show multiple ports neatly -->
+                                        <td>
+                                            {% for sp in s.src_ports %}
+                                            {{ sp }}{% if not loop.last %}<br>{% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            {% for dp in s.dest_ports %}
+                                            {{ dp }}{% if not loop.last %}<br>{% endif %}
+                                            {% endfor %}
+                                        </td>
+        
+                                        <td>{{ s.dad }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -400,33 +413,33 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">StackWise Details</h5>
                             </div>
-                            <table id="datatables-dashboard-modi-projects" class="table table-striped">
+                            <table id="datatables-dashboard-modi-projects" class="table table-striped text-center">
                                 <thead>
                                     <tr>
-                                    <th>Switch Num</th>
-                                    <th>Serial Number</th>
-                                    <th>Product ID</th>
-                                    <th>MAC Address</th>
-                                    <th>Role</th>
-                                    <th>State</th>
-                                    <th>Priority</th>
-                                    <th>Port 1 → Switch</th>
-                                    <th>Port 2 → Switch</th>
+                                        <th>Switch Num</th>
+                                        <th>Serial Number</th>
+                                        <th>Product ID</th>
+                                        <th>MAC Address</th>
+                                        <th>Role</th>
+                                        <th>State</th>
+                                        <th>Priority</th>
+                                        <th>Port 1 → Switch</th>
+                                        <th>Port 2 → Switch</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for s in stack_info %}
                                     <tr>
-                                    <td>{{ s.switch_num }}</td>
-                                    <td>{{ s.serial }}</td>
-                                    <td>{{ s.pID }}</td>
-                                    <td>{{ s.mac | capitalize }}</td>
-                                    <td>{{ s.role }}</td>
-                                    <td>{{ s.state }}</td>
-                                    <td>{{ s.priority }}</td>
-                                    <td>{{ s.port1_neighbor_sw }}</td>
-                                    <td>{{ s.port2_neighbor_sw }}</td> 
-                                </tr>
+                                        <td>{{ s.switch_num }}</td>
+                                        <td>{{ s.serial }}</td>
+                                        <td>{{ s.pID }}</td>
+                                        <td>{{ s.mac | capitalize }}</td>
+                                        <td>{{ s.role }}</td>
+                                        <td>{{ s.state }}</td>
+                                        <td>{{ s.priority }}</td>
+                                        <td>{{ s.port1_neighbor_sw }}</td>
+                                        <td>{{ s.port2_neighbor_sw }}</td> 
+                                    </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -539,24 +552,62 @@
     </script>
     
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            $("#datatables-dashboard-modi-projects").DataTable({
-                paging: true,        // enable pagination
-                pageLength: 10,      // show 10 rows per page
-                lengthChange: false,  // allow user to change rows/page via a dropdown (optional)
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            // 1) Add an input to each footer cell
+            $('#datatables-dashboard-modi-projects tfoot th').each(function () {
+                const title = $(this).text().trim();
+                $(this).html(
+                '<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />'
+                );
+            });
+            
+            // 2) Initialize DataTable
+            const table = $("#datatables-dashboard-modi-projects").DataTable({
+                paging: true,
+                pageLength: 10,
+                lengthChange: false,
                 autoWidth: false,
                 ordering: false,
-                bFilter: false,      // keep search disabled (optional)
-                info: true,           // show "Showing X to Y of Z entries"
+            
+                // IMPORTANT: keep searching enabled
+                // searching: true, // (default is true, so this line is optional)
+                dom: 'lrtip',      // hide default global search input, but keep filtering enabled
+            
+                info: true,
                 language: {
-                    emptyTable: "No project data available.",
-                    zeroRecords: "No matching records found.",
-                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                    infoEmpty: "Showing 0 to 0 of 0 entries"
+                emptyTable: "No project data available.",
+                zeroRecords: "No matching records found.",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                infoEmpty: "Showing 0 to 0 of 0 entries"
+                },
+            
+                // 3) Bind footer inputs to column search
+                initComplete: function () {
+                const api = this.api();
+            
+                api.columns().every(function () {
+                    const column = this;
+                    const $input = $('input', column.footer());
+            
+                    // optional: debounce to reduce redraws on each keystroke
+                    let t;
+                    $input.on('keyup change', function () {
+                    clearTimeout(t);
+                    const val = this.value;
+                    t = setTimeout(function () {
+                        if (column.search() !== val) {
+                        // no regex, smart search on
+                        column.search(val, false, true).draw();
+                        }
+                    }, 150);
+                    });
+                });
                 }
             });
         });
     </script>
+    
     
     <!-- Charts -->
     <style>
