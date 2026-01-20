@@ -25,13 +25,12 @@
 									<div class="card-body text-center">
 										<div class="mb-3">
 											<button class="btn btn-secondary ms-2 country-filter" id="clear-filter">All</button>
-											<button class="btn btn-outline-primary country-filter" data-country="Malaysia">MY</button>
-											<button class="btn btn-outline-secondary country-filter" data-country="Thailand">TH</button>
-											<button class="btn btn-outline-success country-filter" data-country="Indonesia">ID</button>
-											<button class="btn btn-outline-danger country-filter" data-country="Hong Kong">HK</button>
-											<button class="btn btn-outline-warning country-filter" data-country="Philippines">PH</button>
-											<button class="btn btn-outline-info country-filter" data-country="Singapore">SG</button>
-											<button class="btn btn-outline-dark country-filter" data-country="Macao">MO</button>
+											<button class="btn btn-outline-primary country-filter" country="Malaysia">MY</button>
+											<button class="btn btn-outline-secondary country-filter" country="Thailand">TH</button>
+											<button class="btn btn-outline-success country-filter" country="Indonesia">ID</button>
+											<button class="btn btn-outline-danger country-filter" country="Hong Kong">HK</button>
+											<button class="btn btn-outline-warning country-filter" country="Philippines">PH</button>
+											<button class="btn btn-outline-info country-filter" country="Singapore">SG</button>
 										</div>
 									</div>
 									<table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
@@ -106,46 +105,56 @@
 		</div>
 	</div>
 
-	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>	
+<script>
+	const params = new URLSearchParams(window.location.search);
+    let siteParam = (params.get('site') || '').trim();
 	
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-		$('#datatables-column-search-text-inputs tfoot th').each(function() {
-			var title = $(this).text();
-			$(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-		});
-	
-		var table = $('#datatables-column-search-text-inputs').DataTable({
-			columnDefs: [
-			{ searchable: true } 
-			]
-		});
-	
-		table.columns().every(function() {
-			var that = this;
-			$('input', this.footer()).on('keyup change clear', function() {
-			if (that.search() !== this.value) {
-				that.search(this.value).draw();
-			}
-			});
-		});
-	
-		// Button filtering on Country column
-		const COUNTRY_COL = 5; 
-		$('.country-filter').on('click', function() {
-			const code = $(this).data('country');
-			table.column(COUNTRY_COL).search('^' + code + '$', true, false).draw();
-		});
-	
-		// Clear all filters
-		$('#clear-filter').on('click', function() {
-			table.columns().search('');
-			$('#datatables-column-search-text-inputs tfoot input').val('');
-			table.search(''); 
-			table.draw();
-		});
-		});
-	</script>
+	if (!siteParam) {
+        const siteraw = (document.getElementById("site")?.textContent || "").trim();
+        siteParam = siteraw;
+        siteParam = (siteParam || '').toString().trim();
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        $('#datatables-column-search-text-inputs tfoot th').each(function() {
+            var title = $(this).text();
+            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+        });
+
+        var table = $('#datatables-column-search-text-inputs').DataTable({
+            columnDefs: [
+                { searchable: true }
+            ]
+        });
+        // Column search functionality
+        table.columns().every(function() {
+            var that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+                if (that.search() !== this.value) {
+                    that.search(this.value).draw();
+                }
+            });
+        });
+        // Button filtering on Country column
+        const COUNTRY_COL = 5; 
+        $('.country-filter').on('click', function() {
+			const ctr = $(this).attr('country');
+            table.column(COUNTRY_COL).search('^' + ctr + '$', true, false).draw();
+        });
+        // Clear all filters
+        $('#clear-filter').on('click', function() {
+            table.columns().search('');
+            $('#datatables-column-search-text-inputs tfoot input').val('');
+            table.search(''); 
+            table.draw();
+        });
+        if (siteParam && siteParam.trim() !== "") {
+            // Assuming site contains the country code like "MY", "SG", etc.
+            table.column(COUNTRY_COL).search('^' + siteParam + '$', true, false).draw();
+        }
+    });
+</script>
+
 	
 	
 </body>

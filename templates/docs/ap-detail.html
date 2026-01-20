@@ -160,6 +160,13 @@
 												<td>{{ iss.category | default('-', true) }}</td>
 											</tr>
 											{% endfor %}
+											{% if not issues %}
+											<td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+										{% endif %}
 										</tbody>
 									</table>
 								</div>

@@ -142,13 +142,43 @@ def device_detail(client_mac):
 @session_check
 def access_points():
     access_points = access_point.get_ap()
+    # for ap in access_points:
+    #     mac = ap.get("additionalInfo").get("macAddress")
+    #     status = access_point.get_reach(mac)
+    #     ap["reachability"] = status
     return render_template("access-points.html", 
                            access_points=access_points)
+
+@app.route('/bad-device/<site>', methods=["POST", "GET"])
+@session_check
+def bad_device(site):
+    devType = ""
+    bad_dev = []
+    if devType == "AP":
+        access_points = access_point.get_ap()
+        for ap in access_points:
+            if ap.get("location") == site:
+                mac = ap.get("additionalInfo").get("macAddress")
+                overallHealth = function.get_reach(mac)
+                if overallHealth < 7:
+                    bad_dev.append(ap)
+        return render_template("access-points.html", 
+                            access_points=bad_dev)
+    elif devType == "Distribution" or devType == "Core" or devType == "Access" :
+        devType = devType.upper()
+        print(devType)
+        devices = switch.get_switches(devType)
+        for dev in devices:
+            mac = dev.get("macAddress")
+            overallHealth = function.get_reach(mac)
+            if overallHealth < 7:
+                bad_dev.append(dev)
+        sw_locations = switch.get_swLocation()
+        return render_template("switches.html", devices=devices, sw_locations=sw_locations)
 
 @app.route('/access_points/<ap_mac>/<site_id>', methods=['POST', 'GET'])
 @session_check
 def ap_detail(ap_mac, site_id):
-
     ap = function.get_device_detail(ap_mac)
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id)
@@ -156,16 +186,9 @@ def ap_detail(ap_mac, site_id):
     issues = access_point.get_Issues(ap.get("nwDeviceId"))
     # print(wlcName)
     # print(wlc_dc)
-
     ap_details = function.get_device(ap.get("nwDeviceId"))
     radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio, issues=issues)
-
-@app.route('/network-devices', methods=['POST', 'GET'])
-@session_check
-def devices():
-    devices = function.get_devices()
-    return render_template("network-devices.html", devices=devices)
 
 @app.route('/', methods=["POST", "GET"])
 def sign_in():
