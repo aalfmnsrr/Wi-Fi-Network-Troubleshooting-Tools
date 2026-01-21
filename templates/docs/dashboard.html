@@ -542,7 +542,14 @@
 		  });
 		
 		  const labels = ["MY", "HK", "ID", "TH", "SG", "PH"];
-		
+		  const siteNameByLabel = {
+				"MY": "Malaysia",
+				"HK": "Hong Kong",
+				"ID": "Indonesia",
+				"TH": "Thailand",
+				"SG": "Singapore",
+				"PH": "Philippines"
+		};
 		  const datasets = [{
 			  label: "Core",        backgroundColor: "#28a745", data: [coreMY, coreHK, coreID, coreTH, coreSG, corePH]
 			}, {
@@ -556,18 +563,15 @@
 			}, {
 			  label: "AP",          backgroundColor: "#343a40", data: [apMY, apHK, apID, apTH, apSG, apPH]
 		  }];
-			const linkMatrix = {
-			0: {
-				0: "{{ url_for('bad_device', site='Malaysia') }}",
-				1: "{{ url_for('bad_device', site='Hong Kong') }}",
-				2: "{{ url_for('bad_device', site='Indonesia') }}",
-				3: "{{ url_for('bad_device', site='Thailand') }}",
-				4: "{{ url_for('bad_device', site='Singapore') }}",
-				5: "{{ url_for('bad_device', site='Philippines') }}"
-			}
-			};
-			function linkFor(datasetIndex, dataIndex) {
-				return linkMatrix[datasetIndex]?.[dataIndex];
+		  const badDeviceUrlTemplate = "{{ url_for('bad_device', site='__SITE__', devType='__TYPE__') }}";
+
+			function buildBadDeviceUrl(siteLabel, devType) {
+			const siteFull = siteNameByLabel[siteLabel];
+			if (!siteFull) return null;
+
+			return badDeviceUrlTemplate
+				.replace('__SITE__', encodeURIComponent(siteFull))
+				.replace('__TYPE__', encodeURIComponent(devType));
 			}
 		  const ctx = document.getElementById("chartjs-bar").getContext("2d");
 		  const barChart = new Chart(ctx, {
@@ -582,27 +586,32 @@
 				xAxes: [{ stacked: false, gridLines: { color: "transparent" } }]
 			  },
 			  // 2) Make bars clickable
-			  onClick: function(evt, activeElements) {
-				const el = activeElements && activeElements[0];
-				if (!el) return;
-		
-				const datasetIndex = el._datasetIndex;
-				const dataIndex = el._index;
-		
-				const url = linkFor(datasetIndex, dataIndex);
-				if (url) {
-				  // Navigate in same tab:
-				  window.location.href = url;
-				  // Or open new tab:
-				  // window.open(url, '_blank', 'noopener');
+			  
+				
+			onClick: function (evt) {
+			const points = this.getElementAtEvent(evt);
+			if (!points || !points.length) return;
+
+			const el = points[0];                 // the actual bar under the mouse
+			const datasetIndex = el._datasetIndex; // v2 internal index of dataset
+			const dataIndex    = el._index;        // v2 internal index within dataset
+
+			const siteLabel = this.data.labels[dataIndex];
+			const devType   = this.data.datasets[datasetIndex].label;
+
+			// window.alert(devType);
+
+			const url = buildBadDeviceUrl(siteLabel, devType);
+			if (url) window.location.href = url;
+			},
+
+				hover: {
+				onHover: function (evt) {
+					const points = this.getElementAtEvent(evt);
+					evt.target.style.cursor = points.length ? 'pointer' : 'default';
 				}
-			  },
-			  hover: {
-				onHover: function(evt) {
-				  const points = this.getElementAtEvent(evt);
-				  evt.target.style.cursor = points.length ? "pointer" : "default";
 				}
-			  }
+
 			}
 		  });
 		});
