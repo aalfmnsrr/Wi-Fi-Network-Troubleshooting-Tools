@@ -120,3 +120,14 @@ def get_devices(): # network devices
     response = requests.get(url_inventory, headers=header, verify=False)
     devices = response.json().get("response", [])
     return devices
+
+def get_reach(mac):
+    get_token()
+    header = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Auth-Token': Config.token
+    }
+    url = f"{Config.dnac}/intent/api/v1/device-detail?identifier=macAddress&searchBy={mac}"
+    response = requests.get(url, headers=header, verify=False).json().get("response").get("overallHealth")
+    return response

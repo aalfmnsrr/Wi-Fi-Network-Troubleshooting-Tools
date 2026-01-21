@@ -35,7 +35,7 @@ def get_ap():
                 r["location"] = "Malaysia"
             elif r['label'].startswith("ID"):
                 r["location"] = "Indonesia"
-            elif r['label'].startswith("HK"):
+            elif r['label'].startswith("HK") or r['label'].startswith("MO"):
                 r["location"] = "Hong Kong"
             elif r['label'].startswith("TH"):
                 r["location"] = "Thailand"
@@ -43,16 +43,6 @@ def get_ap():
                 r["location"] = "Philippines"
             elif r['label'].startswith("SG"):
                 r["location"] = "Singapore"
-            elif r['label'].startswith("MO"):
-                r["location"] = "Macao"
-    # print(len(access_points))
-    ind = 0
-    while ind < len(access_points) - 1:
-        current_ap = access_points[ind]
-        next_ap = access_points[ind+1]
-        if current_ap == next_ap:
-            access_points.remove(next_ap)
-        ind += 1
     return access_points
 
 def get_Issues(device_id):
