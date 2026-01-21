@@ -508,156 +508,116 @@
 			chart.render();
 		});
 	</script>
+	
+
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
-			const el = document.getElementById('site-health');
-			const jsonText = el.textContent || el.innerText;
-			let siteHealth = [];
-			let coreMY, coreSG, coreHK, corePH, coreTH, coreID = 0
-			let accessMY, accessSG, accessHK, accessPH, accessTH, accessID = 0
-			let distMY, distSG, distHK, distPH, distTH, distID = 0
-			let routerMY, routerSG, routerHK, routerPH, routerTH, routerID = 0
-			let wlcMY, wlcSG, wlcHK, wlcPH, wlcTH, wlcID = 0
-			let apMY, apSG, apHK, apPH, apTH, apID = 0
-			siteHealth = JSON.parse(jsonText);
-			siteHealth.forEach(item => {
+		  const el = document.getElementById('site-health');
+		  const jsonText = el.textContent || el.innerText;
+		  let siteHealth = JSON.parse(jsonText);
+		
+		  // Initialize defaults to 0 so undefined doesn't show as NaN
+		  let coreMY=0, coreSG=0, coreHK=0, corePH=0, coreTH=0, coreID=0;
+		  let accessMY=0, accessSG=0, accessHK=0, accessPH=0, accessTH=0, accessID=0;
+		  let distMY=0, distSG=0, distHK=0, distPH=0, distTH=0, distID=0;
+		  let routerMY=0, routerSG=0, routerHK=0, routerPH=0, routerTH=0, routerID=0;
+		  let wlcMY=0, wlcSG=0, wlcHK=0, wlcPH=0, wlcTH=0, wlcID=0;
+		  let apMY=0, apSG=0, apHK=0, apPH=0, apTH=0, apID=0;
+		
+		  siteHealth.forEach(item => {
 			const site = item.site;
-			const core = item.coreTotalCount - item.coreGoodCount; 
-			const access = item.accessTotalCount - item.accessGoodCount; 
-			const dist = item.distributionTotalCount - item.distributionGoodCount; 
-			const router = item.routerTotalCount - item.routerGoodCount; 
-			const wlc = item.wlcDeviceTotalCount - item.wlcDeviceGoodCount; 
-			const ap = item.apDeviceTotalCount - item.apDeviceGoodCount; 
-			if(site == "MY"){
-				coreMY = core
-				accessMY = access
-				distMY = dist
-				routerMY = router
-				wlcMY = wlc
-				apMY = ap
-			} else if (site == "SG"){
-				coreSG = core
-				accessSG = access
-				distSG = dist
-				routerSG = router
-				wlcSG = wlc
-				apSG = ap
-			} else if (site == "HK"){
-				coreHK = core
-				accessHK = access
-				distHK = dist
-				routerHK = router
-				wlcHK = wlc
-				apHK = ap
-			} else if (site == "PH"){
-				corePH = core
-				accessPH = access
-				distPH = dist
-				routerPH = router
-				wlcPH = wlc
-				apPH = ap
-			} else if (site == "TH"){
-				coreTH = core
-				accessTH = access
-				distTH = dist
-				routerTH = router
-				wlcTH = wlc
-				apTH = ap
-			} else if (site == "ID"){
-				coreID = core
-				accessID = access
-				distID = dist
-				routerID = router
-				wlcID = wlc
-				apID = ap
-			}})
-			// Bar chart
-			new Chart(document.getElementById("chartjs-bar"), {
-				type: "bar",
-				data: {
-					labels: ["MY", "HK", "ID", "TH", "SG", "PH"],
-					datasets: [{
-						label: "Core",
-						backgroundColor: "#28a745",
-						borderColor: "#28a745",
-						hoverBackgroundColor: "#28a745",
-						hoverBorderColor: "#28a745",
-						data: [coreMY, coreHK, coreID, coreTH, coreSG, corePH],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}, {
-						label: "Access",
-						backgroundColor: "#fd7e14",
-						borderColor: "#fd7e14",
-						hoverBackgroundColor: "#fd7e14",
-						hoverBorderColor: "#fd7e14",
-						data: [accessMY, accessHK, accessID, accessTH, accessSG, accessPH],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}, {
-						label: "Distribution",
-						backgroundColor: "#dc3545",
-						borderColor: "#dc3545",
-						hoverBackgroundColor: "#dc3545",
-						hoverBorderColor: "#dc3545",
-						data: [distMY, distHK, distID, distTH, distSG, distPH],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}, {
-						label: "Router",
-						backgroundColor: "#dc3545",
-						borderColor: "#dc3545",
-						hoverBackgroundColor: "#dc3545",
-						hoverBorderColor: "#dc3545",
-						data: [routerMY, routerHK, routerID, routerTH, routerSG, routerPH],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}, {
-						label: "WLC",
-						backgroundColor: "#dc3545",
-						borderColor: "#dc3545",
-						hoverBackgroundColor: "#dc3545",
-						hoverBorderColor: "#dc3545",
-						data: [wlcMY, wlcHK, wlcID, wlcTH, wlcSG, wlcPH],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}, {
-						label: "AP",
-						backgroundColor: "#dc3545",
-						borderColor: "#dc3545",
-						hoverBackgroundColor: "#dc3545",
-						hoverBorderColor: "#dc3545",
-						data: [apMY, apHK, apID, apTH, apSG, apPH],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}]
-				},
-				options: {
-					maintainAspectRatio: false,
-					legend: {
-						display: false
-					},
-					scales: {
-						yAxes: [{
-							gridLines: {
-								display: false
-							},
-							stacked: false,
-							ticks: {
-								stepSize: 20
-							}
-						}],
-						xAxes: [{
-							stacked: false,
-							gridLines: {
-								color: "transparent"
-							}
-						}]
-					}
+			const core   = item.coreTotalCount - item.coreGoodCount;
+			const access = item.accessTotalCount - item.accessGoodCount;
+			const dist   = item.distributionTotalCount - item.distributionGoodCount;
+			const router = item.routerTotalCount - item.routerGoodCount;
+			const wlc    = item.wlcDeviceTotalCount - item.wlcDeviceGoodCount;
+			const ap     = item.apDeviceTotalCount - item.apDeviceGoodCount;
+		
+			if (site === "MY") { coreMY=core; accessMY=access; distMY=dist; routerMY=router; wlcMY=wlc; apMY=ap; }
+			else if (site === "SG") { coreSG=core; accessSG=access; distSG=dist; routerSG=router; wlcSG=wlc; apSG=ap; }
+			else if (site === "HK") { coreHK=core; accessHK=access; distHK=dist; routerHK=router; wlcHK=wlc; apHK=ap; }
+			else if (site === "PH") { corePH=core; accessPH=access; distPH=dist; routerPH=router; wlcPH=wlc; apPH=ap; }
+			else if (site === "TH") { coreTH=core; accessTH=access; distTH=dist; routerTH=router; wlcTH=wlc; apTH=ap; }
+			else if (site === "ID") { coreID=core; accessID=access; distID=dist; routerID=router; wlcID=wlc; apID=ap; }
+		  });
+		
+		  const labels = ["MY", "HK", "ID", "TH", "SG", "PH"];
+		  const siteNameByLabel = {
+				"MY": "Malaysia",
+				"HK": "Hong Kong",
+				"ID": "Indonesia",
+				"TH": "Thailand",
+				"SG": "Singapore",
+				"PH": "Philippines"
+		};
+		  const datasets = [{
+			  label: "Core",        backgroundColor: "#28a745", data: [coreMY, coreHK, coreID, coreTH, coreSG, corePH]
+			}, {
+			  label: "Access",      backgroundColor: "#fd7e14", data: [accessMY, accessHK, accessID, accessTH, accessSG, accessPH]
+			}, {
+			  label: "Distribution",backgroundColor: "#dc3545", data: [distMY, distHK, distID, distTH, distSG, distPH]
+			}, {
+			  label: "Router",      backgroundColor: "#17a2b8", data: [routerMY, routerHK, routerID, routerTH, routerSG, routerPH]
+			}, {
+			  label: "WLC",         backgroundColor: "#6f42c1", data: [wlcMY, wlcHK, wlcID, wlcTH, wlcSG, wlcPH]
+			}, {
+			  label: "AP",          backgroundColor: "#343a40", data: [apMY, apHK, apID, apTH, apSG, apPH]
+		  }];
+		  const badDeviceUrlTemplate = "{{ url_for('bad_device', site='__SITE__', devType='__TYPE__') }}";
+
+			function buildBadDeviceUrl(siteLabel, devType) {
+			const siteFull = siteNameByLabel[siteLabel];
+			if (!siteFull) return null;
+
+			return badDeviceUrlTemplate
+				.replace('__SITE__', encodeURIComponent(siteFull))
+				.replace('__TYPE__', encodeURIComponent(devType));
+			}
+		  const ctx = document.getElementById("chartjs-bar").getContext("2d");
+		  const barChart = new Chart(ctx, {
+			type: "bar",
+			data: { labels, datasets },
+			options: {
+			  maintainAspectRatio: false,
+			  legend: { display: true },
+			  tooltips: { intersect: true, mode: "nearest" },
+			  scales: {
+				yAxes: [{ gridLines: { display: false }, stacked: false, ticks: { stepSize: 20 } }],
+				xAxes: [{ stacked: false, gridLines: { color: "transparent" } }]
+			  },
+			  // 2) Make bars clickable
+			  
+				
+			onClick: function (evt) {
+			const points = this.getElementAtEvent(evt);
+			if (!points || !points.length) return;
+
+			const el = points[0];                 // the actual bar under the mouse
+			const datasetIndex = el._datasetIndex; // v2 internal index of dataset
+			const dataIndex    = el._index;        // v2 internal index within dataset
+
+			const siteLabel = this.data.labels[dataIndex];
+			const devType   = this.data.datasets[datasetIndex].label;
+
+			// window.alert(devType);
+
+			const url = buildBadDeviceUrl(siteLabel, devType);
+			if (url) window.location.href = url;
+			},
+
+				hover: {
+				onHover: function (evt) {
+					const points = this.getElementAtEvent(evt);
+					evt.target.style.cursor = points.length ? 'pointer' : 'default';
 				}
-			});
+				}
+
+			}
+		  });
 		});
-	</script>
+		</script>
+		
+	
 </body>
 
 </html>

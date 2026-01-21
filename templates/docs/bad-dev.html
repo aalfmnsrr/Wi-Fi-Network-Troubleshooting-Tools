@@ -3,7 +3,7 @@
 			<main class="content">
 				<div class="container-fluid p-0">
 
-					<h1 class="h3 mb-3">Access Points</h1>
+					<h1 class="h3 mb-3">Fair/Bad {{ family }}</h1>
 <!-- 
 					<div class="alert alert-warning alert-dismissible" role="alert">
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
@@ -22,7 +22,7 @@
 										 target="_blank" rel="noopener noreferrer nofollow">here</a>.</h6>
 								</div> -->
 								<div class="card-body">
-									<div class="card-body text-center">
+									<!-- <div class="card-body text-center">
 										<div class="mb-3">
 											<button class="btn btn-secondary ms-2 country-filter" id="clear-filter">All</button>
 											<button class="btn btn-outline-primary country-filter" country="Malaysia">MY</button>
@@ -32,40 +32,132 @@
 											<button class="btn btn-outline-warning country-filter" country="Philippines">PH</button>
 											<button class="btn btn-outline-info country-filter" country="Singapore">SG</button>
 										</div>
-									</div>
+									</div> -->
 									<table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
-										<thead>
+										{% if family == "AP" %}
+											<thead>
+												<tr>
+													<th>Hostname</th>
+													<th>Health Score</th>
+													<th>IP Address</th>
+													<th>MAC Address</th>
+													<th>Software Version</th>
+													<th>Device Type</th>
+													<th>Location</th>
+												</tr>
+											</thead>
+											<tbody>
+											{% for ap in access_points %}
 											<tr>
-												<th>Hostname</th>
-												<th>IP Address</th>
-												<th>MAC Address</th>
-												<th>Software Version</th>
-												<th>Device Type</th>
-												<th>Location</th>
+												<td><a href="{{ url_for('ap_detail', ap_mac=ap.macAddress, site_id=ap.additionalInfo.siteid) }}">{{ ap.label }}</a></td>
+												{% if 4 > ap.health %}
+													<td style="color: red">{{ ap.health }}</td>
+												{% else %}
+													<td style="color: orange">{{ ap.health }}</td>
+												{% endif %}
+												<td>{{ ap.ip }}</td>
+												<td>{{ ap.additionalInfo.macAddress | upper }}</td>
+												<td>{{ ap.softwareVersion }}</td>
+												<td>{{ ap.deviceType }}</td>
+												<td>{{ ap.location }}</td>
 											</tr>
-										</thead>
-										<tbody>
-										{% for ap in access_points %}
-										<tr>
-											<td><a href="{{ url_for('ap_detail', ap_mac=ap.additionalInfo.macAddress, site_id=ap.additionalInfo.siteid) }}">{{ ap.label }}</a></td>
-											<td>{{ ap.ip }}</td>
-											<td>{{ ap.additionalInfo.macAddress | upper }}</td>
-											<td>{{ ap.softwareVersion }}</td>
-											<td>{{ ap.deviceType }}</td>
-											<td>{{ ap.location }}</td>
-										</tr>
-										{% endfor %}
-										</tbody>
-										<tfoot>
+											{% endfor %}
+											</tbody>
+											<tfoot>
+												<tr>
+													<th>Hostname</th>
+													<th>Health Score</th>
+													<th>IP Address</th>
+													<th>MAC Address</th>
+													<th>Software Version</th>
+													<th>Device Type</th>
+													<th>Location</th>
+												</tr>
+											</tfoot>
+										{% elif family == "Switches" %}
+											<thead>
+												<tr>
+													<th>Hostname</th>
+													<th>Health Score</th>
+													<th>Role</th>
+													<th>IP Address</th>
+													<th>MAC Addresss</th>
+													<th>Software Version</th>
+													<th>Device Type</th>
+													<th>Location</th>
+												</tr>
+											</thead>
+											<tbody>
+											{% for device in devices %}
 											<tr>
-												<th>Hostname</th>
-												<th>IP Address</th>
-												<th>MAC Address</th>
-												<th>Software Version</th>
-												<th>Device Type</th>
-												<th>Location</th>
+												<td><a href = "/switches/{{device.id}}">{{ device.hostname }}</a></td>
+												{% if 4 > device.health %}
+													<td style="color: red">{{ device.health }}</td>
+												{% else %}
+													<td style="color: orange">{{ device.health }}</td>
+												{% endif %}
+												<td>{{ device.role }}</td>
+												<td>{{ device.managementIpAddress }}</td>
+												<td>{{ device.macAddress }}</td>
+												<td>{{ device.softwareVersion }}</td>
+												<td>{{ device.type }}</td>
+												<td>{{ device.location }}</td>
 											</tr>
-										</tfoot>
+											{% endfor %}
+											</tbody>
+											<tfoot>
+												<tr>
+													<th>Hostname</th>
+													<th>Health Score</th>
+													<th>Role</th>
+													<th>IP Address</th>
+													<th>MAC Addresss</th>
+													<th>Software Version</th>
+													<th>Device Type</th>
+													<th>Location</th>
+												</tr>
+											</tfoot>
+										{% elif family == "WLC" %}
+											<thead>
+												<tr>
+													<th>Hostname</th>
+													<th>Health Score</th>
+													<th>Location</th>
+													<th>IP Address</th>
+													<th>MAC Address</th>
+													<th>Software Version</th>
+													<th>Device Type</th>
+												</tr>
+											</thead>
+											<tbody>
+											{% for w in wlc %}
+											<tr>
+												<td><a href = "{{url_for('wlc_details', id = w.id) }} " target="_blank">{{ w.hostname }}</a></td>
+												{% if 4 > w.health %}
+													<td style="color: red">{{ w.health }}</td>
+												{% else %}
+													<td style="color: orange">{{ w.health }}</td>
+												{% endif %}
+												<td>{{ w.dc }}</td>
+												<td>{{ w.managementIpAddress }}</td>
+												<td>{{ w.macAddress }}</td>
+												<td>{{ w.softwareVersion }}</td>
+												<td>{{ w.type }}</td>
+											</tr>
+											{% endfor %}
+											</tbody>
+											<tfoot>
+												<tr>
+													<th>Hostname</th>
+													<th>Health Score</th>
+													<th>Location</th>
+													<th>IP Address</th>
+													<th>MAC Address</th>
+													<th>Software Version</th>
+													<th>Device Type</th>
+												</tr>
+											</tfoot>
+										{% endif %}
 									</table>
 								</div>
 							</div>

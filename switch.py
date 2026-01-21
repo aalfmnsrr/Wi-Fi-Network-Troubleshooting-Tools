@@ -15,6 +15,7 @@ def get_switches(role = None): # get switch by role
     params = {}
     if role:
         params['role'] = role
+        print(role)
 
     response = requests.get(url_inventory, headers = header, params = params, verify=False)
     devices = []
