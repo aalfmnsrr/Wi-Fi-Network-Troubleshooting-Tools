@@ -78,11 +78,11 @@
                                     </h3>
                                     <p class="mb-2">CPU Utilization</p>
                                     {% set cpu_val = wlc.cpuHealth|default('0')|replace('%','')|float %}
-                                    {% if cpu_val > 90 %}
+                                    <!-- {% if cpu_val > 90 %}
                                         <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
                                     {% else %}
                                         <i class="align-middle text-success" data-feather="thumbs-up"></i>
-                                    {% endif %}
+                                    {% endif %} -->
                                 </div>
                                 <div class="d-inline-block ms-3">
                                     <div class="stat">
@@ -233,13 +233,13 @@
                                     <td class="d-none d-xl-table-cell">{{ wlc.platformId }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="d-none d-xl-table-cell">Role:</td>
+                                    <td class="d-none d-xl-table-cell">Role</td>
                                     <td class="d-none d-xl-table-cell"> {{ wlc.deviceRole }}</td>
                                 </tr>
-                                <tr>
+                                <!-- <tr>
                                     <td class="d-none d-xl-table-cell">Last Update</td>
                                     <td class="d-none d-xl-table-cell">{{ wlc.lastUpdated  }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr>
                                     <td class="d-none d-xl-table-cell">Location</td>
                                     <td class="d-none d-xl-table-cell">{{  health.location  }}</td>
@@ -263,8 +263,8 @@
                                 <tr>
                                     <th  class="d-none d-xl-table-cell">ID</th>
                                     <th  class="d-none d-xl-table-cell">Interface Name</th>
+                                    <!-- <th  class="d-none d-xl-table-cell">Operational Status</th> -->
                                     <th  class="d-none d-xl-table-cell">IP Address</th>
-                                    <th  class="d-none d-xl-table-cell">Operational Status</th>
                                     <th  class="d-none d-xl-table-cell">Admin Status</th>
                                     <th  class="d-none d-xl-table-cell">MAC Address</th>
                                     <th  class="d-none d-xl-table-cell">Duplex</th>
@@ -281,12 +281,12 @@
                                     <td  class="d-none d-xl-table-cell">{{ i.ifIndex }}</td>
                                     <td  class="d-none d-xl-table-cell">{{ i.portName | default('-', true) }}</td>
         
-                                    {% set oper = (i.status | default('', true)) %}
+                                    <!-- {% set oper = (i.status | default('', true)) %}
                                     {% if not oper or oper == 'DOWN' %}
                                         <td style="color: red;"  class="d-none d-xl-table-cell">{{ oper or 'DOWN' }}</td>
                                     {% else %}
                                         <td style="color: green;"  class="d-none d-xl-table-cell">{{ oper }}</td>
-                                    {% endif %}
+                                    {% endif %} -->
 
                                     <td  class="d-none d-xl-table-cell">
                                         {% if i.addresses is defined and i.addresses and i.addresses|length > 0 %}
