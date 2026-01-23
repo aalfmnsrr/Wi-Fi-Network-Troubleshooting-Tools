@@ -2,13 +2,20 @@
 {% block body %}
     <main class="content">
         <div class="container-fluid p-0">
-
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-message">
+                    <p class="mb-0">
+                        <strong>Important!</strong> All data is fetched daily at 00:00am. Click <b>Fetch Data</b> button to retrieve the latest data.</a>
+                    </p>
+                </div>
+            </div>
             <div class="row mb-2 mb-xl-3">
                 <div class="col-auto d-none d-sm-block">
                     <h3 class ="mb-0">
                     WLC Health -
-                    <nobr style="color:#3266bb;">{{ wlc.name }}</nobr>
-                    {% if wlc.communicationState == "REACHABLE" %}
+                    <nobr style="color:#3266bb;">{{ wlc.hostname }}</nobr>
+                    {% if wlc.details.communicationState == "REACHABLE" %}
                         <span class="badge bg-success ms-2 align-middle">Reachable</span>
                     {% else %}
                         <span class="badge bg-danger ms-2 align-middle">Unreachable</span>
@@ -36,9 +43,22 @@
                                             <button class="btn btn-primary shadow-sm">
                     <i class="align-middle" data-feather="filter">&nbsp;</i>
                     </button>
-                    <button class="btn btn-primary shadow-sm" onclick="location.reload()">
-                        <i class="align-middle" data-feather="refresh-cw" >&nbsp;</i>
+                    <button class="btn btn-primary shadow-sm" onclick="refreshWLC()">
+                        <p class="align-middle mb-0">Fetch Data</p>
                     </button>
+                    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" aria-labelledby="loadingModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-body d-flex align-items-center">
+                            <div class="spinner-border text-dark me-3" role="status" aria-hidden="true"></div>
+                            <div>
+                                <div id="loadingModalLabel" class="fw-semibold text-center">Fetching data…</div>
+                                <small class="text-muted text-center">This may take a moment.</small>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">  
@@ -47,9 +67,9 @@
                         <div class="card-body py-4">
                             <div class="d-flex align-items-start">
                                 <div class="flex-grow-1">
-                                    <h3 class="mb-2">{{ wlc.metricsDetails.overallHealthScore }}</h3>
+                                    <h3 class="mb-2">{{ wlc.details.overallHealth }}</h3>
                                     <p class="mb-2">Overall Health</p>
-                                    {% if 5 > wlc.metricsDetails.overallHealthScore %}
+                                    {% if 5 > wlc.details.overallHealth %}
                                         <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
                                     {% else %}
                                         <i class="align-middle text-success" data-feather="thumbs-up"></i>
@@ -127,7 +147,7 @@
                         <div class="card-body py-4">
                             <div class="d-flex align-items-start">
                                 <div class="flex-grow-1">
-                                    {% set parts = d.upTime.split(',') %}
+                                    {% set parts = d.split(',') %}
                                         <h3 class="mb-2">{{ parts[0] }}</h3>
                                     <p class="mb-2">Uptime</p>
                                     <div class="mb-0">
@@ -206,7 +226,7 @@
                             <tbody>
                                 <tr>
                                     <td class="d-none d-xl-table-cell">Name</td>
-                                    <td class="d-none d-xl-table-cell">{{ wlc.name }}</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.hostname }}</td>
                                 </tr>
                                 <tr>
                                     <td class="d-none d-xl-table-cell">IP Address</td>
@@ -218,7 +238,7 @@
                                 </tr>
                                 <tr>
                                     <td class="d-none d-xl-table-cell">Series</td>
-                                    <td class="d-none d-xl-table-cell">{{ wlc.deviceSeries}}</td>
+                                    <td class="d-none d-xl-table-cell">{{ wlc.series}}</td>
                                 </tr>
                                 <tr>
                                     <td class="d-none d-xl-table-cell">Software Version</td>
@@ -229,12 +249,12 @@
                                     <td class="d-none d-xl-table-cell">{{ wlc.serialNumber}}</td>
                                 </tr>
                                 <tr>
-                                    <td class="d-none d-xl-table-cell">Platform ID:</td>
+                                    <td class="d-none d-xl-table-cell">Platform ID</td>
                                     <td class="d-none d-xl-table-cell">{{ wlc.platformId }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="d-none d-xl-table-cell">Role:</td>
-                                    <td class="d-none d-xl-table-cell"> {{ wlc.deviceRole }}</td>
+                                    <td class="d-none d-xl-table-cell">Role</td>
+                                    <td class="d-none d-xl-table-cell"> {{ wlc.details.nwDeviceRole | capitalize }}</td>
                                 </tr>
                                 <tr>
                                     <td class="d-none d-xl-table-cell">Last Update</td>
@@ -307,14 +327,14 @@
                                         <td style="color: green;"  class="d-none d-xl-table-cell">{{ admin }}</td>
                                     {% endif %}
         
-                                    <td  class="d-none d-xl-table-cell">{{i.macAddress}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.macAddress | default('-', true) | upper }}</td>
 
-                                    <td  class="d-none d-xl-table-cell">{{i.duplex}}</td>
-                                    <td  class="d-none d-xl-table-cell">{{i.mtu}}</td>
-                                    <td  class="d-none d-xl-table-cell">{{i.portMode}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.duplex | default('-', true) }}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.mtu | default('-', true) }}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.portMode | default('-', true) }}</td>
                                     <td  class="d-none d-xl-table-cell">{{ i.formattedSpeed | default('-', true) }}</td>
-                                    <td  class="d-none d-xl-table-cell">{{i.portType}}</td>
-                                    <td  class="d-none d-xl-table-cell">{{i.description}}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.portType | default('-', true) }}</td>
+                                    <td  class="d-none d-xl-table-cell">{{i.description | default('-', true) }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -340,12 +360,12 @@
                             <tbody>
                                 {% for p in physical %}
                                 <tr>
-                                    <td class="d-none d-xl-table-cell"><strong>{{p.name}}</strong></td>
-                                    <td class="d-none d-xl-table-cell">{{p.serialNumber}}</td>
-                                    <td class="d-none d-xl-table-cell ">{{p.operationalStateCode}}</td>
-                                    <td class="d-none d-xl-table-cell ">{{p.productId}}</td>
-                                    <td class="d-none d-xl-table-cell ">{{p.vendorEquipmentType}}</td>
-                                    <td class="d-none d-xl-table-cell ">{{p.description}}</td>
+                                    <td class="d-none d-xl-table-cell"><strong>{{p.name | default('-', true) }}</strong></td>
+                                    <td class="d-none d-xl-table-cell">{{p.serialNumber  | default('-', true) }}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.operationalStateCode | default('-', true) }}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.productId | default('-', true) }}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.vendorEquipmentType | default('-', true) }}</td>
+                                    <td class="d-none d-xl-table-cell ">{{p.description | default('-', true) }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -391,7 +411,7 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Associate APs</h5>
 
-                                {% if wlc.name.startswith('APDC') %}
+                                {% if wlc.hostname.startswith('APDC') %}
                                                 
                                 <div class="row justify-content-center mt-3 mb-2">
                                     <div class="col-auto" id="office-filter-nav">
@@ -642,6 +662,44 @@
         });
     });
 </script>
+<script id="wlc-id" type="application/json">
+    {{ id | tojson }}
+</script>
+
+<script>
+    const idraw = (document.getElementById("wlc-id")?.textContent || "").trim();
+    const id_data = idraw ? JSON.parse(idraw) : null;
+
+    const baseUrl = "{{ url_for('refresh_wlc') }}";
+    const url = `${baseUrl}?id=${encodeURIComponent(id_data)}`;
+    function showLoading() {
+        const modalEl = document.getElementById('loadingModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: 'static', keyboard: false });
+        modal.show();
+    }
+
+    function hideLoading() {
+        const modalEl = document.getElementById('loadingModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.hide();
+    }
+
+    function refreshWLC() {
+        showLoading();   // show spinner + message
+
+        fetch(url, { method: "GET" })
+            .then(res => res.json())
+            .then(data => {
+                console.log("WLC refreshed:", data);
+                location.reload();  // reload after backend finishes
+            })
+            .catch(err => {
+                console.error(err);
+                hideLoading();  // ensure modal hides if there's an error
+            });
+    }
+</script>
+
 
     
     

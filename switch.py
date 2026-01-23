@@ -2,9 +2,11 @@
 import requests, function, access_point, re
 from config import Config
 from collections import defaultdict
+from os import makedirs, replace
+import json
 
-# Retrieving switches based on their role
-def get_switches(role = None): # get switch by role
+def refresh(id):
+    sw = None
     function.get_token()
     header = {
             'Content-Type': 'application/json',
@@ -12,15 +14,74 @@ def get_switches(role = None): # get switch by role
             'X-Auth-Token': Config.token
         }
     url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Switches and Hubs"
-    params = {}
-    if role:
-        params['role'] = role
-        print(role)
-
-    response = requests.get(url_inventory, headers = header, params = params, verify=False)
-    devices = []
+    response = requests.get(url_inventory, headers = header, verify=False)
     devices = response.json().get("response", [])
-    return devices
+    for d in devices:
+        if d.get('id') == id:
+            d["details"] = function.get_device_detail(d.get("macAddress"))
+            d["AP"] = get_ap_neighbors(d.get("id"))
+            d["vlans"] = get_vlan(d.get("id"))
+            stack_json = get_stack_info(d.get("id"))
+            d["stack_json"] = stack_json
+            d["stack_info"] = dict_stack_summary(stack_json)
+            d["svl_info"] = dict_svl_summary(stack_json)
+            d["interface"] = get_interface(d.get("id"))
+            d["poe"] = get_poe(d.get("id"))
+            sw = d
+            break
+    return sw
+
+# Retrieving switches based on their role
+def get_switches(): # get switch by role
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Switches and Hubs"
+    response = requests.get(url_inventory, headers = header, verify=False)
+    devices = response.json().get("response", [])
+    for d in devices:
+        d["details"] = function.get_device_detail(d.get("macAddress"))
+        d["AP"] = get_ap_neighbors(d.get("id"))
+        d["vlans"] = get_vlan(d.get("id"))
+        stack_json = get_stack_info(d.get("id"))
+        d["stack_json"] = stack_json
+        d["stack_info"] = dict_stack_summary(stack_json)
+        d["svl_info"] = dict_svl_summary(stack_json)
+        d["interface"] = get_interface(d.get("id"))
+        d["poe"] = get_poe(d.get("id"))
+    makedirs(Config.inventory_path + "/Switches", exist_ok=True)
+    with open(Config.switch_path, "w", encoding="utf-8") as f:
+        json.dump(devices, f, indent=4, ensure_ascii=False, default=str)
+
+def get_sw_by_role(role):
+    switches = []
+    switch_json = None
+    with open(Config.switch_path, 'r', encoding="utf-8") as f:
+        switch_json = json.load(f)
+    for sw in switch_json:
+        if sw.get("role") == role.upper():
+            switches.append(sw)
+    return switches
+
+def fetch_sw(id):
+    sw_json = None
+    ind = None
+    new_data = None
+    with open(Config.switch_path, 'r', encoding="utf-8") as f:
+        sw_json = json.load(f)
+    for i, sw in enumerate(sw_json):
+        if sw.get("id") == id:
+            ind = i
+            new_data = refresh(sw.get("id"))
+            break
+    sw_json[ind] = new_data
+    temp = Config.switch_path + ".tmp"
+    with open(temp, 'w', encoding="utf-8") as f:
+        json.dump(sw_json, f, ensure_ascii=False, indent=2)
+    replace(temp, Config.switch_path)
 
 # Retrieving location of the switches
 def _extract_clean_location(raw: str) -> str | None:
@@ -48,27 +109,14 @@ def _extract_clean_location(raw: str) -> str | None:
 
     return loc or None
 
-def get_swLocation():
-    function.get_token()
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Auth-Token': Config.token
-    }
-    url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Switches and Hubs"
-
-    resp = requests.get(url_inventory, headers=headers, verify=False)
-    resp.raise_for_status()
-    response_list = resp.json().get("response", [])
-
+def get_swLocation(devices):
     sw_location = {}
-    for dev in response_list:
+    for dev in devices:
         dev_id = dev.get('id')
         raw = dev.get('snmpLocation')
         clean = _extract_clean_location(raw)
         if dev_id:
             sw_location[dev_id] = clean
-
     return sw_location
 
 # Retrieving AP that connected to the switch
@@ -195,7 +243,6 @@ def get_vlan(device_id):
         }
     
     url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/vlan"
-
     vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return vlan
 
@@ -478,8 +525,18 @@ def get_switchIssues(device_id):
         }
     
     url_inventory = f"{Config.dnac}/intent/api/v1/issues?deviceId={device_id}"
-   
+    ind = None
     issues = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    with open(Config.switch_path, 'r', encoding="utf-8") as f:
+        switch_json = json.load(f)
+    for i, s in enumerate(switch_json):
+        if s.get("id") == device_id:
+            ind = i
+    switch_json[ind]["issues"] = issues
+    temp_path = Config.switch_path + ".tmp"
+    with open(temp_path, 'w', encoding="utf-8") as f:
+        json.dump(switch_json, f, ensure_ascii=False, indent=2)
+    replace(temp_path, Config.switch_path)
     return issues
 
 # def get_switch_details(device_id):

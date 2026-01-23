@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from config import Config
 from markupsafe import Markup
 from functools import wraps
@@ -7,7 +7,8 @@ from flask_apscheduler import APScheduler
 import function, access_point, client_function, wlcs, switch, dashboard_page
 import bcrypt
 from datetime import timedelta
-from os import makedirs
+from os.path import exists
+import threading
 
 app = Flask(__name__, template_folder='templates/docs')
 app.secret_key = Config.SECRET_KEY
@@ -21,18 +22,30 @@ app.config["SCHEDULER_TIMEZONE"] = "Asia/Kuala_Lumpur"
 scheduler = APScheduler()
 
 def fetch_dnac_data():
-    ap = access_point.get_ap()
-    wlc = wlcs.get_wlc()
-    sw = switch.get_switches()
-    makedirs(Config.ap_path, exist_ok=True)
-    makedirs(Config.wlc_path, exist_ok=True)
-    makedirs(Config.switch_path, exist_ok=True)
-    with open(f"{Config.ap_path}/ap.json", "w", encoding="utf-8") as f:
-        json.dump(ap, f, indent=4, ensure_ascii=False, default=str)
-    with open(f"{Config.wlc_path}/wlc.json", "w", encoding="utf-8") as f:
-        json.dump(wlc, f, indent=4, ensure_ascii=False, default=str)
-    with open(f"{Config.switch_path}/switches.json", "w", encoding="utf-8") as f:
-        json.dump(sw, f, indent=4, ensure_ascii=False, default=str)
+    t1 = None
+    t2 = None
+    t3 = None
+    t4 = None
+    if not exists(Config.ap_path):
+        t1 = threading.Thread(target=access_point.get_ap)
+        t1.start()
+    if not exists(Config.wlc_path):
+        t2= threading.Thread(target=wlcs.get_wlc)
+        t2.start()
+    if not exists(Config.switch_path):    
+        t3= threading.Thread(target=switch.get_switches)
+        t3.start()
+    if not exists(Config.dashboard_path):
+        t4= threading.Thread(target=dashboard_page.get_dashboard())
+        t4.start()
+    if t1:
+        t1.join()
+    if t2:
+        t2.join()
+    if t3:
+        t3.join()
+    if t4:
+        t4.join()
 
 # run at 12am daily
 @scheduler.task("cron", id="fetch_dnac_data", hour="0", minute="0", misfire_grace_time=900, max_instances=1)
@@ -51,29 +64,57 @@ def session_check(func):
 @app.route('/dashboard', methods=['POST', 'GET'])
 @session_check
 def dashboard():
-    overall = dashboard_page.get_overall()
-    access = dashboard_page.get_access()
-    core = dashboard_page.get_core()
-    distribution = dashboard_page.get_distribution()
-    router = dashboard_page.get_router()
-    with open(f"{Config.wlc_path}/wlc.json", 'r', encoding="utf-8") as f:
-        wlc = json.load(f)
-    ap = dashboard_page.get_AP()
-    site_health = dashboard_page.get_site_health()
-    clients = dashboard_page.get_clients()
-    system = dashboard_page.get_sys_performance()
+    dashboard_json = None
+    with open(Config.dashboard_path, 'r', encoding="utf-8") as f:
+        dashboard_json = json.load(f)
     return render_template("dashboard.html",
-                           overall=overall,
-                           access=access,
-                           core=core,
-                           distribution=distribution,
-                           router=router,
-                           wlc=wlc,
-                           ap=ap,
-                           site_health=site_health,
-                           clients=clients,
-                           system=system
+                           overall=dashboard_json.get("overall"),
+                           access=dashboard_json.get("access"),
+                           core=dashboard_json.get("core"),
+                           distribution=dashboard_json.get("distribution"),
+                           router=dashboard_json.get("router"),
+                           wlc=dashboard_json.get("wlc"),
+                           ap=dashboard_json.get("ap"),
+                           site_health=dashboard_json.get("site_health"),
+                           clients=dashboard_json.get("clients"),
+                           system=dashboard_json.get("system")
                            )
+
+@app.route("/refresh-dashboard", methods=["GET"])
+@session_check
+def refresh_dashboard():
+    dashboard_page.fetch_dashboard()
+    return jsonify({"status": "ok"})
+
+@app.route("/refresh-ap", methods=["GET"])
+@session_check
+def refresh_ap():
+    id = request.args.get("id")
+    if not id:
+        return jsonify({"status": "error", "message": "Missing id"}), 400
+    mac = access_point.fetch_ap(id)
+    ap_detail(mac)
+    return jsonify({"status": "ok"})
+
+@app.route("/refresh-switch", methods=["GET"])
+@session_check
+def refresh_switch():
+    id = request.args.get("id")
+    if not id:
+        return jsonify({"status": "error", "message": "Missing id"}), 400
+    switch.fetch_sw(id)
+    switch_detail(id)
+    return jsonify({"status": "ok"})
+
+@app.route("/refresh-wlc", methods=["GET"])
+@session_check
+def refresh_wlc():
+    id = request.args.get("id")
+    if not id:
+        return jsonify({"status": "error", "message": "Missing id"}), 400
+    wlcs.fetch_wlc(id)
+    wlc_details(id)
+    return jsonify({"status": "ok"})
 
 @app.route('/clients', methods=['POST', 'GET'])
 @session_check
@@ -118,7 +159,7 @@ def device_detail(client_mac):
     neighbor_topology = client_function.get_neighbor_topology(client["hostMac"])["nodes"]
     tx = []
     rx = []
-    with open(f"{Config.ap_path}/ap.json", 'r', encoding="utf-8") as f:
+    with open(Config.ap_path, 'r', encoding="utf-8") as f:
         aps = json.load(f)
     client_links = client_function.get_client_enrichment_detail(client_mac)
 
@@ -155,7 +196,7 @@ def device_detail(client_mac):
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
 def access_points():
-    with open(f"{Config.ap_path}/ap.json", 'r', encoding="utf-8") as f:
+    with open(Config.ap_path, 'r', encoding="utf-8") as f:
         aps = json.load(f)
     return render_template("access-points.html",
                            access_points=aps)
@@ -165,7 +206,7 @@ def access_points():
 def bad_device(site, devType):
     bad_dev = []
     if devType == "AP":
-        with open(f"{Config.ap_path}/ap.json", 'r', encoding="utf-8") as f:
+        with open(Config.ap_path, 'r', encoding="utf-8") as f:
             access_points = json.load(f)
         for ap in access_points:
             if ap.get("location") == site:
@@ -179,10 +220,10 @@ def bad_device(site, devType):
                             access_points=bad_dev,
                             family="AP")
     elif devType == "Distribution" or devType == "Core" or devType == "Access" :
-        devices = switch.get_switches(devType.upper())
+        devices = switch.get_sw_by_role(devType)
+        sw_loc = switch.get_swLocation(devices)
         for dev in devices:
             dev_id = dev.get("id")
-            sw_loc = switch.get_swLocation()
             location = sw_loc.get(dev_id)
             if site == "Hong Kong":
                 site = "Hongkong"
@@ -197,7 +238,7 @@ def bad_device(site, devType):
                                devices=bad_dev,
                                family = "Switches")
     elif devType == "WLC":
-        with open(f"{Config.wlc_path}/wlc.json", 'r', encoding="utf-8") as f:
+        with open(Config.wlc_path, 'r', encoding="utf-8") as f:
             wlc_list = json.load(f)
         for wlc in wlc_list:
             if wlc.get("dc") == site:
@@ -210,19 +251,31 @@ def bad_device(site, devType):
                             wlc=bad_dev,
                             family="WLC")
 
-@app.route('/access_points/<ap_mac>/<site_id>', methods=['POST', 'GET'])
+@app.route('/access_points/<ap_mac>', methods=['POST', 'GET'])
 @session_check
-def ap_detail(ap_mac, site_id):
-    ap = function.get_device_detail(ap_mac)
+def ap_detail(ap_mac):
+    ap = {}
+    ap_details = {}
+    id = ""
+    site_id = ""
+    with open(Config.ap_path, 'r', encoding="utf-8") as f:
+        ap_json = json.load(f)
+    for a in ap_json:
+        if a.get("additionalInfo").get("macAddress").upper() == ap_mac.upper():
+            site_id = a.get("additionalInfo").get("siteid")
+            id = a.get("id")
+            if not a.get("details"):
+                ap = function.append_details(a.get("additionalInfo").get("macAddress"), "AP")
+            else:
+                ap = a.get("details")
+            break
     wlc_id = ap.get("connectedWlcUuid")
-    wlcName = function.get_devName(wlc_id)
+    wlcName = function.get_devName(wlc_id, "WLC")
     wlc_dc = function.get_dc(wlc_id)
     issues = access_point.get_Issues(ap.get("nwDeviceId"))
-    # print(wlcName)
-    # print(wlc_dc)
-    ap_details = function.get_device(ap.get("nwDeviceId"))
-    radio = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
-    return render_template('ap-detail.html', ap=ap, wlcName=wlcName, wlc_id=wlc_id, wlc_dc=wlc_dc, ap_details=ap_details, radio=radio, issues=issues)
+    ap_details = function.append_AP_dev(ap.get("nwDeviceId"), "AP")
+    radios = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
+    return render_template('ap-detail.html', ap=ap, wlcName=wlcName, ap_details=ap_details, wlc_id=wlc_id, wlc_dc=wlc_dc, radio=radios, issues=issues, id=id)
 
 @app.route('/', methods=["POST", "GET"])
 def sign_in():
@@ -274,37 +327,51 @@ def signout():
 @app.route('/wlc/id=<id>', methods=['POST', 'GET'])
 @session_check
 def wlc_details(id):
-
-    ssids = wlcs.get_ssid(id)
-    interface = wlcs.wlc_int(id)
-    wlc = wlcs.get_wlc_by_id(id)
-    physical = wlcs.get_physical(id)
-    ap_wlc = {}
-    ap_wlc = wlcs.get_AP_in_WLC(wlc.get("managementIpAddress"))
-    site = wlc.get('siteHierarchyId').strip("/").split("/")[-1]
-    health = wlcs.health(site, id)
-
-    with open(f"{Config.ap_path}/ap.json", 'r', encoding="utf-8") as f:
+    wlc = None
+    ssids = None
+    interface = None
+    physical = None
+    ap_wlc = None
+    aps = None
+    health = None
+    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
+        device = json.load(f)
+    for w in device:
+        if w["id"] == id:
+            wlc = w
+            break
+    id = wlc.get("id")
+    d = wlc.get("upTime")
+    ssids = wlc.get("ssid")
+    interface = wlc.get("interface")
+    physical = wlc.get("physical")
+    ap_wlc = wlc.get("AP")
+    health = wlc.get("health")
+    with open(Config.ap_path, 'r', encoding="utf-8") as f:
         aps = json.load(f)
-    device = function.get_device(id)
-
     for i in interface:
         i['formattedSpeed'] = switch.format_speed_kbps(i.get('speed'))
-
-    return render_template("/wlc/wlc_details.html", d = device, aps = aps, wlc = wlc, ap_wlc = ap_wlc, health = health, ssids = ssids, int = interface, physical = physical)
+    return render_template("/wlc/wlc_details.html", id= id, d = d, aps = aps, wlc = wlc, ap_wlc = ap_wlc, health = health, ssids = ssids, int = interface, physical = physical)
 
 @app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
 @session_check
 def wlc_ssid(dc, id):
-
-    ssids = wlcs.get_ssid(id)
-    interface = wlcs.wlc_int(id)
-    wlc = wlcs.get_wlc_by_id(id)
-    physical = wlcs.get_physical(id)
-
-    hostname = wlc.get('name')
-    series = wlc.get('deviceSeries')
-
+    wlc = None
+    ssids = None
+    interface = None
+    physical = None
+    hostname = None
+    series = None
+    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
+        device = json.load(f)
+    for w in device:
+        if w["id"] == id:
+            wlc = w
+            ssids = w.get("ssid")
+            interface = w.get("interface")
+            physical = w.get("physical")
+            hostname = w.get('name')
+            series = w.get('deviceSeries')
     return render_template("/wlc/wlc_ssid.html", wlcs = wlc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
 
 @app.route('/wlc', methods=['POST', 'GET'])
@@ -315,19 +382,17 @@ def wlc_home():
 @app.route('/wlc/list', methods=['POST', 'GET'])
 @session_check
 def wlc_list():
-    with open(f"{Config.wlc_path}/wlc.json", 'r', encoding="utf-8") as f:
+    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
         wlc = json.load(f)
     return render_template("/wlc/wlc_list.html", wlc = wlc)
 
 @app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
 @session_check
 def wlc(dc):
-
     ap_wlc = {}
     wlc = []
-    with open(f"{Config.wlc_path}/wlc.json", 'r', encoding="utf-8") as f:
+    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
         all_wlc = json.load(f)
-
     for w in all_wlc:
         if w.get('hostname').startswith(dc):
             wlc.append(w)
@@ -336,43 +401,56 @@ def wlc(dc):
         ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
         # print(ip)
         wlc_health = wlcs.health_wlc(dc, ip)
-
-    with open(f"{Config.ap_path}/ap.json", 'r', encoding="utf-8") as f:
+    with open(Config.ap_path, 'r', encoding="utf-8") as f:
         aps = json.load(f)
-
     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc, aps = aps, dc = dc)
 
 # Alif
 @app.route('/switches', methods=['POST', 'GET'])
 @session_check
 def switches():
-    role_filter = request.args.get('role')
-    devices = switch.get_switches(role = role_filter)
-    sw_locations = switch.get_swLocation()
+    devices = None
+    with open(Config.switch_path, 'r', encoding="utf-8") as f:
+        devices = json.load(f)
+    sw_locations = switch.get_swLocation(devices)
     return render_template("switches.html", devices=devices, sw_locations=sw_locations)
 
 @app.route('/switches/<device_id>', methods=['GET'])
 @session_check
 def switch_detail(device_id):
-    device = function.get_device(device_id)
-
-    device_mac = device.get('macAddress')
-    sw = function.get_device_detail(device_mac)
-
-    access_points = []
-    access_points = switch.get_ap_neighbors(device_id)
-    ap_cnt = len(access_points)
-    ap_groups = switch.group_ap_labels_by_floor(access_points)
-
-    vlans = switch.get_vlan(device_id)
-    vlan_count = len(vlans)
-
-    stack_json = switch.get_stack_info(device_id)
-    stack_info = switch.dict_stack_summary(stack_json)
-    svl_info = switch.dict_svl_summary(stack_json)
-    use_svl = bool(stack_json.get('svlSwitchInfo')) and bool(svl_info)
-
-    sw_interface = switch.get_interface(device_id)
+    device = None
+    ap_cnt = None
+    ap_groups = None
+    vlans = None
+    vlan_count = None
+    poe = None
+    issues = None
+    stack_json = None
+    stack_info = None
+    svl_info = None
+    use_svl = None
+    sw_interface = None
+    sw = None
+    access_points = None
+    with open(Config.switch_path, 'r', encoding="utf-8") as f:
+        device = sw = json.load(f)
+    for d in device:
+        if d["id"] == device_id:
+            sw = d.get("details")
+            access_points = d.get("AP")
+            ap_cnt = len(access_points)
+            ap_groups = switch.group_ap_labels_by_floor(access_points)
+            vlans = d.get("vlans")
+            vlan_count = len(vlans)
+            poe = d.get("poe")
+            issues = switch.get_switchIssues(device_id)
+            stack_json = d.get("stack_json")
+            stack_info = d.get("stack_info")
+            svl_info = d.get("svl_info")
+            use_svl = bool(stack_json.get('svlSwitchInfo')) and bool(svl_info)
+            sw_interface = d.get("interface")
+            device = d
+            break
     # Decorate each interface with a formatted speed string
     # Ensure sw_interface is a list/dict iterable; adjust if your structure is different
     if isinstance(sw_interface, list):
@@ -385,11 +463,6 @@ def switch_detail(device_id):
             intf['speed_fmt'] = switch.format_speed_kbps(intf.get('speed'))
         # If you want to render the nested list, reassign:
         sw_interface = interfaces
-
-    poe = switch.get_poe(device_id)
-
-    issues = switch.get_switchIssues(device_id)
-
     return render_template("sw-details.html", device=device, sw=sw, access_points=access_points, ap_cnt=ap_cnt,
     ap_groups=ap_groups, vlan_count=vlan_count, stack_json=stack_json, stack_info=stack_info, svl_info=svl_info,
     use_svl=use_svl, device_id=device_id, sw_interface=sw_interface, poe=poe, issues=issues)
@@ -398,13 +471,13 @@ def switch_detail(device_id):
 @session_check
 def switch_access_points(device_id):
     # APs connected to this switch only
-    sw = function.get_device(device_id)
+    sw = function.get_device(device_id, "Switch")
     aps = switch.get_ap_neighbors(device_id)
     return render_template("access-points.html", access_points=aps, source_switch=device_id, sw=sw)
 
 @app.route('/switches/<device_id>/vlans', methods=['GET'])
 def switch_vlans(device_id):
-    device = function.get_device(device_id)
+    device = function.get_device(device_id, "Switch")
     vlans = switch.get_vlan(device_id)
 
     return render_template("sw-vlan.html", device=device, vlans=vlans)
