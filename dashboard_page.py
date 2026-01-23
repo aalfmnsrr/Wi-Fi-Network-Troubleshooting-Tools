@@ -1,6 +1,29 @@
 import function
 import requests
 from config import Config
+from os import makedirs
+import json
+
+def get_dashboard():
+    dashboard = {}
+    net_health = network_health()
+    dashboard["network"] = net_health
+    dashboard["overall"] = get_overall(net_health)
+    dashboard["access"] = get_access(net_health)
+    dashboard["core"] = get_core(net_health)
+    dashboard["distribution"] = get_distribution(net_health)
+    dashboard["router"] = get_router(net_health)
+    dashboard["wlc"] = get_wlc(net_health)
+    dashboard["ap"] = get_AP(net_health)
+    dashboard["site_health"] = get_site_health()
+    dashboard["clients"] = get_clients()
+    dashboard["system"] = get_sys_performance()
+    makedirs(Config.inventory_path + "/Dashboard", exist_ok=True)
+    with open(Config.dashboard_path, "w", encoding="utf-8") as f:
+        json.dump(dashboard, f, indent=4, ensure_ascii=False, default=str)
+
+def fetch_dashboard():
+    get_dashboard()
 
 def network_health():
     function.get_token()
@@ -27,21 +50,21 @@ def get_sys_performance():
     # print(response)
     return response
 
-def get_overall():
-    health = network_health()
+def get_overall(network_health):
+    health = network_health
     health = health.get("response")[0]
     return health
 
-def get_core():
-    health = network_health()
+def get_core(network_health):
+    health = network_health
     # print(health)
     health = health.get("healthDistirubution")
     for h in health:
         if h["category"] == "Core":
             return h
 
-def get_access():
-    health = network_health()
+def get_access(network_health):
+    health = network_health
     # print(health)
     health = health.get("healthDistirubution")
     # print(health)
@@ -49,29 +72,29 @@ def get_access():
         if h["category"] == "Access":
             return h
         
-def get_distribution():
-    health = network_health()
+def get_distribution(network_health):
+    health = network_health
     health = health.get("healthDistirubution")
     for h in health:
         if h["category"] == "Distribution":
             return h
         
-def get_router():
-    health = network_health()
+def get_router(network_health):
+    health = network_health
     health = health.get("healthDistirubution")
     for h in health:
         if h["category"] == "Router":
             return h
         
-def get_wlc():
-    health = network_health()
+def get_wlc(network_health):
+    health = network_health
     health = health.get("healthDistirubution")
     for h in health:
         if h["category"] == "WLC":
             return h
         
-def get_AP():
-    health = network_health()
+def get_AP(network_health):
+    health = network_health
     health = health.get("healthDistirubution")
     for h in health:
         if h["category"] == "AP":

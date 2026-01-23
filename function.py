@@ -3,6 +3,8 @@ from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from config import Config
 from datetime import datetime, timedelta
+from netmiko import ConnectHandler
+from os import replace
 
 def get_date(*input):
     if len(input) != 0:
@@ -27,24 +29,100 @@ def append_file(filename, output):
     except FileNotFoundError as error:
         return str(error)
     
-def get_dc(wlc_id):
+# append new details info if details is null
+def append_details(mac, type):
+    ind = None
+    path = ""
+    mac_in_file = ""
+    if type == "AP":
+        path = Config.ap_path
+    elif type == "WLC":
+        path = Config.wlc_path
+    elif type == "Switch":
+        path = Config.switch_path
+    with open(path, 'r', encoding="utf-8") as f:
+        data_json = json.load(f)    
+    for i, item in enumerate(data_json):
+        if type == "AP":
+            mac_in_file = item.get("additionalInfo").get("macAddress").upper()  
+        elif type == "WLC":
+            mac_in_file = item.get("macAddress").upper()
+        elif type == "Switch":
+            mac_in_file = item.get("macAddress").upper()
+        if mac_in_file == mac.upper():
+            ind = i
+            break
+    details = get_device_detail(mac)
+    data_json[ind]["details"] = dict(details)
+    tmp_path = f"{path}.tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(data_json, f, ensure_ascii=False, indent=2)
+    replace(tmp_path, path)
+    return details
+
+def append_AP_dev(dev_id, type):
+    ind = None
+    path = ""
+    id_in_file = ""
+    data_json = None
+    if type == "AP":
+        path = Config.ap_path
+    elif type == "WLC":
+        path = Config.wlc_path
+    elif type == "Switch":
+        path = Config.switch_path
+    with open(path, 'r', encoding="utf-8") as f:
+        data_json = json.load(f)    
+    for i, item in enumerate(data_json):
+        id_in_file = item.get("id") 
+        if id_in_file == dev_id:
+            ind = i
+            break
     get_token()
     header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'X-Auth-Token': Config.token
         }
-    url = f"{Config.dnac}/intent/api/v1/network-device/{wlc_id}"
+    url = f"{Config.dnac}/intent/api/v1/network-device/{dev_id}"
     response = requests.get(url, headers=header, verify=False)
     device = response.json().get("response")
-    if device["snmpLocation"] == "Singapore Regional Data Center"or device["hostname"].startswith('APDC'):
-        return "APDC"
-    elif device["snmpLocation"] == "AXA Group Operations Hongkong" or  device["hostname"].startswith('HK'):
-        return "HK-NTT"
-    elif "Thailand" in device["snmpLocation"] or  device["hostname"].startswith('TH'):
-        return "TH-NTT"
-    elif device["snmpLocation"] == "AXA Group Operations Indonesia" or  device["hostname"].startswith('ID'):
-        return "INDO"
+    data_json[ind]["device"] = dict(device)
+    tmp_path = f"{path}.tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(data_json, f, ensure_ascii=False, indent=2)
+    replace(tmp_path, path)
+    return device
+    
+def get_dc(wlc_id):
+    with open(Config.wlc_path, "r", encoding="utf-8") as f:
+        wlc_json = json.load(f)
+        for wlc in wlc_json:
+            if wlc.get("id") == wlc_id:
+                if wlc.get("dc") == "Thailand":
+                    return "TH-NTT"
+                elif wlc.get("dc") == "Singapore":
+                    return "APDC"
+                elif wlc.get("dc") == "Hong Kong":
+                    return "HK-NTT"
+                elif wlc.get("dc") == "Indonesia":
+                    return "INDO"
+
+def get_cdp(device):
+    device = {
+        "device_type": "cisco_ios",  
+        "host": device.get(""),
+        "username": Config.cisco_user,
+        "password": Config.cisco_pass,
+        "secret": Config.cisco_pass, 
+    }
+    with ConnectHandler(**device) as net_connect:
+        command_output = net_connect.send_command(
+                        "show cdp neighbors",
+                        read_timeout=600,
+                        )   
+        print(command_output)
+    # return command_output
     
 def get_site_id(location):
     get_token()
@@ -61,33 +139,42 @@ def get_site_id(location):
             # print(r.get("id"))
             return r.get("id")
 
-def get_device(dev_id):
-    get_token()
-    header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Auth-Token': Config.token
-        }
-    url = f"{Config.dnac}/intent/api/v1/network-device/{dev_id}"
-    response = requests.get(url, headers=header, verify=False)
-    device = response.json().get("response")
-    return device
+def get_device(dev_id, type):
+    if type == "AP":
+        path = Config.ap_path 
+    elif type == "WLC":
+        path = Config.wlc_path 
+    elif type == "Switch":
+        path = Config.switch_path 
+    with open(path, 'r', encoding="utf-8") as f:
+        device_json = json.load(f)
+        for d in device_json:
+            if d["id"] == dev_id:
+                return d
 
-def get_devName(dev_id):
-    get_token()
-    header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Auth-Token': Config.token
-        }
-    url = f"{Config.dnac}/intent/api/v1/network-device?id={dev_id}"
-    response = requests.get(url, headers=header, verify=False)
-    devName = response.json().get("response")[0].get("hostname")
-    return devName
+def get_devName(dev_id, devType):
+    if devType == "AP":
+        with open(Config.ap_path, 'r', encoding="utf-8") as f:
+            ap_json = json.load(f)
+        for ap in ap_json:
+            if ap.get("id") == dev_id:
+                return ap.get("label")
+    elif devType == "WLC":
+        with open(Config.wlc_path, 'r', encoding="utf-8") as f:
+            wlc_json = json.load(f)
+        for wlc in wlc_json:
+            if wlc.get("id") == dev_id:
+                return wlc.get("label")
+    elif devType == "Switch":
+        with open(Config.switch_path, 'r', encoding="utf-8") as f:
+            sw_json = json.load(f)
+        for sw in sw_json:
+            if sw.get("id") == dev_id:
+                return sw.get("label")
 
-def get_device_detail(dev_mac):
+def get_device_detail(mac):
     get_token()
-    url = f"{Config.dnac}/intent/api/v1/device-detail?identifier=macAddress&searchBy={dev_mac}" 
+    url = f"{Config.dnac}/intent/api/v1/device-detail?identifier=macAddress&searchBy={mac}" 
     header = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
