@@ -80,6 +80,15 @@ def dashboard():
                            system=dashboard_json.get("system")
                            )
 
+@app.route("/get-ap-by-region", methods=["GET"])
+@session_check
+def get_ap_by_region():
+    country = request.args.get("country")
+    if not country:
+        return jsonify({"status": "error", "message": "Missing id"}), 400
+    ap = access_point.get_ap_by_ctr(country)
+    return render_template("access-points.html", access_points=ap)
+
 @app.route("/refresh-dashboard", methods=["GET"])
 @session_check
 def refresh_dashboard():
@@ -196,8 +205,7 @@ def device_detail(client_mac):
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
 def access_points():
-    with open(Config.ap_path, 'r', encoding="utf-8") as f:
-        aps = json.load(f)
+    aps = access_point.get_ap_by_ctr("All")
     return render_template("access-points.html",
                            access_points=aps)
 
