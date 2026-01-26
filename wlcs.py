@@ -33,6 +33,7 @@ def refresh(id):
             w["AP"] = get_AP_in_WLC(w.get("managementIpAddress"))
             site = details.get('siteHierarchyGraphId').strip("/").split("/")[-1]
             w["health"] = health(site, w.get("id"))
+            w["cdp"] = function.get_cdp(w.get("hostname"), w.get("managementIpAddress"))
             new_data = w
             break
     return new_data
@@ -82,8 +83,9 @@ def get_wlc(): #get wlc
         w["AP"] = get_AP_in_WLC(w.get("managementIpAddress"))
         site = details.get('siteHierarchyGraphId').strip("/").split("/")[-1]
         w["health"] = health(site, w.get("id"))
+        w["cdp"] = function.get_cdp(w.get("hostname"), w.get("managementIpAddress"))
     makedirs(Config.inventory_path + "/WLCs", exist_ok=True)
-    with open(f"{Config.wlc_path}/wlc.json", "w", encoding="utf-8") as f:
+    with open(f"{Config.wlc_path}", "w", encoding="utf-8") as f:
         json.dump(wlc, f, indent=4, ensure_ascii=False, default=str)
 
 def get_wlc_by_id(wlc_id): #same as above but to avoid long time reloading

@@ -5,6 +5,86 @@ from config import Config
 from datetime import datetime, timedelta
 from netmiko import ConnectHandler
 from os import replace
+import re
+
+def get_cdp(hostname, ip):
+    device = {
+        "device_type": "cisco_ios",  
+        "ip": ip,
+        "host": hostname,
+        "username": Config.username,
+        "password": Config.password,
+        "secret": Config.password, 
+        "fast_cli": True,
+        "auth_timeout": 30,
+    }
+    with ConnectHandler(**device) as net_connect:
+        try:
+            command_output = net_connect.send_command(
+                            "show cdp neighbors",
+                            read_timeout=600,
+                            use_textfsm=True,
+                            )   
+            if "Total cdp entries displayed : 0" in command_output:
+                return None
+            return command_output
+        except Exception:
+            pass
+            # Fallback: raw + regex parser
+            raw = net_connect.send_command("show cdp neighbors",
+                                           read_timeout=600,)
+            parse_cdp = parse_cdp_text_regex(raw)
+            return parse_cdp
+
+
+def parse_cdp_text_regex(output: str): # if textfsm isnt available, returns dictionary
+    results = []
+    if not output or "CDP is not enabled" in output or "Invalid" in output:
+        return results
+    lines = output.splitlines()
+    header_idx = None
+    for i, line in enumerate(lines):
+        if (
+            "Device ID" in line
+            and "Port ID" in line
+            and ("Local Intrfce" in line or "Local Interface" in line)
+        ):
+            header_idx = i
+            break
+
+    if header_idx is None:
+        generic = re.compile(
+            r"^(?P<device_id>\S[^\s].*?)\s+(?P<local_interface>(?:[A-Za-z]+\s*\d.*?|[A-Za-z]+Ethernet[^\s]+|Port\s+\d+))\s+\d+\s+.*?(?P<port_id>(?:[A-Za-z]+\s*\d.*?|[A-Za-z]+Ethernet[^\s]+|Fa\d+/\d+|\S+))$"
+        )
+        for line in lines:
+            m = generic.search(line.strip())
+            if m:
+                results.append(
+                    {
+                        "device_id": m.group("device_id").strip(),
+                        "local_interface": m.group("local_interface").strip(),
+                        "port_id": m.group("port_id").strip(),
+                    }
+                )
+        return results
+    for line in lines[header_idx + 2 :]:
+        line = line.rstrip()
+        if not line or line.startswith("---"):
+            continue
+        cols = re.split(r"\s{2,}", line)
+        if len(cols) < 6:
+            continue
+        device_id = cols[0].strip()
+        local_interface = cols[1].strip()
+        port_id = cols[-1].strip()
+        results.append(
+            {
+                "device_id": device_id,
+                "local_interface": local_interface,
+                "port_id": port_id,
+            }
+        )
+    return results
 
 def get_date(*input):
     if len(input) != 0:
@@ -107,22 +187,6 @@ def get_dc(wlc_id):
                     return "HK-NTT"
                 elif wlc.get("dc") == "Indonesia":
                     return "INDO"
-
-def get_cdp(device):
-    device = {
-        "device_type": "cisco_ios",  
-        "host": device.get(""),
-        "username": Config.cisco_user,
-        "password": Config.cisco_pass,
-        "secret": Config.cisco_pass, 
-    }
-    with ConnectHandler(**device) as net_connect:
-        command_output = net_connect.send_command(
-                        "show cdp neighbors",
-                        read_timeout=600,
-                        )   
-        print(command_output)
-    # return command_output
     
 def get_site_id(location):
     get_token()

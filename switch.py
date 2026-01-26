@@ -27,6 +27,7 @@ def refresh(id):
             d["svl_info"] = dict_svl_summary(stack_json)
             d["interface"] = get_interface(d.get("id"))
             d["poe"] = get_poe(d.get("id"))
+            d["cdp"] = function.get_cdp(d.get("hostname"), d.get("managementIpAddress"))
             sw = d
             break
     return sw
@@ -52,6 +53,7 @@ def get_switches(): # get switch by role
         d["svl_info"] = dict_svl_summary(stack_json)
         d["interface"] = get_interface(d.get("id"))
         d["poe"] = get_poe(d.get("id"))
+        d["cdp"] = function.get_cdp(d.get("hostname"), d.get("managementIpAddress"))
     makedirs(Config.inventory_path + "/Switches", exist_ok=True)
     with open(Config.switch_path, "w", encoding="utf-8") as f:
         json.dump(devices, f, indent=4, ensure_ascii=False, default=str)
