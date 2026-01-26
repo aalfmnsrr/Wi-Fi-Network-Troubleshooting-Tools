@@ -224,6 +224,20 @@
                         Stack Details
                     </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="power-tab" data-bs-toggle="tab"
+                                data-bs-target="#power-pane" type="button" role="tab"
+                                aria-controls="power-pane" aria-selected="false">
+                            Power Supply Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="power-tab" data-bs-toggle="tab"
+                                data-bs-target="#power-pane" type="button" role="tab"
+                                aria-controls="power-pane" aria-selected="false">
+                            Power Supply Details
+                        </button>
+                    </li>
                 </ul>
             </div>
             <div class="tab-content" id="switchTabContent">
@@ -394,8 +408,8 @@
                                         <th>Product ID</th>
                                         <th>MAC Address</th>
                                         <th>Role</th>
-                                        <th>State</th>
                                         <th>Priority</th>
+                                        <th>Status</th>
                                         <th>Source Port(s)</th>
                                         <th>Destination Port(s)</th>
                                         <th>DAD Port</th>
@@ -409,8 +423,8 @@
                                         <td>{{ s.pID }}</td>
                                         <td>{{ s.mac }}</td>
                                         <td>{{ s.role }}</td>
-                                        <td>{{ s.state }}</td>
                                         <td>{{ s.priority }}</td>
+                                        <td>{{ s.state }}</td>
         
                                         <!-- Show multiple ports neatly -->
                                         <td>
@@ -441,8 +455,8 @@
                                         <th>Product ID</th>
                                         <th>MAC Address</th>
                                         <th>Role</th>
-                                        <th>State</th>
                                         <th>Priority</th>
+                                        <th>Status</th>
                                         <th>Port 1 → Switch</th>
                                         <th>Port 2 → Switch</th>
                                     </tr>
@@ -455,8 +469,8 @@
                                         <td>{{ s.pID }}</td>
                                         <td>{{ s.mac | capitalize }}</td>
                                         <td>{{ s.role }}</td>
-                                        <td>{{ s.state }}</td>
                                         <td>{{ s.priority }}</td>
+                                        <td>{{ s.state }}</td>
                                         <td>{{ s.port1_neighbor_sw }}</td>
                                         <td>{{ s.port2_neighbor_sw }}</td> 
                                     </tr>
@@ -465,6 +479,113 @@
                         </table>
                         {% endif %}
                     </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="power-pane" role="tabpanel" aria-labelledby="power-tab">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">POE Details</h5>
+                    </div>
+                    <div class="row justify-content-center">
+						<div class="col-md-6 col-xxl-3 d-flex">
+							<div class="card flex-fill">
+								<div class="card-body">
+									<div class="row">
+										<div class="col mt-0">
+											<h5 class="card-title">POE Budgetted</h5>
+										</div>
+
+										<div class="col-auto">
+											<div class="stat stat-sm">
+												<i class="align-middle" data-feather="zap"></i>
+											</div>
+										</div>
+									</div>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerAllocated }} W</span>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-xxl-3 d-flex">
+							<div class="card flex-fill">
+								<div class="card-body">
+									<div class="row">
+										<div class="col mt-0">
+											<h5 class="card-title">POE Consumed</h5>
+										</div>
+
+										<div class="col-auto">
+											<div class="stat stat-sm">
+												<i class="align-middle" data-feather="power"></i>
+											</div>
+										</div>
+									</div>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerConsumed }} W</span>
+								</div>
+							</div>
+						</div>
+                        <div class="col-md-6 col-xxl-3 d-flex">
+							<div class="card flex-fill">
+								<div class="card-body">
+									<div class="row">
+										<div class="col mt-0">
+											<h5 class="card-title">POE Remaining</h5>
+										</div>
+
+										<div class="col-auto">
+											<div class="stat stat-sm">
+												<i class="align-middle" data-feather="bar-chart-2"></i>
+											</div>
+										</div>
+									</div>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerRemaining }} W</span>
+								</div>
+							</div>
+						</div>
+                    </div>
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Power Supply Details</h5>
+                    </div>
+                    <table id="datatables-dashboard-modi-projects" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Operational Status</th>
+                                <th>Serial Number</th>
+                                <th>Vendor Equipment Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pwr in pwrSply %}
+                                {% if "PWR" in pwr.productId or "C6800-XL-3KW" in pwr.productId %}
+                                <tr>
+                                    <td>{{ pwr.name | default('-', true) }}</td>
+                                    
+                                    {% if pwr.operationalStateCode|lower|trim == "normal" or pwr.operationalStateCode|lower|trim == "on" %}
+                                        <td>
+                                            <i class="align-middle text-success" data-feather="check-circle"></i>
+                                        </td>
+                                    {% else %}
+                                        <td>
+                                            <i class="align-middle text-danger" data-feather="x-circle"></i>
+                                        </td>
+                                    {% endif %}
+
+                                    <td>{{ pwr.serialNumber | default('-', true) }}</td>
+                                
+                                    <td>{{ pwr.vendorEquipmentType | default('-', true) }}</td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Name</th>
+                                <th>Operational Status</th>
+                                <th>Serial Number</th>
+                                <th>Vendor Equipment Type</th>
+                            </tr>
+                        </tfoot>
+                    </table>    
                 </div>
             </div>
             <div class="row">
