@@ -198,6 +198,38 @@ def get_vlan(device_id):
     vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return vlan
 
+# Retrieving Power Supply information
+def get_powerSupply(device_id):
+    function.get_token()
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/equipment"
+
+    pwrSply = requests.get(url_inventory, headers=header, verify=False).json().get("response")
+    return pwrSply
+
+# Sorting the power supply by name
+def sort_power_supplies(pwr_list):
+    """
+    Sort by Switch number asc, then PSU letter (A, B, C...).
+    Falls back gracefully if the name pattern is missing.
+    """
+    def keyfn(p):
+        name = (p or {}).get('name', '') or ''
+        # Match: "Switch 2 - Power Supply A"  (case-insensitive)
+        m = re.search(r'switch\s+(\d+)\s*-\s*power\s*supply\s*([A-Z])', name, re.IGNORECASE)
+        switch_num = int(m.group(1)) if m else 10**9   # big number pushes unknown to the end
+        psu_letter = (m.group(2).upper() if m else 'Z')
+        psu_rank = {'A': 0, 'B': 1, 'C': 2, 'D': 3}.get(psu_letter, 99)
+        # Stable tie-breaker to keep deterministic order
+        serial = (p or {}).get('serialNumber') or ''
+        return (switch_num, psu_rank, serial)
+    return sorted(pwr_list or [], key=keyfn)
+
 # Retrieving interfaces from the switch
 def get_interface(device_id):
     function.get_token()
@@ -374,8 +406,8 @@ def dict_svl_summary(stack):
             'pID': s.get('platformId') or '-',
             'mac': s.get('macAddress') or '-',
             'role': s.get('role') or '-',
-            'state': s.get('state') or '-',
             'priority': s.get('switchPriority') or '-',
+            'state': s.get('state') or '-',
         }
 
     # Helper: ordered unique

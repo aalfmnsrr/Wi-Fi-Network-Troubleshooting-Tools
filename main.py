@@ -304,6 +304,9 @@ def switch_detail(device_id):
     vlans = switch.get_vlan(device_id)
     vlan_count = len(vlans)
 
+    pwrSply = switch.get_powerSupply(device_id)
+    pwrSply = switch.sort_power_supplies(pwrSply)
+
     stack_json = switch.get_stack_info(device_id)
     stack_info = switch.dict_stack_summary(stack_json)
     svl_info = switch.dict_svl_summary(stack_json)
@@ -328,8 +331,8 @@ def switch_detail(device_id):
     issues = switch.get_switchIssues(device_id)
 
     return render_template("sw-details.html", device=device, sw=sw, access_points=access_points, ap_cnt=ap_cnt, 
-    ap_groups=ap_groups, vlan_count=vlan_count, stack_json=stack_json, stack_info=stack_info, svl_info=svl_info, 
-    use_svl=use_svl, device_id=device_id, sw_interface=sw_interface, poe=poe, issues=issues)
+    ap_groups=ap_groups, vlan_count=vlan_count, pwrSply=pwrSply, stack_json=stack_json, stack_info=stack_info, 
+    svl_info=svl_info, use_svl=use_svl, device_id=device_id, sw_interface=sw_interface, poe=poe, issues=issues)
 
 @app.route('/switches/<device_id>/aps', methods=['GET'])
 @session_check
