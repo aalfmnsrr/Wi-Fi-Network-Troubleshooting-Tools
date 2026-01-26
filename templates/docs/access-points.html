@@ -32,7 +32,7 @@
 								<div class="card-body">
 									<div class="card-body text-center">
 										<div class="mb-3">
-											<button class="btn btn-secondary ms-2 country-filter" id="clear-filter">All</button>
+											<button class="btn btn-secondary ms-2 country-filter" country="All">All</button>
 											<button class="btn btn-outline-primary country-filter" country="Malaysia">MY</button>
 											<button class="btn btn-outline-secondary country-filter" country="Thailand">TH</button>
 											<button class="btn btn-outline-success country-filter" country="Indonesia">ID</button>
@@ -45,6 +45,7 @@
 										<thead>
 											<tr>
 												<th>Hostname</th>
+												<th>Status</th>
 												<th>IP Address</th>
 												<th>MAC Address</th>
 												<th>Software Version</th>
@@ -56,6 +57,14 @@
 										{% for ap in access_points %}
 										<tr>
 											<td><a href="{{ url_for('ap_detail', ap_mac=ap.additionalInfo.macAddress, site_id=ap.additionalInfo.siteid) }}">{{ ap.label }}</a></td>
+											
+											<td>
+												{% if ap.details.communicationState == "REACHABLE" %}
+												<span class="badge bg-success">{{ ap.details.communicationState | capitalize }}</span>
+												{% else %}
+												<span class="badge bg-danger">{{ ap.details.communicationState | capitalize }}</span>
+												{% endif %}
+											</td>
 											<td>{{ ap.ip }}</td>
 											<td>{{ ap.additionalInfo.macAddress | upper }}</td>
 											<td>{{ ap.softwareVersion }}</td>
@@ -67,6 +76,7 @@
 										<tfoot>
 											<tr>
 												<th>Hostname</th>
+												<th>Status</th>
 												<th>IP Address</th>
 												<th>MAC Address</th>
 												<th>Software Version</th>
@@ -114,57 +124,48 @@
 	</div>
 
 	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>	
-<script>
-	const params = new URLSearchParams(window.location.search);
-    let siteParam = (params.get('site') || '').trim();
 	
-	if (!siteParam) {
-        const siteraw = (document.getElementById("site")?.textContent || "").trim();
-        siteParam = siteraw;
-        siteParam = (siteParam || '').toString().trim();
-    }
-    document.addEventListener("DOMContentLoaded", function() {
-        $('#datatables-column-search-text-inputs tfoot th').each(function() {
-            var title = $(this).text();
-            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-        });
 
-        var table = $('#datatables-column-search-text-inputs').DataTable({
-            columnDefs: [
-                { searchable: true }
-            ]
-        });
-        // Column search functionality
-        table.columns().every(function() {
-            var that = this;
-            $('input', this.footer()).on('keyup change clear', function() {
-                if (that.search() !== this.value) {
-                    that.search(this.value).draw();
-                }
-            });
-        });
-        // Button filtering on Country column
-        const COUNTRY_COL = 5; 
-        $('.country-filter').on('click', function() {
-			const ctr = $(this).attr('country');
-            table.column(COUNTRY_COL).search('^' + ctr + '$', true, false).draw();
-        });
-        // Clear all filters
-        $('#clear-filter').on('click', function() {
-            table.columns().search('');
-            $('#datatables-column-search-text-inputs tfoot input').val('');
-            table.search(''); 
-            table.draw();
-        });
-        if (siteParam && siteParam.trim() !== "") {
-            // Assuming site contains the country code like "MY", "SG", etc.
-            table.column(COUNTRY_COL).search('^' + siteParam + '$', true, false).draw();
-        }
-    });
-</script>
-
-	
-	
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			// Build footer inputs for column search
+			$('#datatables-column-search-text-inputs tfoot th').each(function() {
+				var title = $(this).text();
+				$(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+			});
+		
+			// Initialize DataTable
+			var table = $('#datatables-column-search-text-inputs').DataTable({
+				columnDefs: [{ searchable: true }]
+			});
+		
+			// Column-search listeners
+			table.columns().every(function() {
+				var that = this;
+				$('input', this.footer()).on('keyup change clear', function() {
+					if (that.search() !== this.value) {
+						that.search(this.value).draw();
+					}
+				});
+			});
+		
+			$(document).on('click', '.country-filter', function() {
+				const country = $(this).attr('country');
+				if (!country) return;
+		
+				const baseUrl = "{{ url_for('get_ap_by_region') }}";
+				const url = `${baseUrl}?country=${encodeURIComponent(country)}`;
+				window.location.href = url; // hard redirect
+			});
+			// Auto-filter if ?site=XX is present in the URL
+			const params = new URLSearchParams(window.location.search);
+			let siteParam = (params.get('site') || '').trim();
+			if (siteParam !== "") {
+				const COUNTRY_COL = 5; // adjust if your country column index differs
+				table.column(COUNTRY_COL).search('^' + siteParam + '$', true, false).draw();
+			}
+		});
+		</script>
 </body>
 
 </html>

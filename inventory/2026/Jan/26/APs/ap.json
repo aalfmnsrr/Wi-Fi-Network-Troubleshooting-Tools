@@ -13209,7 +13209,104 @@
       "connectivityStatus": 100,
       "ledFlashEnabled": "false",
       "cpuScore": 10.0
-    }
+    },
+    "issues": [],
+    "device": {
+      "family": "Unified AP",
+      "type": "Cisco Catalyst 9130AXI Unified Access Point",
+      "lastUpdateTime": 1769337805474,
+      "serialNumber": "KWC264508DK",
+      "macAddress": "88:9c:ad:bd:4b:c0",
+      "deviceSupportLevel": "Supported",
+      "softwareType": null,
+      "softwareVersion": "17.12.5.41",
+      "collectionInterval": "NA",
+      "dnsResolvedManagementAddress": "",
+      "lastManagedResyncReasons": "",
+      "managementState": "Managed",
+      "pendingSyncRequestsCount": "0",
+      "reasonsForDeviceResync": "",
+      "reasonsForPendingSyncRequests": "",
+      "inventoryStatusDetail": "NA",
+      "syncRequestedByApp": "",
+      "upTime": "101 days, 21:24:00.270",
+      "roleSource": "AUTO",
+      "lastUpdated": "2026-01-25 10:43:25",
+      "bootDateTime": null,
+      "apManagerInterfaceIp": "10.144.84.56",
+      "collectionStatus": "Managed",
+      "interfaceCount": "0",
+      "hostname": "MY-PCH-10F-AP01",
+      "locationName": null,
+      "managementIpAddress": "10.35.149.161",
+      "platformId": "C9130AXI-K",
+      "reachabilityFailureReason": "NA",
+      "reachabilityStatus": "Reachable",
+      "series": "Cisco Catalyst 9130AXI Series Unified Access Points",
+      "snmpContact": "",
+      "snmpLocation": "default location",
+      "apEthernetMacAddress": "2c:1a:05:00:56:64",
+      "associatedWlcIp": "10.54.242.253",
+      "errorCode": "null",
+      "errorDescription": null,
+      "lastDeviceResyncStartTime": "",
+      "lineCardCount": "0",
+      "lineCardId": "",
+      "managedAtleastOnce": false,
+      "memorySize": "NA",
+      "tagCount": "0",
+      "tunnelUdpPort": null,
+      "uptimeSeconds": 8883803,
+      "vendor": "NA",
+      "waasDeviceMode": null,
+      "description": null,
+      "location": null,
+      "role": "ACCESS",
+      "instanceUuid": "3f5619f5-87de-4f9b-bcfd-307d4f259107",
+      "instanceTenantId": "69213197b7c14769676a0fe1",
+      "id": "3f5619f5-87de-4f9b-bcfd-307d4f259107"
+    },
+    "radios": [
+      {
+        "id": "f7154a9a-3826-40fb-925c-226dc428ad63",
+        "bands": [
+          5.0
+        ],
+        "channel": 36,
+        "txPower": 0,
+        "antenna": {
+          "elevation": 0,
+          "name": "Internal-9130-Single-5GHz",
+          "azimuth": 0
+        }
+      },
+      {
+        "id": "db29a498-5b51-4a6e-a641-e1647a5d440b",
+        "bands": [
+          2.4
+        ],
+        "channel": 11,
+        "txPower": 9,
+        "antenna": {
+          "elevation": 0,
+          "name": "Internal-9130-2.4GHz",
+          "azimuth": 0
+        }
+      },
+      {
+        "id": "991b3830-1f6d-464e-b79f-1a83d7d770a4",
+        "bands": [
+          5.0
+        ],
+        "channel": 120,
+        "txPower": 8,
+        "antenna": {
+          "elevation": 0,
+          "name": "Internal-9130-5GHz",
+          "azimuth": 0
+        }
+      }
+    ]
   },
   {
     "deviceType": "Cisco Catalyst 9130AXI Unified Access Point",

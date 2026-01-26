@@ -34,6 +34,18 @@ def refresh(id):
             break
     return ap
 
+def get_ap_by_ctr(ctr):
+    ap_json = None
+    aps = []
+    with open(Config.ap_path, 'r', encoding="utf-8") as f:
+        ap_json = json.load(f)
+    if ctr == "All":
+        return ap_json
+    for ap in ap_json:
+        if ap.get("location") == ctr:
+            aps.append(ap)
+    return aps
+
 def get_floor_id():
     function.get_token()
     header = {
