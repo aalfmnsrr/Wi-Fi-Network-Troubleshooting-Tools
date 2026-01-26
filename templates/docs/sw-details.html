@@ -231,13 +231,6 @@
                             Power Supply Details
                         </button>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="power-tab" data-bs-toggle="tab"
-                                data-bs-target="#power-pane" type="button" role="tab"
-                                aria-controls="power-pane" aria-selected="false">
-                            Power Supply Details
-                        </button>
-                    </li>
                 </ul>
             </div>
             <div class="tab-content" id="switchTabContent">
@@ -560,14 +553,11 @@
                                 <tr>
                                     <td>{{ pwr.name | default('-', true) }}</td>
                                     
-                                    {% if pwr.operationalStateCode|lower|trim == "normal" or pwr.operationalStateCode|lower|trim == "on" %}
-                                        <td>
-                                            <i class="align-middle text-success" data-feather="check-circle"></i>
-                                        </td>
+                                    {% set state = pwr.operationalStateCode | default('', true) | lower | trim %}
+                                    {% if state in ['normal', 'on', 'operational', 'ok'] %}
+                                        <td><i class="align-middle text-success" data-feather="check-circle"></i></td>
                                     {% else %}
-                                        <td>
-                                            <i class="align-middle text-danger" data-feather="x-circle"></i>
-                                        </td>
+                                        <td><i class="align-middle text-danger" data-feather="x-circle"></i></td>
                                     {% endif %}
 
                                     <td>{{ pwr.serialNumber | default('-', true) }}</td>
