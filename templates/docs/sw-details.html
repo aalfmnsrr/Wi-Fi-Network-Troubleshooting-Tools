@@ -2,7 +2,14 @@
 {% block body %}
     <main class="content">
         <div class="container-fluid p-0">
-
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-message">
+                    <p class="mb-0">
+                        <strong>Important!</strong> All data is fetched daily at 00:00am. Click <b>Fetch Data</b> button to retrieve the latest data.</a>
+                    </p>
+                </div>
+            </div>
             <div class="row mb-2 mb-xl-3">
                 <div class="col-auto d-none d-sm-block">
                     <h3 class ="mb-0">
@@ -19,7 +26,7 @@
                 <div class="col-auto ms-auto text-end mt-n1">
 
                     <div class="dropdown me-2 d-inline-block position-relative">
-                        <a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropDOWN" data-bs-display="static">
+                        <a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
                         <i class="align-middle mt-n1" data-feather="calendar"></i> Today
                     </a>
 
@@ -36,9 +43,22 @@
                                             <button class="btn btn-primary shadow-sm">
                     <i class="align-middle" data-feather="filter">&nbsp;</i>
                     </button>
-                    <button class="btn btn-primary shadow-sm" onclick="location.reload()">
-                        <i class="align-middle" data-feather="refresh-cw" >&nbsp;</i>
+                    <button class="btn btn-primary shadow-sm" onclick="refreshSwitch()">
+                        <p class="align-middle mb-0">Fetch Data</p>
                     </button>
+                    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" aria-labelledby="loadingModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-body d-flex align-items-center">
+                            <div class="spinner-border text-dark me-3" role="status" aria-hidden="true"></div>
+                            <div>
+                                <div id="loadingModalLabel" class="fw-semibold">Fetching data…</div>
+                                <small class="text-muted">This may take a moment.</small>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">  
@@ -50,7 +70,7 @@
                                     <h3 class="mb-2">{{ sw.overallHealth }}</h3>
                                     <p class="mb-2">Overall Health</p>
                                     {% if 5 > sw.overallHealth %}
-                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                        <i class="align-middle text-danger" data-feather="thumbs-down"></i>
                                     {% else %}
                                         <i class="align-middle text-success" data-feather="thumbs-up"></i>
                                     {% endif %}
@@ -79,7 +99,7 @@
                                     <p class="mb-2">CPU Utilization</p>
                                     {% set cpu_val = sw.cpu|default('0')|replace('%','')|float %}
                                     {% if cpu_val > 90 %}
-                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                        <i class="align-middle text-danger" data-feather="thumbs-down"></i>
                                     {% else %}
                                         <i class="align-middle text-success" data-feather="thumbs-up"></i>
                                     {% endif %}
@@ -108,7 +128,7 @@
                                     <p class="mb-2">Memory</p>
                                     {% set mem_val = sw.memory|default('0')|replace('%','')|float %}
                                     {% if mem_val > 90 %}
-                                        <i class="align-middle text-danger" data-feather="thumbs-DOWN"></i>
+                                        <i class="align-middle text-danger" data-feather="thumbs-down"></i>
                                     {% else %}
                                         <i class="align-middle text-success" data-feather="thumbs-up"></i>
                                     {% endif %}
@@ -203,6 +223,13 @@
                             aria-controls="stack-pane" aria-selected="false">
                         Stack Details
                     </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="power-tab" data-bs-toggle="tab"
+                                data-bs-target="#power-pane" type="button" role="tab"
+                                aria-controls="power-pane" aria-selected="false">
+                            Power Supply Details
+                        </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="power-tab" data-bs-toggle="tab"
@@ -320,15 +347,15 @@
                                     <td class="text-start">{{ intf.name | default('-', true) }}</td>
         
                                     {% set oper = (intf.operStatus | default('', true)) %}
-                                    {% if not oper or oper == 'DOWN' %}
-                                        <td style="color: red ">{{ oper or 'DOWN' }}</td>
+                                    {% if not oper or oper == 'down' %}
+                                        <td style="color: red ">{{ oper or 'down' }}</td>
                                     {% else %}
                                         <td style="color: green;">{{ oper }}</td>
                                     {% endif %}
                 
                                     {% set admin = (intf.adminStatus | default('', true)) %}
-                                    {% if not admin or admin == 'DOWN' %}
-                                        <td style="color: red;">{{ admin or 'DOWN' }}</td>
+                                    {% if not admin or admin == 'down' %}
+                                        <td style="color: red;">{{ admin or 'down' }}</td>
                                     {% else %}
                                         <td style="color: green;">{{ admin }}</td>
                                     {% endif %}
@@ -879,19 +906,41 @@
                 }
         });
     </script>
-    
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            feather.replace();
-        });
-
-        // If your table content is injected/updated later (e.g., via AJAX or DataTables redraw),
-        // call feather.replace() again after the update:
-        // $('#datatables-dashboard-modi-projects').on('draw.dt', function() { feather.replace(); });
-    </script>
-
-
-  
+    <script id="sw-id" type="application/json">
+		{{ device_id | tojson }}
+	</script>
+	<script>
+		const idraw = (document.getElementById("sw-id")?.textContent || "").trim();
+		const id_data = idraw ? JSON.parse(idraw) : null;
+	
+		const baseUrl = "{{ url_for('refresh_switch') }}";
+		const url = `${baseUrl}?id=${encodeURIComponent(id_data)}`;
+		function showLoading() {
+			const modalEl = document.getElementById('loadingModal');
+			const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: 'static', keyboard: false });
+			modal.show();
+		}
+	
+		function hideLoading() {
+			const modalEl = document.getElementById('loadingModal');
+			const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+			modal.hide();
+		}
+		
+		function refreshSwitch() {
+			showLoading();   // show spinner + message
+	
+			fetch(url, { method: "GET" })
+				.then(res => res.json())
+				.then(data => {
+					console.log("WLC refreshed:", data);
+					location.reload();  // reload after backend finishes
+				})
+				.catch(err => {
+					console.error(err);
+					hideLoading();  // ensure modal hides if there's an error
+				});
+		}
+	</script>
   
 {% endblock %}

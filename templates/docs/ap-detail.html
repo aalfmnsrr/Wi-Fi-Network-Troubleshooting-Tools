@@ -2,7 +2,14 @@
 		{% block body %}
 			<main class="content">
 				<div class="container-fluid p-0">
-
+					<div class="alert alert-warning alert-dismissible" role="alert">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						<div class="alert-message">
+							<p class="mb-0">
+								<strong>Important!</strong> All data is fetched daily at 00:00am. Click <b>Fetch Data</b> button to retrieve the latest data.</a>
+							</p>
+						</div>
+					</div>
 					<div class="row mb-2 mb-xl-3">
 						<div class="col-auto d-none d-sm-block">
 							<h3 class ="mb-0">
@@ -36,9 +43,22 @@
 													<button class="btn btn-primary shadow-sm">
 							<i class="align-middle" data-feather="filter">&nbsp;</i>
 							</button>
-							<button class="btn btn-primary shadow-sm" onclick="location.reload()">
-								<i class="align-middle" data-feather="refresh-cw" >&nbsp;</i>
+							<button class="btn btn-primary shadow-sm" onclick="refreshAP()">
+								<p class="align-middle mb-0">Fetch Data</p>
 							</button>
+							<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" aria-labelledby="loadingModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+								<div class="modal-dialog modal-dialog-centered modal-sm">
+								<div class="modal-content">
+									<div class="modal-body d-flex align-items-center">
+									<div class="spinner-border text-dark me-3" role="status" aria-hidden="true"></div>
+									<div>
+										<div id="loadingModalLabel" class="fw-semibold">Fetching data…</div>
+										<small class="text-muted">This may take a moment.</small>
+									</div>
+									</div>
+								</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="row">  
@@ -160,6 +180,13 @@
 												<td>{{ iss.category | default('-', true) }}</td>
 											</tr>
 											{% endfor %}
+											{% if not issues %}
+											<td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+										{% endif %}
 										</tbody>
 									</table>
 								</div>
@@ -689,6 +716,42 @@
 				ordering: false
 			});
 		});
+	</script>
+	<script id="ap-id" type="application/json">
+		{{ id | tojson }}
+	</script>
+	<script>
+		const idraw = (document.getElementById("ap-id")?.textContent || "").trim();
+		const id_data = idraw ? JSON.parse(idraw) : null;
+	
+		const baseUrl = "{{ url_for('refresh_ap') }}";
+		const url = `${baseUrl}?id=${encodeURIComponent(id_data)}`;
+		function showLoading() {
+			const modalEl = document.getElementById('loadingModal');
+			const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: 'static', keyboard: false });
+			modal.show();
+		}
+	
+		function hideLoading() {
+			const modalEl = document.getElementById('loadingModal');
+			const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+			modal.hide();
+		}
+		
+		function refreshAP() {
+			showLoading();   // show spinner + message
+	
+			fetch(url, { method: "GET" })
+				.then(res => res.json())
+				.then(data => {
+					console.log("AP refreshed:", data);
+					location.reload();  // reload after backend finishes
+				})
+				.catch(err => {
+					console.error(err);
+					hideLoading();  // ensure modal hides if there's an error
+				});
+		}
 	</script>
 
 </body>

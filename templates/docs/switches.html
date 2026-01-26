@@ -2,17 +2,25 @@
 {% block body %}
     <main class="content">
         <div class="container-fluid p-0">
-
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-message">
+                    <p class="mb-0">
+                        <strong>Important!</strong> 
+                        <a> All data is fetched daily at 00:00am. To avoid API request overload, click any hostname to open its details page, then use the <b>Fetch Data</b> button to update <b>only that single device</b>.</a>
+                    </p>
+                </div>
+            </div>
             <h1 class="h3 mb-3">Switch Devices</h1>
 
             <div class="row">
                 <div class="col-12">
                     <div class="card">                       
                         <div style="display: flex; margin: 10px; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                            <a href="/switches" class="btn btn-secondary">All Switches</a>
-                            <a href="/switches?role=CORE" class="btn btn-primary">Core</a>
-                            <a href="/switches?role=DISTRIBUTION" class="btn btn-primary">Distribution</a>
-                            <a href="/switches?role=ACCESS" class="btn btn-primary">Access</a>
+                            <a href="/switches" class="btn btn-secondary role-filter" id="clear-filter">All Switches</a>
+                            <a href="/switches?role=CORE" class="btn btn-primary role-filter" role="CORE">Core</a>
+                            <a href="/switches?role=DISTRIBUTION" class="btn btn-primary role-filter" role="DISTRIBUTION">Distribution</a>
+                            <a href="/switches?role=ACCESS" class="btn btn-primary role-filter" role="ACCESS">Access</a>
                         </div>
                         <div class="card-body">
                             <table id="datatables-column-search-text-inputs" class="table table-striped " style="width:100%" >
@@ -91,52 +99,52 @@
     <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
 
     <script>
-    // DataTables with Column Search by Text Inputs
-    document.addEventListener("DOMContentLoaded", function() {
+        const params = new URLSearchParams(window.location.search);
+        let roleParam = (params.get('role') || '').trim();
         
-        // Setup - add a text input to each footer cell
-        $('#datatables-column-search-text-inputs tfoot th').each(function() {
-            var title = $(this).text();
-            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-        });
-        // DataTables
-        var table = $('#datatables-column-search-text-inputs').DataTable();
-        
-        // Apply the search
-        table.columns().every(function() {
-            var that = this;
-            $('input', this.footer()).on('keyup change clear', function() {
-                if (that.search() !== this.value) {
-                    that
-                        .search(this.value)
-                        .draw();
-                }
+        if (!roleParam) {
+            const roleraw = (document.getElementById("role")?.textContent || "").trim();
+            roleParam = roleraw;
+            roleParam = (roleParam || '').toString().trim();
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            $('#datatables-column-search-text-inputs tfoot th').each(function() {
+                var title = $(this).text();
+                $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
             });
-        });
-    });
-    // DataTables with Column Search by Select Inputs
-    document.addEventListener("DOMContentLoaded", function() {
-        $('#datatables-column-search-select-inputs').DataTable({
-            initComplete: function() {
-                this.api().columns().every(function() {
-                    var column = this;
-                    var select = $('<select class="form-control"><option value=""></option></select>')
-                        .appendTo($(column.footer()).empty())
-                        .on('change', function() {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search(val ? '^' + val + '$' : '', true, false)
-                                .draw();
-                        });
-                    column.data().unique().sort().each(function(d, j) {
-                        select.append('<option value="' + d + '">' + d + '</option>')
-                    });
+    
+            var table = $('#datatables-column-search-text-inputs').DataTable({
+                columnDefs: [
+                    { searchable: true }
+                ]
+            });
+            // Column search functionality
+            table.columns().every(function() {
+                var that = this;
+                $('input', this.footer()).on('keyup change clear', function() {
+                    if (that.search() !== this.value) {
+                        that.search(this.value).draw();
+                    }
                 });
+            });
+            // Button filtering on Country column
+            const ROLE_COL = 1; 
+            $('.role-filter').on('click', function() {
+                const ctr = $(this).attr('role');
+                table.column(ROLE_COL).search('^' + ctr + '$', true, false).draw();
+            });
+            // Clear all filters
+            $('#clear-filter').on('click', function() {
+                table.columns().search('');
+                $('#datatables-column-search-text-inputs tfoot input').val('');
+                table.search(''); 
+                table.draw();
+            });
+            if (roleParam && roleParam.trim() !== "") {
+                // Assuming role contains the role code like "MY", "SG", etc.
+                table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
             }
         });
-    });
     </script>
 
 {% endblock %}
