@@ -441,6 +441,7 @@ def switch_detail(device_id):
     sw = None
     access_points = None
     pwrSply = None
+    cdp = None
     with open(Config.switch_path, 'r', encoding="utf-8") as f:
         device = sw = json.load(f)
     for d in device:
@@ -459,6 +460,7 @@ def switch_detail(device_id):
             use_svl = bool(stack_json.get('svlSwitchInfo')) and bool(svl_info)
             sw_interface = d.get("interface")
             pwrSply = switch.sort_power_supplies(d.get("powerSupply"))
+            cdp = d.get("cdp") or []
             device = d
             break
     # Decorate each interface with a formatted speed string
@@ -476,7 +478,7 @@ def switch_detail(device_id):
 
     return render_template("sw-details.html", device=device, sw=sw, access_points=access_points, ap_cnt=ap_cnt,
     ap_groups=ap_groups, vlan_count=vlan_count, stack_json=stack_json, stack_info=stack_info, svl_info=svl_info,
-    use_svl=use_svl, device_id=device_id, sw_interface=sw_interface, poe=poe, issues=issues, pwrSply=pwrSply)
+    use_svl=use_svl, device_id=device_id, sw_interface=sw_interface, poe=poe, issues=issues, pwrSply=pwrSply, cdp=cdp)
 
 @app.route('/switches/<device_id>/aps', methods=['GET'])
 @session_check

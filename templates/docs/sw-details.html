@@ -231,6 +231,13 @@
                             Power Supply Details
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cdp-tab" data-bs-toggle="tab"
+                                data-bs-target="#cdp-pane" type="button" role="tab"
+                                aria-controls="cdp-pane" aria-selected="false">
+                            CDP Neighbors
+                        </button>
+                    </li>
                 </ul>
             </div>
             <div class="tab-content" id="switchTabContent">
@@ -577,6 +584,53 @@
                         </tfoot>
                     </table>    
                 </div>
+            </div>
+            <div class="tab-pane fade" id="cdp-pane" role="tabpanel" aria-labelledby="cdp-tab">
+                <h2>CDP Topology</h2>
+                <div id="cdp-graph" style="width:100%; height: 520px; border: 1px solid #e5e7eb; border-radius: 10px;"></div>
+                <noscript>Please enable JavaScript to see the topology.</noscript>
+            
+                <h3>CDP Neighbors</h3>
+                {% if cdp and cdp|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                    <thead>
+                        <tr>
+                        <th>Local Interface</th>
+                        <th>Neighbor</th>
+                        <th>Neighbor Interface</th>
+                        <th>Platform</th>
+                        <th>Capability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for n in cdp %}
+                        <tr>
+                            <td>{{ n.local_interface or '-' }}</td>
+                            <td>
+                                <img
+                                    src="{{ '/static/assets/img/devices/unknown.png' }}"
+                                    alt="icon"
+                                    width="16"
+                                    height="16"
+                                    style="margin-right:6px;"
+                                    onerror="this.src='/static/assets/img/devices/unknown.png';"
+                                    data-platform="{{ n.platform or '' }}"
+                                    data-neighbor="{{ n.neighbor or '' }}"
+                                    />
+                                {{ n.neighbor or '-' }}
+                            </td>
+                            <td>{{ n.neighbor_interface or '-' }}</td>
+                            <td>{{ n.platform or '-' }}</td>
+                            <td>{{ n.capability or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>No CDP neighbors found.</p>
+                {% endif %}
             </div>
             <div class="row">
                 <div class="col-12 col-lg-6">
@@ -932,5 +986,167 @@
 				});
 		}
 	</script>
+
+    <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+    
+    <script>
+        // Map from platform/neighbor pattern to a static icon URL
+        function deviceIconForNeighbor(n) {
+            const platform = (n.platform || '').toLowerCase();
+            const name = (n.neighbor || '').toLowerCase();
+
+            // Heuristics:
+            // 1) Cisco IP phones typically start with "sep"
+            if (name.startsWith('sep')) return '/static/assets/img/devices/phone.png';
+
+            // 2) Switch families
+            if (name.includes('asw') || name.includes('dsw') || name.includes('csw')) {
+            return '/static/assets/img/devices/switch.png';
+            }
+
+            // 3) AP families
+            if (name.includes('ap') || platform.includes('c9130')) {
+            return '/static/assets/img/devices/access.png';
+            }
+
+            // 4) VG families
+            if (name.includes('vg') || platform.includes('isr')) {
+            return '/static/assets/img/devices/voip.png';
+            }
+
+            // Router-ish
+            // if (platform.includes('asr') || platform.includes('isr') || platform.includes('router')) {
+            // return '/static/assets/img/devices/router.png';
+            // }
+
+            // Fall back
+            return '/static/assets/img/devices/unknown.png';
+        }
+    </script>
+
+    <script>
+        (function () {
+            const device = {{ device | tojson }};
+            const cdp = {{ cdp | tojson }};
+            const thisDeviceName = device?.hostname || device?.details?.hostname || 'This Switch';
+            
+            const neighbors = Array.isArray(cdp) ? cdp : (cdp && Array.isArray(cdp.neighbors) ? cdp.neighbors : []);
+            const safe = s => String(s || '').replace(/[^a-zA-Z0-9:_\-.]/g, '_').slice(0, 80);
+            const mainId = `dev:${safe(device.id || device?.details?.id || thisDeviceName)}`;
+            
+            const elements = [];
+            elements.push({
+                data: { id: mainId, label: thisDeviceName, role: 'self' },
+                classes: 'self-node'
+            });
+            
+            for (const n of neighbors) {
+                const nName = n.neighbor || n.platform || 'Neighbor';
+                const neighborId = `nbr:${safe(nName)}`;
+            
+                if (!elements.find(e => e.data?.id === neighborId)) {
+                elements.push({
+                    data: {
+                    id: neighborId,
+                    label: nName,
+                    role: 'neighbor',
+                    platform: n.platform || '',
+                    icon: deviceIconForNeighbor(n)  // <-- store icon path
+                    },
+                    classes: 'neighbor-node'
+                });
+                }
+            
+                const localIf = n.local_interface || '';
+                const remoteIf = n.neighbor_interface || '';
+                const edgeId = `link:${safe(thisDeviceName)}:${safe(localIf)}->${safe(nName)}:${safe(remoteIf)}`;
+            
+                elements.push({
+                data: {
+                    id: edgeId,
+                    source: mainId,
+                    target: neighborId,
+                    label: `${localIf || '—'} \u2194 ${remoteIf || '—'}`
+                }
+                });
+            }
+            
+            const cy = cytoscape({
+                container: document.getElementById('cdp-graph'),
+                elements,
+                style: [
+                // Generic node style with background images
+                { selector: 'node', style: {
+                    'background-color': '#e2e8f0',
+                    'border-width': 2,
+                    'border-color': '#0ea5e9',
+                    'shape': 'round-rectangle',
+                    'width': 70,
+                    'height': 70,
+            
+                    // Image
+                    'background-image': 'data(icon)',      // << use per-node icon
+                    'background-fit': 'cover',
+                    'background-opacity': 1,
+            
+                    // Text label below the node
+                    'label': 'data(label)',
+                    'text-valign': 'bottom',
+                    'text-halign': 'center',
+                    'text-margin-y': 6,
+                    'font-size': '11px',
+                    'color': '#0b1b2a'
+                }},
+                // Self node can use a fixed switch icon (or platform-based if you prefer)
+                { selector: 'node.self-node', style: {
+                    'background-image': '/static/assets/img/devices/switch.png',
+                    'border-color': '#22c55e',
+                    'background-color': '#d1fae5',
+                    'font-weight': 'bold',
+                    'color': '#065f46'
+                }},
+                { selector: 'edge', style: {
+                    'width': 2,
+                    'line-color': '#94a3b8',
+                    'curve-style': 'bezier',
+                    'label': 'data(label)',
+                    'font-size': '11px',
+                    'text-rotation': 'autorotate',
+                    'text-margin-y': -8,
+                    'color': '#334155'
+                }},
+                { selector: ':selected', style: {
+                    'border-width': 3,
+                    'border-color': '#fbbf24',
+                    'line-color': '#fbbf24'
+                }}
+                ],
+                layout: { name: 'cose', animate: true, padding: 40, nodeRepulsion: 8000 }
+            });
+            
+            // Re-layout when tab becomes visible (Bootstrap)
+            const tabTrigger = document.querySelector('[data-bs-target="#cdp-pane"], a[href="#cdp-pane"]');
+            if (tabTrigger) {
+                tabTrigger.addEventListener('shown.bs.tab', () => {
+                cy.resize();
+                cy.fit();
+                cy.layout({ name: 'cose', animate: true, padding: 40, nodeRepulsion: 8000 }).run();
+                });
+            } else {
+                cy.fit();
+            }
+            })();
+        </script>
+    
+    <script>
+        document.querySelectorAll('img[data-platform]').forEach(img => {
+        const n = {
+            platform: img.getAttribute('data-platform'),
+            neighbor: img.getAttribute('data-neighbor')
+        };
+        img.src = deviceIconForNeighbor(n);
+        });
+    </script>
+  
   
 {% endblock %}
