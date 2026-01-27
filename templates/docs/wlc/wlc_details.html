@@ -205,6 +205,13 @@
                             Associate APs
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="power-tab" data-bs-toggle="tab"
+                                data-bs-target="#power-pane" type="button" role="tab"
+                                aria-controls="power-pane" aria-selected="false">
+                            Power Supply Details
+                        </button>
+                    </li>
                 </ul>
             </div>
 
@@ -459,14 +466,57 @@
                        
                         </div>
                     </div>
-        </div>
-            <div class="row">
-            
+                </div>
+                <div class="tab-pane fade" id="power-pane" role="tabpanel" aria-labelledby="power-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Power Supply Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-modi-projects" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Operational Status</th>
+                                    <th>Serial Number</th>
+                                    <th>Vendor Equipment Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pwrSply in physical %}
+                                    {% if "cevPowerSupply" in pwrSply.vendorEquipmentType %}
+                                    <tr>
+                                        <td>{{ pwrSply.name | default('-', true) }}</td>
+                                        
+                                        {% set state = pwrSply.operationalStateCode | default('', true) | lower | trim %}
+                                        {% if state in ['normal', 'on', 'operational', 'ok'] %}
+                                            <td><i class="align-middle text-success" data-feather="check-circle"></i></td>
+                                        {% else %}
+                                            <td><i class="align-middle text-danger" data-feather="x-circle"></i></td>
+                                        {% endif %}
+    
+                                        <td>{{ pwrSply.serialNumber | default('-', true) }}</td>
+                                    
+                                        <td>{{ pwrSply.vendorEquipmentType | default('-', true) }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Operational Status</th>
+                                    <th>Serial Number</th>
+                                    <th>Vendor Equipment Type</th>
+                                </tr>
+                            </tfoot>
+                        </table>    
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
-    <footer class="footer">
+    <!-- <footer class="footer">
         <div class="container-fluid">
             <div class="row text-muted">
                 <div class="col-6 text-start">
@@ -492,7 +542,7 @@
                 </div>
             </div>
         </div>
-    </footer>
+    </footer> -->
 
     <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
 
@@ -598,16 +648,59 @@
     </script>
     
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-        $("#datatables-dashboard-modi-projects").DataTable({
-            paging: true,        // enable pagination
-            pageLength: 12,      // show 10 rows per page
-            lengthChange: false,  // allow user to change rows/page via a dropdown (optional)
-            autoWidth: false,
-            ordering: false,
-            bFilter: false,      // keep search disabled (optional)
-            info: true           // show "Showing X to Y of Z entries"
-        });
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            // 1) Add an input to each footer cell
+            $('#datatables-dashboard-modi-projects tfoot th').each(function () {
+                const title = $(this).text().trim();
+                $(this).html(
+                '<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />'
+                );
+            });
+            
+            // 2) Initialize DataTable
+            const table = $("#datatables-dashboard-modi-projects").DataTable({
+                paging: true,
+                pageLength: 10,
+                lengthChange: false,
+                autoWidth: false,
+                ordering: false,
+            
+                // IMPORTANT: keep searching enabled
+                // searching: true, // (default is true, so this line is optional)
+                dom: 'lrtip',      // hide default global search input, but keep filtering enabled
+            
+                info: true,
+                language: {
+                emptyTable: "No project data available.",
+                zeroRecords: "No matching records found.",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                infoEmpty: "Showing 0 to 0 of 0 entries"
+                },
+            
+                // 3) Bind footer inputs to column search
+                initComplete: function () {
+                const api = this.api();
+            
+                api.columns().every(function () {
+                    const column = this;
+                    const $input = $('input', column.footer());
+            
+                    // optional: debounce to reduce redraws on each keystroke
+                    let t;
+                    $input.on('keyup change', function () {
+                    clearTimeout(t);
+                    const val = this.value;
+                    t = setTimeout(function () {
+                        if (column.search() !== val) {
+                        // no regex, smart search on
+                        column.search(val, false, true).draw();
+                        }
+                    }, 150);
+                    });
+                });
+                }
+            });
         });
     </script>
 
