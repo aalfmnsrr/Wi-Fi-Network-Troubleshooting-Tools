@@ -2,7 +2,15 @@
 {% block body %}
 			<main class="content">
 				<div class="container-fluid p-0">
-
+					<div class="alert alert-warning alert-dismissible" role="alert">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						<div class="alert-message">
+							<p class="mb-0">
+								<strong>Important!</strong> 
+								<a> All data is fetched daily at 00:00am. To avoid API request overload, click any hostname to open its details page, then use the <b>Fetch Data</b> button to update <b>only that single device</b>.</a>
+							</p>
+						</div>
+					</div>
 					<h1 class="h3 mb-3">Fair/Bad {{ family }}</h1>
 <!-- 
 					<div class="alert alert-warning alert-dismissible" role="alert">
@@ -38,6 +46,7 @@
 											<thead>
 												<tr>
 													<th>Hostname</th>
+													<th>Status</th>
 													<th>Health Score</th>
 													<th>IP Address</th>
 													<th>MAC Address</th>
@@ -49,11 +58,18 @@
 											<tbody>
 											{% for ap in access_points %}
 											<tr>
-												<td><a href="{{ url_for('ap_detail', ap_mac=ap.macAddress, site_id=ap.additionalInfo.siteid) }}">{{ ap.label }}</a></td>
-												{% if 4 > ap.health %}
-													<td style="color: red">{{ ap.health }}</td>
+												<td><a href="{{ url_for('ap_detail', ap_mac=ap.additionalInfo.macAddress, site_id=ap.additionalInfo.siteid) }}">{{ ap.label }}</a></td>
+												<td>
+													{% if ap.details.communicationState == "REACHABLE" %}
+													<span class="badge bg-success">{{ ap.details.communicationState | capitalize }}</span>
+													{% else %}
+													<span class="badge bg-danger">{{ ap.details.communicationState | capitalize }}</span>
+													{% endif %}
+												</td>
+												{% if 4 > ap.details.overallHealth %}
+													<td style="color: red">{{ ap.details.overallHealth }}</td>
 												{% else %}
-													<td style="color: orange">{{ ap.health }}</td>
+													<td style="color: orange">{{ ap.details.overallHealth }}</td>
 												{% endif %}
 												<td>{{ ap.ip }}</td>
 												<td>{{ ap.additionalInfo.macAddress | upper }}</td>
@@ -66,6 +82,7 @@
 											<tfoot>
 												<tr>
 													<th>Hostname</th>
+													<th>Status</th>
 													<th>Health Score</th>
 													<th>IP Address</th>
 													<th>MAC Address</th>
@@ -78,6 +95,7 @@
 											<thead>
 												<tr>
 													<th>Hostname</th>
+													<th>Status</th>
 													<th>Health Score</th>
 													<th>Role</th>
 													<th>IP Address</th>
@@ -91,10 +109,17 @@
 											{% for device in devices %}
 											<tr>
 												<td><a href = "/switches/{{device.id}}">{{ device.hostname }}</a></td>
-												{% if 4 > device.health %}
-													<td style="color: red">{{ device.health }}</td>
+												<td>
+													{% if device.details.communicationState == "REACHABLE" %}
+													<span class="badge bg-success">{{ device.details.communicationState | capitalize }}</span>
+													{% else %}
+													<span class="badge bg-danger">{{ device.details.communicationState | capitalize }}</span>
+													{% endif %}
+												</td>
+												{% if 4 > device.details.overallHealth %}
+													<td style="color: red">{{ device.details.overallHealth }}</td>
 												{% else %}
-													<td style="color: orange">{{ device.health }}</td>
+													<td style="color: orange">{{ device.details.overallHealth }}</td>
 												{% endif %}
 												<td>{{ device.role }}</td>
 												<td>{{ device.managementIpAddress }}</td>
@@ -108,6 +133,7 @@
 											<tfoot>
 												<tr>
 													<th>Hostname</th>
+													<th>Status</th>
 													<th>Health Score</th>
 													<th>Role</th>
 													<th>IP Address</th>
@@ -121,6 +147,7 @@
 											<thead>
 												<tr>
 													<th>Hostname</th>
+													<th>Status</th>
 													<th>Health Score</th>
 													<th>Location</th>
 													<th>IP Address</th>
@@ -133,10 +160,17 @@
 											{% for w in wlc %}
 											<tr>
 												<td><a href = "{{url_for('wlc_details', id = w.id) }} " target="_blank">{{ w.hostname }}</a></td>
-												{% if 4 > w.health %}
-													<td style="color: red">{{ w.health }}</td>
+												<td>
+													{% if w.details.communicationState == "REACHABLE" %}
+													<span class="badge bg-success">{{ w.details.communicationState | capitalize }}</span>
+													{% else %}
+													<span class="badge bg-danger">{{ w.details.communicationState | capitalize }}</span>
+													{% endif %}
+												</td>
+												{% if 4 > w.details.overallHealth %}
+													<td style="color: red">{{ w.details.overallHealth }}</td>
 												{% else %}
-													<td style="color: orange">{{ w.health }}</td>
+													<td style="color: orange">{{ w.details.overallHealth }}</td>
 												{% endif %}
 												<td>{{ w.dc }}</td>
 												<td>{{ w.managementIpAddress }}</td>
@@ -149,6 +183,7 @@
 											<tfoot>
 												<tr>
 													<th>Hostname</th>
+													<th>Status</th>
 													<th>Health Score</th>
 													<th>Location</th>
 													<th>IP Address</th>
