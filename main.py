@@ -7,17 +7,20 @@ from flask_apscheduler import APScheduler
 import function, access_point, client_function, wlcs, switch, dashboard_page
 import bcrypt
 from datetime import timedelta
-from os.path import exists
+from os.path import exists, isfile, join
+from os import listdir
 import threading
+from pprint import pprint
 
 app = Flask(__name__, template_folder='templates/docs')
 app.secret_key = Config.SECRET_KEY
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_SECURE'] = False # should be set to True in Production!!!!!!, this means that HTTPS is required
 app.config['SESSION_COOKIE_DOMAIN'] = None
 app.config['SESSION_COOKIE_PATH'] = '/'
+app.config['SESSION_REFRESH_EACH_REQUEST'] = True
 app.config["SCHEDULER_TIMEZONE"] = "Asia/Kuala_Lumpur"
 scheduler = APScheduler()
 
@@ -218,11 +221,7 @@ def bad_device(site, devType):
             access_points = json.load(f)
         for ap in access_points:
             if ap.get("location") == site:
-                mac = ap.get("additionalInfo").get("macAddress")
-                ap["macAddress"] = mac
-                overallHealth = function.get_reach(mac)
-                if overallHealth < 7:
-                    ap["health"] = overallHealth
+                if ap.get("details").get("overallHealth") < 7:
                     bad_dev.append(ap)
         return render_template("bad-dev.html",
                             access_points=bad_dev,
@@ -236,11 +235,7 @@ def bad_device(site, devType):
             if site == "Hong Kong":
                 site = "Hongkong"
             if location == site:
-                mac = dev.get("macAddress")
-                overallHealth = function.get_reach(mac)
-                if overallHealth < 7:
-                    dev["location"] = location
-                    dev["health"] = overallHealth
+                if dev.get("details").get("overallHealth") < 7:
                     bad_dev.append(dev)
         return render_template("bad-dev.html",
                                devices=bad_dev,
@@ -250,10 +245,7 @@ def bad_device(site, devType):
             wlc_list = json.load(f)
         for wlc in wlc_list:
             if wlc.get("dc") == site:
-                mac = wlc.get("macAddress")
-                overallHealth = function.get_reach(mac)
-                if overallHealth < 7:
-                    wlc["health"] = overallHealth
+                if wlc.get("details").get("overallHealth") < 7:
                     bad_dev.append(wlc)
         return render_template("bad-dev.html",
                             wlc=bad_dev,
@@ -272,10 +264,7 @@ def ap_detail(ap_mac):
         if a.get("additionalInfo").get("macAddress").upper() == ap_mac.upper():
             site_id = a.get("additionalInfo").get("siteid")
             id = a.get("id")
-            if not a.get("details"):
-                ap = function.append_details(a.get("additionalInfo").get("macAddress"), "AP")
-            else:
-                ap = a.get("details")
+            ap = a.get("details")
             break
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id, "WLC")
