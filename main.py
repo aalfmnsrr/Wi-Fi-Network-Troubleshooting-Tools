@@ -418,10 +418,25 @@ def wlc(dc):
 @session_check
 def switches():
     devices = None
+    role = request.args.get("role")
     with open(Config.switch_path, 'r', encoding="utf-8") as f:
         devices = json.load(f)
+    
+    
+    # Filter if a role is provided (safer normalization)
+    if role:
+        role_norm = (role or "").strip().upper()
+        devices = [
+            d for d in devices
+            if (d.get("role") or "").strip().upper() == role_norm
+        ]
+    else:
+        role_norm = None  # for logging only
+
+
     sw_locations = switch.get_swLocation(devices)
-    return render_template("switches.html", devices=devices, sw_locations=sw_locations)
+
+    return render_template("switches.html", devices=devices, sw_locations=sw_locations, role=role)
 
 @app.route('/switches/<device_id>', methods=['GET'])
 @session_check
@@ -442,27 +457,39 @@ def switch_detail(device_id):
     access_points = None
     pwrSply = None
     cdp = None
+
     with open(Config.switch_path, 'r', encoding="utf-8") as f:
         device = sw = json.load(f)
     for d in device:
         if d["id"] == device_id:
             sw = d.get("details")
+            
             access_points = d.get("AP")
             ap_cnt = len(access_points)
             ap_groups = switch.group_ap_labels_by_floor(access_points)
+            
             vlans = d.get("vlans")
             vlan_count = len(vlans)
+            
             poe = d.get("poe")
+            
             issues = switch.get_switchIssues(device_id)
+            
             stack_json = d.get("stack_json")
             stack_info = d.get("stack_info")
             svl_info = d.get("svl_info")
             use_svl = bool(stack_json.get('svlSwitchInfo')) and bool(svl_info)
+            
             sw_interface = d.get("interface")
+            
             pwrSply = switch.sort_power_supplies(d.get("powerSupply"))
+            
             cdp = d.get("cdp") or []
+            
             device = d
+            
             break
+    
     # Decorate each interface with a formatted speed string
     # Ensure sw_interface is a list/dict iterable; adjust if your structure is different
     if isinstance(sw_interface, list):
