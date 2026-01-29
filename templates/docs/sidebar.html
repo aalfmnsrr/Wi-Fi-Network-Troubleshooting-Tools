@@ -60,7 +60,7 @@
                         </li>
                         <li class="sidebar-item">
                             <a class="sidebar-link" href ="{{ url_for('wlc_list')}}">
-                                <i class="align-middle" data-feather="wifi"></i> <span class="align-middle">Wireless Controllers</span>
+                                <i class="align-middle" data-feather="wifi"></i> <span class="align-middle">Wireless LAN Controllers</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
@@ -245,3 +245,18 @@
                     </div>
                 </nav>
         {% block body %} {% endblock %}
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row text-muted">
+                    <div class="col-6 align-self-end">
+                        <p class="mb-0 ">
+                            &copy; 2026 - <a href="index.html" class="text-muted"><b>AXA GO Asia Network Team</b> - All Rights Reserved</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+{% block script %} {% endblock %}
