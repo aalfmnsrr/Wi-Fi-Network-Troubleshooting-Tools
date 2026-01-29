@@ -221,7 +221,7 @@ def bad_device(site, devType):
             access_points = json.load(f)
         for ap in access_points:
             if ap.get("location") == site:
-                if ap.get("details").get("overallHealth") < 7:
+                if ap.get("details").get("overallHealth") < 8:
                     bad_dev.append(ap)
         return render_template("bad-dev.html",
                             access_points=bad_dev,
@@ -235,7 +235,7 @@ def bad_device(site, devType):
             if site == "Hong Kong":
                 site = "Hongkong"
             if location == site:
-                if dev.get("details").get("overallHealth") < 7:
+                if dev.get("details").get("overallHealth") < 8:
                     bad_dev.append(dev)
         return render_template("bad-dev.html",
                                devices=bad_dev,
@@ -245,7 +245,7 @@ def bad_device(site, devType):
             wlc_list = json.load(f)
         for wlc in wlc_list:
             if wlc.get("dc") == site:
-                if wlc.get("details").get("overallHealth") < 7:
+                if wlc.get("details").get("overallHealth") < 8:
                     bad_dev.append(wlc)
         return render_template("bad-dev.html",
                             wlc=bad_dev,
