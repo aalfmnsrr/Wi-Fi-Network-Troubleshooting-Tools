@@ -415,7 +415,7 @@ def search_client():
 
 
 if __name__ == '__main__':
-    app.config['DEBUG'] = False
+    app.config['DEBUG'] = True
     # error.html will be generated if error 400 or 500 if uncomment below
     # app.config['PROPAGATE_EXCEPTIONS'] = False
     # run when app loads
