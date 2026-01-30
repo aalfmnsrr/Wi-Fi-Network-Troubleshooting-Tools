@@ -1,0 +1,379 @@
+{
+    "network": {
+        "version": "1.0",
+        "response": [
+            {
+                "time": "2026-01-23T14:15:00.000+0000",
+                "healthScore": 65,
+                "totalCount": 700,
+                "goodCount": 457,
+                "noHealthCount": 0,
+                "fairCount": 191,
+                "badCount": 52,
+                "maintenanceModeCount": 0,
+                "entity": null,
+                "timeinMillis": 1769177700000
+            }
+        ],
+        "measuredBy": "global",
+        "latestMeasuredByEntity": null,
+        "latestHealthScore": 65,
+        "monitoredDevices": 700,
+        "monitoredHealthyDevices": 457,
+        "monitoredUnHealthyDevices": 243,
+        "noHealthDevices": 0,
+        "notApplicableDevices": 0,
+        "totalDevices": 700,
+        "monitoredPoorHealthDevices": 52,
+        "monitoredFairHealthDevices": 191,
+        "healthContributingDevices": 700,
+        "healthDistirubution": [
+            {
+                "category": "Core",
+                "totalCount": 25,
+                "healthScore": 100,
+                "goodPercentage": 100.0,
+                "badPercentage": 0.0,
+                "fairPercentage": 0.0,
+                "noHealthPercentage": 0.0,
+                "goodCount": 25.0,
+                "badCount": 0.0,
+                "fairCount": 0.0,
+                "noHealthCount": 0.0,
+                "thirdPartyDeviceCount": 0.0
+            },
+            {
+                "category": "Access",
+                "totalCount": 66,
+                "healthScore": 100,
+                "goodPercentage": 100.0,
+                "badPercentage": 0.0,
+                "fairPercentage": 0.0,
+                "noHealthPercentage": 0.0,
+                "goodCount": 66.0,
+                "badCount": 0.0,
+                "fairCount": 0.0,
+                "noHealthCount": 0.0,
+                "thirdPartyDeviceCount": 0.0
+            },
+            {
+                "category": "Distribution",
+                "totalCount": 51,
+                "healthScore": 98,
+                "goodPercentage": 98.039215,
+                "badPercentage": 1.9607843,
+                "fairPercentage": 0.0,
+                "noHealthPercentage": 0.0,
+                "goodCount": 50.0,
+                "badCount": 1.0,
+                "fairCount": 0.0,
+                "noHealthCount": 0.0,
+                "thirdPartyDeviceCount": 0.0,
+                "kpiMetrics": [
+                    {
+                        "key": null,
+                        "value": "POOR"
+                    }
+                ]
+            },
+            {
+                "category": "Router",
+                "totalCount": 9,
+                "healthScore": 100,
+                "goodPercentage": 100.0,
+                "badPercentage": 0.0,
+                "fairPercentage": 0.0,
+                "noHealthPercentage": 0.0,
+                "goodCount": 9.0,
+                "badCount": 0.0,
+                "fairCount": 0.0,
+                "noHealthCount": 0.0,
+                "thirdPartyDeviceCount": 0.0
+            },
+            {
+                "category": "WLC",
+                "totalCount": 8,
+                "healthScore": 100,
+                "goodPercentage": 100.0,
+                "badPercentage": 0.0,
+                "fairPercentage": 0.0,
+                "noHealthPercentage": 0.0,
+                "goodCount": 8.0,
+                "badCount": 0.0,
+                "fairCount": 0.0,
+                "noHealthCount": 0.0,
+                "thirdPartyDeviceCount": 0.0
+            },
+            {
+                "category": "AP",
+                "totalCount": 541,
+                "healthScore": 55,
+                "goodPercentage": 55.26802,
+                "badPercentage": 9.426987,
+                "fairPercentage": 35.30499,
+                "noHealthPercentage": 0.0,
+                "goodCount": 299.0,
+                "badCount": 51.0,
+                "fairCount": 191.0,
+                "noHealthCount": 0.0,
+                "thirdPartyDeviceCount": 0.0,
+                "kpiMetrics": [
+                    {
+                        "key": null,
+                        "value": "POOR"
+                    }
+                ]
+            }
+        ]
+    },
+    "overall": {
+        "time": "2026-01-23T14:15:00.000+0000",
+        "healthScore": 65,
+        "totalCount": 700,
+        "goodCount": 457,
+        "noHealthCount": 0,
+        "fairCount": 191,
+        "badCount": 52,
+        "maintenanceModeCount": 0,
+        "entity": null,
+        "timeinMillis": 1769177700000
+    },
+    "access": {
+        "category": "Access",
+        "totalCount": 66,
+        "healthScore": 100,
+        "goodPercentage": 100.0,
+        "badPercentage": 0.0,
+        "fairPercentage": 0.0,
+        "noHealthPercentage": 0.0,
+        "goodCount": 66.0,
+        "badCount": 0.0,
+        "fairCount": 0.0,
+        "noHealthCount": 0.0,
+        "thirdPartyDeviceCount": 0.0
+    },
+    "core": {
+        "category": "Core",
+        "totalCount": 25,
+        "healthScore": 100,
+        "goodPercentage": 100.0,
+        "badPercentage": 0.0,
+        "fairPercentage": 0.0,
+        "noHealthPercentage": 0.0,
+        "goodCount": 25.0,
+        "badCount": 0.0,
+        "fairCount": 0.0,
+        "noHealthCount": 0.0,
+        "thirdPartyDeviceCount": 0.0
+    },
+    "distribution": {
+        "category": "Distribution",
+        "totalCount": 51,
+        "healthScore": 98,
+        "goodPercentage": 98.039215,
+        "badPercentage": 1.9607843,
+        "fairPercentage": 0.0,
+        "noHealthPercentage": 0.0,
+        "goodCount": 50.0,
+        "badCount": 1.0,
+        "fairCount": 0.0,
+        "noHealthCount": 0.0,
+        "thirdPartyDeviceCount": 0.0,
+        "kpiMetrics": [
+            {
+                "key": null,
+                "value": "POOR"
+            }
+        ]
+    },
+    "router": {
+        "category": "Router",
+        "totalCount": 9,
+        "healthScore": 100,
+        "goodPercentage": 100.0,
+        "badPercentage": 0.0,
+        "fairPercentage": 0.0,
+        "noHealthPercentage": 0.0,
+        "goodCount": 9.0,
+        "badCount": 0.0,
+        "fairCount": 0.0,
+        "noHealthCount": 0.0,
+        "thirdPartyDeviceCount": 0.0
+    },
+    "wlc": {
+        "category": "WLC",
+        "totalCount": 8,
+        "healthScore": 100,
+        "goodPercentage": 100.0,
+        "badPercentage": 0.0,
+        "fairPercentage": 0.0,
+        "noHealthPercentage": 0.0,
+        "goodCount": 8.0,
+        "badCount": 0.0,
+        "fairCount": 0.0,
+        "noHealthCount": 0.0,
+        "thirdPartyDeviceCount": 0.0
+    },
+    "ap": {
+        "category": "AP",
+        "totalCount": 541,
+        "healthScore": 55,
+        "goodPercentage": 55.26802,
+        "badPercentage": 9.426987,
+        "fairPercentage": 35.30499,
+        "noHealthPercentage": 0.0,
+        "goodCount": 299.0,
+        "badCount": 51.0,
+        "fairCount": 191.0,
+        "noHealthCount": 0.0,
+        "thirdPartyDeviceCount": 0.0,
+        "kpiMetrics": [
+            {
+                "key": null,
+                "value": "POOR"
+            }
+        ]
+    },
+    "site_health": [
+        {
+            "site": "HK",
+            "numberOfNetworkDevice": 305,
+            "accessGoodCount": 26,
+            "coreGoodCount": 13,
+            "distributionGoodCount": 43,
+            "routerGoodCount": 7,
+            "wlcDeviceGoodCount": 2,
+            "apDeviceGoodCount": 77,
+            "accessTotalCount": 26,
+            "coreTotalCount": 13,
+            "distributionTotalCount": 44,
+            "routerTotalCount": 7,
+            "wlcDeviceTotalCount": 2,
+            "apDeviceTotalCount": 213
+        },
+        {
+            "site": "PH",
+            "numberOfNetworkDevice": 16,
+            "accessGoodCount": 0,
+            "coreGoodCount": 0,
+            "distributionGoodCount": 0,
+            "routerGoodCount": 0,
+            "wlcDeviceGoodCount": 0,
+            "apDeviceGoodCount": 0,
+            "accessTotalCount": 0,
+            "coreTotalCount": 0,
+            "distributionTotalCount": 0,
+            "routerTotalCount": 0,
+            "wlcDeviceTotalCount": 0,
+            "apDeviceTotalCount": 16
+        },
+        {
+            "site": "ID",
+            "numberOfNetworkDevice": 206,
+            "accessGoodCount": 12,
+            "coreGoodCount": 1,
+            "distributionGoodCount": 1,
+            "routerGoodCount": 0,
+            "wlcDeviceGoodCount": 2,
+            "apDeviceGoodCount": 137,
+            "accessTotalCount": 12,
+            "coreTotalCount": 1,
+            "distributionTotalCount": 1,
+            "routerTotalCount": 0,
+            "wlcDeviceTotalCount": 2,
+            "apDeviceTotalCount": 190
+        },
+        {
+            "site": "MY",
+            "numberOfNetworkDevice": 31,
+            "accessGoodCount": 3,
+            "coreGoodCount": 2,
+            "distributionGoodCount": 0,
+            "routerGoodCount": 0,
+            "wlcDeviceGoodCount": 0,
+            "apDeviceGoodCount": 0,
+            "accessTotalCount": 3,
+            "coreTotalCount": 2,
+            "distributionTotalCount": 0,
+            "routerTotalCount": 0,
+            "wlcDeviceTotalCount": 0,
+            "apDeviceTotalCount": 26
+        },
+        {
+            "site": "SG",
+            "numberOfNetworkDevice": 8,
+            "accessGoodCount": 0,
+            "coreGoodCount": 0,
+            "distributionGoodCount": 0,
+            "routerGoodCount": 0,
+            "wlcDeviceGoodCount": 0,
+            "apDeviceGoodCount": 7,
+            "accessTotalCount": 0,
+            "coreTotalCount": 0,
+            "distributionTotalCount": 0,
+            "routerTotalCount": 0,
+            "wlcDeviceTotalCount": 0,
+            "apDeviceTotalCount": 8
+        },
+        {
+            "site": "TH",
+            "numberOfNetworkDevice": 124,
+            "accessGoodCount": 25,
+            "coreGoodCount": 8,
+            "distributionGoodCount": 6,
+            "routerGoodCount": 0,
+            "wlcDeviceGoodCount": 2,
+            "apDeviceGoodCount": 70,
+            "accessTotalCount": 25,
+            "coreTotalCount": 8,
+            "distributionTotalCount": 6,
+            "routerTotalCount": 0,
+            "wlcDeviceTotalCount": 2,
+            "apDeviceTotalCount": 83
+        },
+        {
+            "site": "SG",
+            "numberOfNetworkDevice": 10,
+            "accessGoodCount": 0,
+            "coreGoodCount": 0,
+            "distributionGoodCount": 0,
+            "routerGoodCount": 0,
+            "wlcDeviceGoodCount": 2,
+            "apDeviceGoodCount": 7,
+            "accessTotalCount": 0,
+            "coreTotalCount": 0,
+            "distributionTotalCount": 0,
+            "routerTotalCount": 0,
+            "wlcDeviceTotalCount": 2,
+            "apDeviceTotalCount": 8
+        }
+    ],
+    "clients": {
+        "wired": 1708,
+        "wireless": 211,
+        "wiredHealth": 100,
+        "wirelessHealth": 96
+    },
+    "system": {
+        "hostName": "APDC3AE12-DNA-001.apdc.mgmt.axa-tech.intraxa",
+        "version": "1",
+        "kpis": {
+            "cpu": {
+                "utilization": "11.83",
+                "units": "percent"
+            },
+            "memory": {
+                "utilization": "80.72",
+                "units": "percent"
+            },
+            "network tx_rate": {
+                "utilization": "11294.56",
+                "units": "kbps"
+            },
+            "network rx_rate": {
+                "utilization": "14189.38",
+                "units": "kbps"
+            }
+        }
+    }
+}

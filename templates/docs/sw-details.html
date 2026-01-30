@@ -2,7 +2,14 @@
 {% block body %}
     <main class="content">
         <div class="container-fluid p-0">
-
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-message">
+                    <p class="mb-0">
+                        <strong>Important!</strong> All data is fetched daily at 00:00am. Click <b>Fetch Data</b> button to retrieve the latest data.</a>
+                    </p>
+                </div>
+            </div>
             <div class="row mb-2 mb-xl-3">
                 <div class="col-auto d-none d-sm-block">
                     <h3 class ="mb-0">
@@ -36,9 +43,22 @@
                                             <button class="btn btn-primary shadow-sm">
                     <i class="align-middle" data-feather="filter">&nbsp;</i>
                     </button>
-                    <button class="btn btn-primary shadow-sm" onclick="location.reload()">
-                        <i class="align-middle" data-feather="refresh-cw" >&nbsp;</i>
+                    <button class="btn btn-primary shadow-sm" onclick="refreshSwitch()">
+                        <p class="align-middle mb-0">Fetch Data</p>
                     </button>
+                    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" aria-labelledby="loadingModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-body d-flex align-items-center">
+                            <div class="spinner-border text-dark me-3" role="status" aria-hidden="true"></div>
+                            <div>
+                                <div id="loadingModalLabel" class="fw-semibold">Fetching data…</div>
+                                <small class="text-muted">This may take a moment.</small>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">  
@@ -204,6 +224,20 @@
                         Stack Details
                     </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="power-tab" data-bs-toggle="tab"
+                                data-bs-target="#power-pane" type="button" role="tab"
+                                aria-controls="power-pane" aria-selected="false">
+                            Power Supply Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cdp-tab" data-bs-toggle="tab"
+                                data-bs-target="#cdp-pane" type="button" role="tab"
+                                aria-controls="cdp-pane" aria-selected="false">
+                            CDP Neighbors
+                        </button>
+                    </li>
                 </ul>
             </div>
             <div class="tab-content" id="switchTabContent">
@@ -294,23 +328,23 @@
                         <div class="card-header">
                             <h5 class="card-title mb-0">Interface Details</h5>
                         </div>
-                        <table id="datatables-dashboard-modi-projects" class="table table-striped text-center">
+                        <table id="datatables-column-search-text-intf" class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th class="text-center">Interface Name</th>
-                                    <th class="text-center">Operational Status</th>
-                                    <th class="text-center">Admin Status</th>
-                                    <th class="text-center">Port Channel ID</th>
-                                    <th class="text-center">Type</th>
-                                    <th class="text-center">Allowed VLAN(s)</th>
-                                    <th class="text-center">Link Speed</th>
-                                    <th class="text-center">Duplex</th>
+                                    <th>Interface Name</th>
+                                    <th>Operational Status</th>
+                                    <th>Admin Status</th>
+                                    <th>Port Channel ID</th>
+                                    <th>Type</th>
+                                    <th>Allowed VLAN(s)</th>
+                                    <th>Link Speed</th>
+                                    <th>Duplex</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for intf in sw_interface %}
                                 <tr>
-                                    <td class="text-start">{{ intf.name | default('-', true) }}</td>
+                                    <td>{{ intf.name | default('-', true) }}</td>
         
                                     {% set oper = (intf.operStatus | default('', true)) %}
                                     {% if not oper or oper == 'down' %}
@@ -366,7 +400,7 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">StackWise Virtual Details</h5>
                             </div>
-                            <table id="datatables-dashboard-modi-projects" class="table table-striped text-center">
+                            <table id="datatables-column-search-text-stack" class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>Switch Num</th>
@@ -374,8 +408,8 @@
                                         <th>Product ID</th>
                                         <th>MAC Address</th>
                                         <th>Role</th>
-                                        <th>State</th>
                                         <th>Priority</th>
+                                        <th>Status</th>
                                         <th>Source Port(s)</th>
                                         <th>Destination Port(s)</th>
                                         <th>DAD Port</th>
@@ -389,8 +423,8 @@
                                         <td>{{ s.pID }}</td>
                                         <td>{{ s.mac }}</td>
                                         <td>{{ s.role }}</td>
-                                        <td>{{ s.state }}</td>
                                         <td>{{ s.priority }}</td>
+                                        <td>{{ s.state }}</td>
         
                                         <!-- Show multiple ports neatly -->
                                         <td>
@@ -413,7 +447,7 @@
                             <div class="card-header">
                                 <h5 class="card-title mb-0">StackWise Details</h5>
                             </div>
-                            <table id="datatables-dashboard-modi-projects" class="table table-striped text-center">
+                            <table id="datatables-column-search-text-stack" class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>Switch Num</th>
@@ -421,8 +455,8 @@
                                         <th>Product ID</th>
                                         <th>MAC Address</th>
                                         <th>Role</th>
-                                        <th>State</th>
                                         <th>Priority</th>
+                                        <th>Status</th>
                                         <th>Port 1 → Switch</th>
                                         <th>Port 2 → Switch</th>
                                     </tr>
@@ -435,8 +469,8 @@
                                         <td>{{ s.pID }}</td>
                                         <td>{{ s.mac | capitalize }}</td>
                                         <td>{{ s.role }}</td>
-                                        <td>{{ s.state }}</td>
                                         <td>{{ s.priority }}</td>
+                                        <td>{{ s.state }}</td>
                                         <td>{{ s.port1_neighbor_sw }}</td>
                                         <td>{{ s.port2_neighbor_sw }}</td> 
                                     </tr>
@@ -445,6 +479,163 @@
                         </table>
                         {% endif %}
                     </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="power-pane" role="tabpanel" aria-labelledby="power-tab">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">POE Details</h5>
+                    </div>
+                    <div class="row justify-content-center">
+						<div class="col-md-6 col-xxl-3 d-flex">
+							<div class="card flex-fill">
+								<div class="card-body">
+									<div class="row">
+										<div class="col mt-0">
+											<h5 class="card-title">POE Budgetted</h5>
+										</div>
+
+										<div class="col-auto">
+											<div class="stat stat-sm">
+												<i class="align-middle" data-feather="zap"></i>
+											</div>
+										</div>
+									</div>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerAllocated }} W</span>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-xxl-3 d-flex">
+							<div class="card flex-fill">
+								<div class="card-body">
+									<div class="row">
+										<div class="col mt-0">
+											<h5 class="card-title">POE Consumed</h5>
+										</div>
+
+										<div class="col-auto">
+											<div class="stat stat-sm">
+												<i class="align-middle" data-feather="power"></i>
+											</div>
+										</div>
+									</div>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerConsumed }} W</span>
+								</div>
+							</div>
+						</div>
+                        <div class="col-md-6 col-xxl-3 d-flex">
+							<div class="card flex-fill">
+								<div class="card-body">
+									<div class="row">
+										<div class="col mt-0">
+											<h5 class="card-title">POE Remaining</h5>
+										</div>
+
+										<div class="col-auto">
+											<div class="stat stat-sm">
+												<i class="align-middle" data-feather="bar-chart-2"></i>
+											</div>
+										</div>
+									</div>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerRemaining }} W</span>
+								</div>
+							</div>
+						</div>
+                    </div>
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Power Supply Details</h5>
+                    </div>
+                    <table id="datatables-column-search-text-pwr" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Operational Status</th>
+                                <th>Serial Number</th>
+                                <th>Vendor Equipment Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pwr in pwrSply %}
+                                {% if "PWR" in pwr.productId or "C6800-XL-3KW" in pwr.productId %}
+                                <tr>
+                                    <td>{{ pwr.name | default('-', true) }}</td>
+                                    
+                                    {% set state = pwr.operationalStateCode | default('', true) | lower | trim %}
+                                    {% if state in ['normal', 'on', 'operational', 'ok'] %}
+                                        <td><i class="align-middle text-success" data-feather="check-circle"></i></td>
+                                    {% else %}
+                                        <td><i class="align-middle text-danger" data-feather="x-circle"></i></td>
+                                    {% endif %}
+
+                                    <td>{{ pwr.serialNumber | default('-', true) }}</td>
+                                
+                                    <td>{{ pwr.vendorEquipmentType | default('-', true) }}</td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>    
+                </div>
+            </div>
+            <div class="tab-pane fade" id="cdp-pane" role="tabpanel" aria-labelledby="cdp-tab">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">CDP Neighbors</h5>
+                    </div>
+                    {% if cdp and cdp|length > 0 %}
+                    <table id="datatables-column-search-text-cdp" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Local Interface</th>
+                                <th>Neighbor</th>
+                                <th>Neighbor Interface</th>
+                                <th>Platform</th>
+                                <th>Capability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for n in cdp %}
+                            <tr>
+                                <td>{{ n.local_interface or '-' }}</td>
+                                <td>
+                                    <img
+                                        src="{{ '/static/assets/img/devices/unknown.png' }}"
+                                        alt="icon"
+                                        width="16"
+                                        height="16"
+                                        style="margin-right:6px;"
+                                        onerror="this.src='/static/assets/img/devices/unknown.png';"
+                                        data-platform="{{ n.platform or '' }}"
+                                        data-neighbor="{{ n.neighbor or '' }}"
+                                        />
+                                    {{ n.neighbor or '-' }}
+                                </td>
+                                <td>{{ n.neighbor_interface or '-' }}</td>
+                                <td>{{ n.platform or '-' }}</td>
+                                <td>{{ n.capability or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Local Interface</th>
+                                <th>Neighbor</th>
+                                <th>Neighbor Interface</th>
+                                <th>Platform</th>
+                                <th>Capability</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    {% else %}
+                    <p>No CDP neighbors found.</p>
+                    {% endif %}
+                </div>
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">CDP Topology</h5>
+                    </div>
+                    <div id="cdp-graph" style="width:100%; height: 600px; border: 1px solid #e5e7eb; border-radius: 10px;"></div>
+                    <noscript>Please enable JavaScript to see the topology.</noscript>
                 </div>
             </div>
             <div class="row">
@@ -477,35 +668,155 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container-fluid">
-            <div class="row text-muted">
-                <div class="col-6 text-start">
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Support</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Help Center</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Privacy</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Terms of Service</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-6 text-end">
-                    <p class="mb-0">
-                        &copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
+    {% endblock %}
+    {% block script %}
     <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          // Add search inputs to each footer cell
+          $('#datatables-column-search-text-intf tfoot th').each(function() {
+            const title = $(this).text();
+            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+          });
+      
+          const table = $('#datatables-column-search-text-intf').DataTable({
+            dom: '<"dt-top"t><"dt-bottom d-flex justify-content-between align-items-center"ip>',
+            columnDefs: [{ searchable: true }]
+          });
+      
+          // Column search functionality
+          table.columns().every(function() {
+            const that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+              if (that.search() !== this.value) {
+                that.search(this.value).draw();
+              }
+            });
+          });
+      
+          // Clear all filters button
+          $('#clear-filter').on('click', function(e) {
+            // Let it navigate back to /switches (all devices)
+            // No need to clear DataTables since page reloads
+          });
+      
+          // Optional: If you also want client-side filtering applied based on URL param (not necessary since server filtered)
+          // const params = new URLSearchParams(window.location.search);
+          // const roleParam = (params.get('role') || '').trim().toUpperCase();
+          // const ROLE_COL = 2;
+          // if (roleParam) {
+          //   table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
+          // }
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+    
+        const table = $('#datatables-column-search-text-stack').DataTable({  
+            dom: 't',
+            columnDefs: [{ searchable: true }]
+        });
+    
+        // Column search functionality
+        table.columns().every(function() {
+            const that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+            if (that.search() !== this.value) {
+                that.search(this.value).draw();
+            }
+            });
+        });
+    
+        // Clear all filters button
+        $('#clear-filter').on('click', function(e) {
+            // Let it navigate back to /switches (all devices)
+            // No need to clear DataTables since page reloads
+        });
+    
+        // Optional: If you also want client-side filtering applied based on URL param (not necessary since server filtered)
+        // const params = new URLSearchParams(window.location.search);
+        // const roleParam = (params.get('role') || '').trim().toUpperCase();
+        // const ROLE_COL = 2;
+        // if (roleParam) {
+        //   table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
+        // }
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+        const table = $('#datatables-column-search-text-pwr').DataTable({
+            dom: '<"dt-top"t><"dt-bottom d-flex justify-content-between align-items-center"ip>',
+            columnDefs: [{ searchable: true }]
+        });
+
+        // Column search functionality
+        table.columns().every(function() {
+            const that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+            if (that.search() !== this.value) {
+                that.search(this.value).draw();
+            }
+            });
+        });
+
+        // Clear all filters button
+        $('#clear-filter').on('click', function(e) {
+            // Let it navigate back to /switches (all devices)
+            // No need to clear DataTables since page reloads
+        });
+
+        // Optional: If you also want client-side filtering applied based on URL param (not necessary since server filtered)
+        // const params = new URLSearchParams(window.location.search);
+        // const roleParam = (params.get('role') || '').trim().toUpperCase();
+        // const ROLE_COL = 2;
+        // if (roleParam) {
+        //   table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
+        // }
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        // Add search inputs to each footer cell
+        $('#datatables-column-search-text-cdp tfoot th').each(function() {
+            const title = $(this).text();
+            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+        });
+    
+        const table = $('#datatables-column-search-text-cdp').DataTable({
+            dom: '<"dt-top"t><"dt-bottom d-flex justify-content-between align-items-center"ip>',
+            columnDefs: [{ searchable: true }]
+        });
+    
+        // Column search functionality
+        table.columns().every(function() {
+            const that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+            if (that.search() !== this.value) {
+                that.search(this.value).draw();
+            }
+            });
+        });
+    
+        // Clear all filters button
+        $('#clear-filter').on('click', function(e) {
+            // Let it navigate back to /switches (all devices)
+            // No need to clear DataTables since page reloads
+        });
+    
+        // Optional: If you also want client-side filtering applied based on URL param (not necessary since server filtered)
+        // const params = new URLSearchParams(window.location.search);
+        // const roleParam = (params.get('role') || '').trim().toUpperCase();
+        // const ROLE_COL = 2;
+        // if (roleParam) {
+        //   table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
+        // }
+        });
+    </script>
 
     <script>
         // DataTables with Column Search by Text Inputs
@@ -540,6 +851,7 @@
         });
     </script>
 
+    
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             $("#datatables-dashboard-projects").DataTable({
@@ -550,64 +862,6 @@
             });
         });
     </script>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            
-            // 1) Add an input to each footer cell
-            $('#datatables-dashboard-modi-projects tfoot th').each(function () {
-                const title = $(this).text().trim();
-                $(this).html(
-                '<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />'
-                );
-            });
-            
-            // 2) Initialize DataTable
-            const table = $("#datatables-dashboard-modi-projects").DataTable({
-                paging: true,
-                pageLength: 10,
-                lengthChange: false,
-                autoWidth: false,
-                ordering: false,
-            
-                // IMPORTANT: keep searching enabled
-                // searching: true, // (default is true, so this line is optional)
-                dom: 'lrtip',      // hide default global search input, but keep filtering enabled
-            
-                info: true,
-                language: {
-                emptyTable: "No project data available.",
-                zeroRecords: "No matching records found.",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                infoEmpty: "Showing 0 to 0 of 0 entries"
-                },
-            
-                // 3) Bind footer inputs to column search
-                initComplete: function () {
-                const api = this.api();
-            
-                api.columns().every(function () {
-                    const column = this;
-                    const $input = $('input', column.footer());
-            
-                    // optional: debounce to reduce redraws on each keystroke
-                    let t;
-                    $input.on('keyup change', function () {
-                    clearTimeout(t);
-                    const val = this.value;
-                    t = setTimeout(function () {
-                        if (column.search() !== val) {
-                        // no regex, smart search on
-                        column.search(val, false, true).draw();
-                        }
-                    }, 150);
-                    });
-                });
-                }
-            });
-        });
-    </script>
-    
     
     <!-- Charts -->
     <style>
@@ -765,5 +1019,357 @@
                 }
         });
     </script>
+    <script id="sw-id" type="application/json">
+		{{ device_id | tojson }}
+	</script>
+	<script>
+		const idraw = (document.getElementById("sw-id")?.textContent || "").trim();
+		const id_data = idraw ? JSON.parse(idraw) : null;
+	
+		const baseUrl = "{{ url_for('refresh_switch') }}";
+		const url = `${baseUrl}?id=${encodeURIComponent(id_data)}`;
+		function showLoading() {
+			const modalEl = document.getElementById('loadingModal');
+			const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: 'static', keyboard: false });
+			modal.show();
+		}
+	
+		function hideLoading() {
+			const modalEl = document.getElementById('loadingModal');
+			const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+			modal.hide();
+		}
+		
+		function refreshSwitch() {
+			showLoading();   // show spinner + message
+	
+			fetch(url, { method: "GET" })
+				.then(res => res.json())
+				.then(data => {
+					console.log("WLC refreshed:", data);
+					location.reload();  // reload after backend finishes
+				})
+				.catch(err => {
+					console.error(err);
+					hideLoading();  // ensure modal hides if there's an error
+				});
+		}
+	</script>
+
+    <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+    
+    <script>
+        // Map from platform/neighbor pattern to a static icon URL
+        function deviceIconForNeighbor(n) {
+            const platform = (n.platform || '').toLowerCase();
+            const name = (n.neighbor || '').toLowerCase();
+
+            // Heuristics:
+            // 1) Cisco IP phones typically start with "sep"
+            if (name.startsWith('sep')) return '/static/assets/img/devices/phone.png';
+
+            // 2) Switch families
+            if (name.includes('asw') || name.includes('dsw') || name.includes('csw')) {
+            return '/static/assets/img/devices/switch.png';
+            }
+
+            // 3) AP families
+            if (name.includes('ap') || platform.includes('c9130')) {
+            return '/static/assets/img/devices/access.png';
+            }
+
+            // 4) VG families
+            if (name.includes('vg') || platform.includes('isr')) {
+            return '/static/assets/img/devices/voip.png';
+            }
+
+            // Router-ish
+            // if (platform.includes('asr') || platform.includes('isr') || platform.includes('router')) {
+            // return '/static/assets/img/devices/router.png';
+            // }
+
+            // Fall back
+            return '/static/assets/img/devices/unknown.png';
+        }
+    </script>
+
+    <script>
+        (function () {
+        const device = {{ device | tojson }};
+        const cdp = {{ cdp | tojson }};
+        const thisDeviceName = device?.hostname || device?.details?.hostname || 'This Switch';
+        
+        const neighbors = Array.isArray(cdp) ? cdp : (cdp && Array.isArray(cdp.neighbors) ? cdp.neighbors : []);
+        const safe = s => String(s || '').replace(/[^a-zA-Z0-9:_\-.]/g, '_').slice(0, 80);
+        const mainId = `dev:${safe(device.id || device?.details?.id || thisDeviceName)}`;
+        
+        // --- Measure container to scale layout ---
+        const container = document.getElementById('cdp-graph');
+        const W = container.clientWidth || 1000;
+        const H = container.clientHeight || 520;
+        const centerX = W / 2;
+        const centerY = H / 2;
+        
+        // --- Helper to group types so similar devices stay near each other ---
+        const scoreType = (n) => {
+            const name = (n.neighbor || '').toLowerCase();
+            const platform = (n.platform || '').toLowerCase();
+            if (name.startsWith('sep')) return 0;                                 // IP phones
+            if (name.includes('ap') || platform.includes('c9130')) return 1;      // APs
+            if (name.includes('vg') || platform.includes('isr')) return 2;        // Voice/VG/ISR
+            if (name.includes('asw') || name.includes('dsw') || name.includes('csw')) return 3; // Switches
+            return 4; // Unknown/other
+        };
+        const sortedNeighbors = [...neighbors].sort((a, b) => scoreType(a) - scoreType(b));
+        
+        // --- Multi-ring parameters (adaptive) ---
+        const NODE_SIZE = 70;                             // keep consistent with style
+        const MIN_ANGULAR_GAP = 12 * Math.PI / 180;       // ~12 degrees minimum between neighbors
+        const BASE_RING_RADIUS = Math.min(W, H) * 0.32;   // slightly larger base radius
+        const RING_STEP = NODE_SIZE * 1.8;                // more distance between rings
+        const MAX_RINGS = Math.max(1, Math.floor((Math.min(W, H) / 2 - 90) / RING_STEP)); // ensure rings fit
+        
+        // Compute how many neighbors fit per ring based on circumference and minimum spacing
+        const capacityForRadius = (r) => {
+            const circumference = 2 * Math.PI * r;
+            const minArc = Math.max(NODE_SIZE * 1.6, r * MIN_ANGULAR_GAP); // more spacing per node
+            return Math.max(6, Math.floor(circumference / minArc)); // at least 6 per ring
+        };
+        
+        // Build rings until all neighbors are placed
+        const ringConfigs = [];
+        let remaining = sortedNeighbors.length;
+        for (let ringIdx = 0; ringIdx < MAX_RINGS && remaining > 0; ringIdx++) {
+            const r = BASE_RING_RADIUS + ringIdx * RING_STEP;
+            const cap = capacityForRadius(r);
+            const count = Math.min(remaining, cap);
+            ringConfigs.push({ radius: r, count });
+            remaining -= count;
+        }
+        // If still remaining after MAX_RINGS (very large topology), increase ring count
+        while (remaining > 0) {
+            const last = ringConfigs[ringConfigs.length - 1];
+            const r = last.radius + RING_STEP;
+            const cap = capacityForRadius(r);
+            const count = Math.min(remaining, cap);
+            ringConfigs.push({ radius: r, count });
+            remaining -= count;
+        }
+        
+        // --- Build elements with preset positions + remember the "baseline" radial positions ---
+        const elements = [];
+        const basePositions = {}; // baseline positions used for "Reset" behavior
+        
+        // Main node at center
+        elements.push({
+            data: { id: mainId, label: thisDeviceName, role: 'self' },
+            position: { x: centerX, y: centerY },
+            classes: 'self-node'
+        });
+        basePositions[mainId] = { x: centerX, y: centerY };
+        
+        // Evenly spread neighbors by ring; cluster by device type within each ring
+        const TWO_PI = Math.PI * 2;
+        let cursor = 0;
+        ringConfigs.forEach((cfg, ringIdx) => {
+            const ringNeighbors = sortedNeighbors.slice(cursor, cursor + cfg.count);
+            cursor += cfg.count;
+        
+            // Offset to avoid vertical stacking
+            const startAngle = Math.PI / 2 + (ringIdx % 2 === 0 ? 0 : (Math.PI / 12));
+        
+            ringNeighbors.forEach((n, idx) => {
+            const theta = startAngle + (idx / cfg.count) * TWO_PI;
+            const nx = centerX + cfg.radius * Math.cos(theta);
+            const ny = centerY + cfg.radius * Math.sin(theta);
+        
+            const nName = n.neighbor || n.platform || `Neighbor-${idx+1}`;
+            const neighborId = `nbr:${safe(nName)}`;
+        
+            elements.push({
+                data: {
+                id: neighborId,
+                label: nName,
+                role: 'neighbor',
+                platform: n.platform || '',
+                icon: deviceIconForNeighbor(n)
+                },
+                position: { x: nx, y: ny },
+                classes: 'neighbor-node'
+            });
+            basePositions[neighborId] = { x: nx, y: ny };
+        
+            const localIf = n.local_interface || '';
+            const remoteIf = n.neighbor_interface || '';
+            const edgeId = `link:${safe(thisDeviceName)}:${safe(localIf)}->${safe(nName)}:${safe(remoteIf)}`;
+        
+            elements.push({
+                data: {
+                id: edgeId,
+                source: mainId,
+                target: neighborId,
+                label: `${localIf || '—'} \u2194 ${remoteIf || '—'}`
+                }
+            });
+            });
+        });
+        
+        // --- Create Cytoscape with dragging enabled ---
+        const cy = cytoscape({
+            container,
+            elements,
+            layout: { name: 'preset' },  // use computed positions; manual drags won't be overwritten
+            wheelSensitivity: 0.2,
+            autoungrabify: false,         // IMPORTANT: allow dragging
+            boxSelectionEnabled: true,    // drag multiple nodes together
+            userPanningEnabled: true,
+            userZoomingEnabled: true,
+            minZoom: 0.2,
+            maxZoom: 3,
+            style: [
+            { selector: 'node', style: {
+                'background-color': '#e2e8f0',
+                'border-width': 2,
+                'border-color': '#0ea5e9',
+                'shape': 'round-rectangle',
+                'width': NODE_SIZE,
+                'height': NODE_SIZE,
+        
+                // Icon
+                'background-image': 'data(icon)',
+                'background-fit': 'cover',
+                'background-opacity': 1,
+        
+                // Labels
+                'label': 'data(label)',
+                'text-valign': 'bottom',
+                'text-halign': 'center',
+                'text-margin-y': 6,
+                'font-size': '12px',
+                'color': '#0b1b2a',
+                'text-wrap': 'wrap',
+                'text-max-width': 160
+            }},
+            { selector: 'node.self-node', style: {
+                'background-image': '/static/assets/img/devices/switch.png',
+                'border-color': '#22c55e',
+                'background-color': '#d1fae5',
+                'font-weight': 'bold',
+                'color': '#065f46'
+            }},
+            { selector: 'edge', style: {
+                'width': 2,
+                'line-color': '#94a3b8',
+                'curve-style': 'bezier',
+                'target-arrow-shape': 'triangle',
+                'target-arrow-color': '#94a3b8',
+                'label': 'data(label)',
+                'font-size': '11px',
+                'text-rotation': 'autorotate',
+                'text-margin-y': -8,
+                'color': '#334155'
+            }},
+            { selector: ':selected', style: {
+                'border-width': 3,
+                'border-color': '#fbbf24',
+                'line-color': '#fbbf24',
+                'target-arrow-color': '#fbbf24'
+            }}
+            ]
+        });
+        
+        // Lock the central node (keep it anchored), neighbors draggable
+        cy.ready(() => {
+            cy.$('node.self-node').lock().ungrabify();
+            cy.$('node.neighbor-node').grabify();
+        });
+        
+        // --- Persist & restore positions (so your manual arrangement is remembered) ---
+        const POS_KEY = `cdpTopology:${safe(thisDeviceName)}`;
+        
+        const loadSavedPositions = () => {
+            try {
+            const saved = JSON.parse(localStorage.getItem(POS_KEY) || '{}');
+            if (saved && typeof saved === 'object') {
+                cy.batch(() => {
+                Object.entries(saved).forEach(([id, pos]) => {
+                    const n = cy.getElementById(id);
+                    if (n && n.nonempty()) n.position(pos);
+                });
+                });
+            }
+            } catch (e) { /* ignore */ }
+        };
+        
+        const savePositions = () => {
+            const map = {};
+            cy.nodes().forEach(n => { map[n.id()] = n.position(); });
+            try { localStorage.setItem(POS_KEY, JSON.stringify(map)); } catch (e) { /* ignore */ }
+        };
+        
+        // On node drag end, save new positions
+        cy.on('dragfree', 'node', savePositions);
+        
+        // Load saved positions (if any) after graph is created
+        loadSavedPositions();
+        
+        // --- Fit view with padding (view-only; does not change node positions) ---
+        const fitGraph = () => {
+            cy.resize();
+            const outerRing = ringConfigs[ringConfigs.length - 1]?.radius || BASE_RING_RADIUS;
+            const padding = Math.max(120, Math.min(280, outerRing * 0.35));
+            cy.fit(cy.nodes(), padding);
+        };
+        
+        // Fit on tab show (Bootstrap) or immediately
+        const tabTrigger = document.querySelector('[data-bs-target="#cdp-pane"], a[href="#cdp-pane"]');
+        if (tabTrigger) {
+            tabTrigger.addEventListener('shown.bs.tab', fitGraph);
+        } else {
+            fitGraph();
+        }
+        
+        // Optional UX: click node to focus, click background to reset view
+        cy.on('tap', 'node', (evt) => {
+            const node = evt.target;
+            cy.animate({ fit: { eles: node, padding: 120 }, duration: 250 });
+        });
+        cy.on('tap', (evt) => {
+            if (evt.target === cy) fitGraph();
+        });
+        
+        // Keyboard shortcut: press "R" to reset positions back to the baseline radial layout
+        window.addEventListener('keydown', (e) => {
+            if ((e.key || '').toLowerCase() === 'r') {
+            cy.batch(() => {
+                Object.entries(basePositions).forEach(([id, pos]) => {
+                const n = cy.getElementById(id);
+                if (n && n.nonempty()) n.position(pos);
+                });
+            });
+            localStorage.removeItem(POS_KEY);
+            fitGraph();
+            }
+        });
+        
+        // Re-fit on resize (view only)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => fitGraph(), 200);
+        });
+        })();
+    </script>
+    
+    <script>
+        document.querySelectorAll('img[data-platform]').forEach(img => {
+        const n = {
+            platform: img.getAttribute('data-platform'),
+            neighbor: img.getAttribute('data-neighbor')
+        };
+        img.src = deviceIconForNeighbor(n);
+        });
+    </script>
+  
   
 {% endblock %}

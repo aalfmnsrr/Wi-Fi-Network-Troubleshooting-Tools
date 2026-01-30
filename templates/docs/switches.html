@@ -2,35 +2,68 @@
 {% block body %}
     <main class="content">
         <div class="container-fluid p-0">
-
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-message">
+                    <p class="mb-0">
+                        <strong>Important!</strong> 
+                        <a> All data is fetched daily at 00:00am. To avoid API request overload, click any hostname to open its details page, then use the <b>Fetch Data</b> button to update <b>only that single device</b>.</a>
+                    </p>
+                </div>
+            </div>
             <h1 class="h3 mb-3">Switch Devices</h1>
 
             <div class="row">
-                <div class="col-12">
-                    <div class="card">                       
+                <div class="col-12">     
+                    <div class="card">
                         <div style="display: flex; margin: 10px; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                            <a href="/switches" class="btn btn-secondary">All Switches</a>
-                            <a href="/switches?role=CORE" class="btn btn-primary">Core</a>
-                            <a href="/switches?role=DISTRIBUTION" class="btn btn-primary">Distribution</a>
-                            <a href="/switches?role=ACCESS" class="btn btn-primary">Access</a>
+                            <a href="/switches"
+                                class="btn {{ 'btn-primary' if not role else 'btn-secondary' }} role-filter"
+                                id="clear-filter">
+                                All Switches
+                            </a>
+                        
+                            <a href="/switches?role=CORE"
+                                class="btn {{ 'btn-primary' if role and role.upper() == 'CORE' else 'btn-secondary' }} role-filter">
+                                Core
+                            </a>
+                        
+                            <a href="/switches?role=DISTRIBUTION"
+                                class="btn {{ 'btn-primary' if role and role.upper() == 'DISTRIBUTION' else 'btn-secondary' }} role-filter">
+                                Distribution
+                            </a>
+                        
+                            <a href="/switches?role=ACCESS"
+                                class="btn {{ 'btn-primary' if role and role.upper() == 'ACCESS' else 'btn-secondary' }} role-filter">
+                                Access
+                            </a>
                         </div>
+                    
                         <div class="card-body">
-                            <table id="datatables-column-search-text-inputs" class="table table-striped " style="width:100%" >
+                            <table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
                                 <thead>
-                                    <tr>
-                                        <th>Hostname</th>
-                                        <th>Role</th>
-                                        <th>IP Address</th>
-                                        <th>MAC Addresss</th>
-                                        <th>Software Version</th>
-                                        <th>Device Type</th>
-                                        <th>Location</th>
-                                    </tr>
+                                <tr>
+                                    <th>Hostname</th>
+                                    <th>Status</th>
+                                    <th>Role</th>
+                                    <th>IP Address</th>
+                                    <th>MAC Addresss</th>
+                                    <th>Software Version</th>
+                                    <th>Device Type</th>
+                                    <th>Location</th>
+                                </tr>
                                 </thead>
                                 <tbody>
                                 {% for device in devices %}
                                 <tr>
-                                    <td><a href = "/switches/{{device.id}}">{{ device.hostname }}</a></td>
+                                    <td><a href="/switches/{{ device.id }}">{{ device.hostname }}</a></td>
+                                    <td>
+                                    {% if device.reachabilityStatus == "Reachable" %}
+                                        <span class="badge bg-success">{{ device.reachabilityStatus | capitalize }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ device.reachabilityStatus | capitalize }}</span>
+                                    {% endif %}
+                                    </td>
                                     <td>{{ device.role }}</td>
                                     <td>{{ device.managementIpAddress }}</td>
                                     <td>{{ device.macAddress }}</td>
@@ -43,6 +76,7 @@
                                 <tfoot>
                                     <tr>
                                         <th>Hostname</th>
+                                        <th>Status</th>
                                         <th>Role</th>
                                         <th>IP Address</th>
                                         <th>MAC Addresss</th>
@@ -60,83 +94,46 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container-fluid">
-            <div class="row text-muted">
-                <div class="col-6 text-start">
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Support</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Help Center</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Privacy</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Terms of Service</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-6 text-end">
-                    <p class="mb-0">
-                        &copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
+    {% endblock %}
+    {% block script %}
     <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
 
     <script>
-    // DataTables with Column Search by Text Inputs
-    document.addEventListener("DOMContentLoaded", function() {
-        
-        // Setup - add a text input to each footer cell
-        $('#datatables-column-search-text-inputs tfoot th').each(function() {
-            var title = $(this).text();
+        document.addEventListener("DOMContentLoaded", function() {
+          // Add search inputs to each footer cell
+          $('#datatables-column-search-text-inputs tfoot th').each(function() {
+            const title = $(this).text();
             $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-        });
-        // DataTables
-        var table = $('#datatables-column-search-text-inputs').DataTable();
-        
-        // Apply the search
-        table.columns().every(function() {
-            var that = this;
+          });
+      
+          const table = $('#datatables-column-search-text-inputs').DataTable({
+            columnDefs: [{ searchable: true }]
+          });
+      
+          // Column search functionality
+          table.columns().every(function() {
+            const that = this;
             $('input', this.footer()).on('keyup change clear', function() {
-                if (that.search() !== this.value) {
-                    that
-                        .search(this.value)
-                        .draw();
-                }
+              if (that.search() !== this.value) {
+                that.search(this.value).draw();
+              }
             });
+          });
+      
+          // Clear all filters button
+          $('#clear-filter').on('click', function(e) {
+            // Let it navigate back to /switches (all devices)
+            // No need to clear DataTables since page reloads
+          });
+      
+          // Optional: If you also want client-side filtering applied based on URL param (not necessary since server filtered)
+          // const params = new URLSearchParams(window.location.search);
+          // const roleParam = (params.get('role') || '').trim().toUpperCase();
+          // const ROLE_COL = 2;
+          // if (roleParam) {
+          //   table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
+          // }
         });
-    });
-    // DataTables with Column Search by Select Inputs
-    document.addEventListener("DOMContentLoaded", function() {
-        $('#datatables-column-search-select-inputs').DataTable({
-            initComplete: function() {
-                this.api().columns().every(function() {
-                    var column = this;
-                    var select = $('<select class="form-control"><option value=""></option></select>')
-                        .appendTo($(column.footer()).empty())
-                        .on('change', function() {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search(val ? '^' + val + '$' : '', true, false)
-                                .draw();
-                        });
-                    column.data().unique().sort().each(function(d, j) {
-                        select.append('<option value="' + d + '">' + d + '</option>')
-                    });
-                });
-            }
-        });
-    });
     </script>
 
 {% endblock %}

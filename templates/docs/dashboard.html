@@ -2,7 +2,14 @@
 {% block body %}
 			<main class="content">
 				<div class="container-fluid p-0">
-
+					<div class="alert alert-warning alert-dismissible" role="alert">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						<div class="alert-message">
+							<p class="mb-0">
+								<strong>Important!</strong> All data is fetched daily at 00:00am. Click <b>Fetch Data</b> button to retrieve the latest data.</a>
+							</p>
+						</div>
+					</div>
 					<div class="row mb-2 mb-xl-3">
 						<div class="col-auto d-none d-sm-block">
 							<h3 > Summary
@@ -29,9 +36,24 @@
 	<button class="btn btn-primary shadow-sm">
      	 <i class="align-middle" data-feather="filter">&nbsp;</i>
     </button>
-	<button class="btn btn-primary shadow-sm" onclick="location.reload()">
-      	<i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
+	<button class="btn btn-primary shadow-sm" onclick="refreshDashboard()">
+      	<p class="align-middle mb-0">Fetch Data</p>
     </button>
+	
+	<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" aria-labelledby="loadingModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered modal-sm">
+		<div class="modal-content">
+			<div class="modal-body d-flex align-items-center">
+			<div class="spinner-border text-dark me-3" role="status" aria-hidden="true"></div>
+			<div>
+				<div id="loadingModalLabel" class="fw-semibold">Fetching data…</div>
+				<small class="text-muted">This may take a moment.</small>
+			</div>
+			</div>
+		</div>
+		</div>
+	</div>
+  
 						</div>
 					</div>
 					<div class="row">
@@ -275,36 +297,8 @@
 				</div>
 			</main>
 
-			<footer class="footer">
-				<div class="container-fluid">
-					<div class="row text-muted">
-						<div class="col-6 text-start">
-							<ul class="list-inline">
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Support</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Help Center</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Privacy</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="#">Terms of Service</a>
-								</li>
-							</ul>
-						</div>
-						<div class="col-6 text-end">
-							<p class="mb-0">
-								&copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
-							</p>
-						</div>
-					</div>
-				</div>
-			</footer>
-		</div>
-	</div>
-
+			{% endblock %}
+{% block script %}
 	<script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
 	<script id="site-health" type="application/json">
 		{{ site_health | tojson }}
@@ -618,7 +612,40 @@
 		</script>
 		
 	
+<script>
+    function showLoading() {
+        const modalEl = document.getElementById('loadingModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: 'static', keyboard: false });
+        modal.show();
+    }
+
+    function hideLoading() {
+        const modalEl = document.getElementById('loadingModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.hide();
+    }
+
+    function refreshDashboard() {
+        showLoading();  // show loading popup immediately
+
+        fetch("/refresh-dashboard")
+            .then(res => res.json())
+            .then(data => {
+                console.log("Dashboard refreshed:", data);
+                location.reload();  // reload page after Python completes
+            })
+            .catch(err => {
+                console.error(err);
+                hideLoading();  // hide modal if error occurs
+            });
+    }
+</script>
+
+	
+		
+	
 </body>
 
 </html>
+
 {% endblock %}

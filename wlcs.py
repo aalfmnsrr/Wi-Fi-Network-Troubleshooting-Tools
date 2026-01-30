@@ -1,6 +1,59 @@
 import function
 import requests
 from config import Config
+from os import makedirs, replace
+import json
+
+def refresh(id):
+    function.get_token()
+    new_data = None
+    header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token': Config.token
+        }
+    url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Wireless Controller"
+    response = requests.get(url_inventory, headers=header, verify=False)
+    wlc = response.json().get("response", [])
+    for w in wlc:
+        if w.get("id") == id:
+            if 'HK-NTT' in w.get('hostname'):
+                w['dc'] = 'Hong Kong'
+            elif 'TH-NTT' in w.get('hostname'):
+                w['dc'] = 'Thailand'
+            elif 'INDO' in w.get('hostname'):
+                w['dc'] = 'Indonesia'
+            elif 'APDC' in w.get('hostname'):
+                w['dc'] = 'Singapore'
+            details = function.get_device_detail(w.get("macAddress"))
+            w["details"] = details
+            w["ssid"] = get_ssid(w.get("id"))
+            w["interface"] = wlc_int(w.get("id"))
+            w["physical"] = get_physical(w.get("id"))
+            w["AP"] = get_AP_in_WLC(w.get("managementIpAddress"))
+            site = details.get('siteHierarchyGraphId').strip("/").split("/")[-1]
+            w["health"] = health(site, w.get("id"))
+            w["cdp"] = function.get_cdp(w.get("hostname"), w.get("managementIpAddress"))
+            new_data = w
+            break
+    return new_data
+
+def fetch_wlc(id):
+    wlc_json = None
+    ind = None
+    new_data = None
+    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
+        wlc_json = json.load(f)
+    for i, wlc in enumerate(wlc_json):
+        if wlc.get("id") == id:
+            ind = i
+            new_data = refresh(wlc.get("id"))
+            break
+    wlc_json[ind] = new_data
+    temp = Config.wlc_path + ".tmp"
+    with open(temp, 'w', encoding="utf-8") as f:
+        json.dump(wlc_json, f, ensure_ascii=False, indent=2)
+    replace(temp, Config.wlc_path)
 
 def get_wlc(): #get wlc
     function.get_token()
@@ -13,7 +66,6 @@ def get_wlc(): #get wlc
     url_inventory = f"{Config.dnac}/intent/api/v1/network-device?family=Wireless Controller"
     response = requests.get(url_inventory, headers=header, verify=False)
     wlc = response.json().get("response", [])
-    
     for w in wlc:
         if 'HK-NTT' in w.get('hostname'):
             w['dc'] = 'Hong Kong'
@@ -23,8 +75,18 @@ def get_wlc(): #get wlc
             w['dc'] = 'Indonesia'
         elif 'APDC' in w.get('hostname'):
             w['dc'] = 'Singapore'
-
-    return wlc
+        details = function.get_device_detail(w.get("macAddress"))
+        w["details"] = details
+        w["ssid"] = get_ssid(w.get("id"))
+        w["interface"] = wlc_int(w.get("id"))
+        w["physical"] = get_physical(w.get("id"))
+        w["AP"] = get_AP_in_WLC(w.get("managementIpAddress"))
+        site = details.get('siteHierarchyGraphId').strip("/").split("/")[-1]
+        w["health"] = health(site, w.get("id"))
+        w["cdp"] = function.get_cdp(w.get("hostname"), w.get("managementIpAddress"))
+    makedirs(Config.inventory_path + "/WLCs", exist_ok=True)
+    with open(f"{Config.wlc_path}", "w", encoding="utf-8") as f:
+        json.dump(wlc, f, indent=4, ensure_ascii=False, default=str)
 
 def get_wlc_by_id(wlc_id): #same as above but to avoid long time reloading
     wlc = []
@@ -38,13 +100,14 @@ def get_wlc_by_id(wlc_id): #same as above but to avoid long time reloading
     url_inventory = f"{Config.dnac}/data/api/v1/networkDevices/{wlc_id}"
     response = requests.get(url_inventory, headers=header, verify=False)
     wlc = response.json().get("response", [])
-
-    return wlc
+    makedirs(Config.wlc_path, exist_ok=True)
+    with open(f"{Config.wlc_path}/wlc.json", "w", encoding="utf-8") as f:
+        json.dump(wlc, f, indent=4, ensure_ascii=False, default=str)
 
 def wlc_id(wlc_ip):
 
     function.get_token()
-    url_inventory = f"https://{Config.dnac_IP}/api/v1/network-device/ip-address/{wlc_ip}"
+    url_inventory = f"https://{Config.dnac}/api/v1/network-device/ip-address/{wlc_ip}"
     header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -60,7 +123,7 @@ def wlc_id(wlc_ip):
 def wlc_int(wlc_id):
 
     function.get_token()
-    url_inventory = f"https://{Config.dnac_IP}/api/v1/interface/network-device/{wlc_id}"
+    url_inventory = f"https://{Config.dnac}/api/v1/interface/network-device/{wlc_id}"
 
     header = {
             'Content-Type': 'application/json',
