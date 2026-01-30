@@ -281,13 +281,17 @@
                                 </tr>
                                 <tr>
                                     <td>VLAN Count</td>
-                                    <td><a href = "/switches/{{device.id}}/vlans">{{ vlan_count | default('-', true)}}</a></td>
+                                    <td class="d-none d-xl-table-cell">
+                                        <a href = "/switches/{{device.id}}/vlans">
+                                            {{ vlan_count | default('-', true)}}
+                                        </a>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>AP</td>
                                     <td class="d-none d-xl-table-cell">
-                                        <a href="{{ url_for('switch_access_points', device_id=device_id) }}">
-                                        {{ ap_cnt }}
+                                        <a href="/switches/{{device_id}}/aps">
+                                            {{ ap_cnt | default('-', true) }}
                                         </a>
                                     </td>
                                 </tr>

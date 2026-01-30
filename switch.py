@@ -5,6 +5,10 @@ from collections import defaultdict
 from os import makedirs, replace
 import json
 
+# ==========================================
+#        Retrieve basic info switch
+# ==========================================
+
 def refresh(id):
     sw = None
     function.get_token()
@@ -33,8 +37,8 @@ def refresh(id):
             break
     return sw
 
-# Retrieving switches based on their role
-def get_switches(): # get switch by role
+# Retrieve sw info and store at inventory folder as json file
+def get_switches():
     function.get_token()
     header = {
             'Content-Type': 'application/json',
@@ -60,6 +64,7 @@ def get_switches(): # get switch by role
     with open(Config.switch_path, "w", encoding="utf-8") as f:
         json.dump(devices, f, indent=4, ensure_ascii=False, default=str)
 
+# Identify the role
 def get_sw_by_role(role):
     switches = []
     switch_json = None
@@ -123,7 +128,11 @@ def get_swLocation(devices):
             sw_location[dev_id] = clean
     return sw_location
 
-# Retrieving AP that connected to the switch
+# ==========================================
+#        Retrieve connected AP
+# ==========================================
+
+# Identify AP existence
 def _is_ap_node(node: dict) -> bool:
     """
     Decide if a topology node is an AP using reliable fields first (family/type),
@@ -146,10 +155,71 @@ def _is_ap_node(node: dict) -> bool:
 
     return False
 
+# Retrive AP location
+def _map_country_location(label: str):
+    if not label:
+        return None
+    if label.startswith("MY"):
+        return "Malaysia"
+    if label.startswith("ID"):
+        return "Indonesia"
+    if label.startswith(("HK", "MO")):
+        return "Hong Kong"
+    if label.startswith("TH"):
+        return "Thailand"
+    if label.startswith("PH"):
+        return "Philippines"
+    if label.startswith("SG"):
+        return "Singapore"
+    return None
+
+# Retrieve AP from its ID
+def _fetch_device_inventory_by_id(device_id: str, headers: dict):
+    """
+    Get /network-device/{id}. Different DNAC versions return either a raw object
+    or {"response": {...}}. Handle both.
+    """
+    if not device_id:
+        return None
+    try:
+        url = f"{Config.dnac}/intent/api/v1/network-device/{device_id}"
+        r = requests.get(url, headers=headers, verify=False)
+        if not r.ok:
+            return None
+        data = r.json() or {}
+        if isinstance(data, dict) and "response" in data and isinstance(data["response"], dict):
+            return data["response"]
+        return data
+    except Exception:
+        return None
+
+# Retrieve AP reachability
+def _normalize_comm_state(val: str) -> str:
+    """
+    Map DNAC reachability to the template's expected values.
+    """
+    if not val:
+        return "UNKNOWN"
+    v = val.strip().upper()
+    # Common DNAC values: "Reachable", "Unreachable", "Not Reachable"
+    if "REACH" in v and "UN" not in v:
+        return "REACHABLE"
+    if "UNREACH" in v or "NOT REACH" in v:
+        return "UNREACHABLE"
+    return v  # fallback if it already matches expected strings
+
+# Retrieve connected AP
 def get_ap_neighbors(switch_device_id):
     """
     Return a list of AP node dicts directly connected to the given switch device_id.
-    Uses the physical topology: nodes + links.
+    Enrich each AP node so templates can safely access:
+      - ap.additionalInfo.macAddress
+      - ap.additionalInfo.siteid
+      - ap.details.communicationState
+      - ap.ip
+      - ap.softwareVersion
+      - ap.deviceType
+      - ap.location
     """
     function.get_token()
     headers = {
@@ -158,35 +228,34 @@ def get_ap_neighbors(switch_device_id):
         'X-Auth-Token': Config.token
     }
 
-    url = f"{Config.dnac}/intent/api/v1/topology/physical-topology"
-    topo = requests.get(url, headers=headers, verify=False).json().get("response", {})
+    # 1) Fetch topology
+    topo_url = f"{Config.dnac}/intent/api/v1/topology/physical-topology"
+    topo = requests.get(topo_url, headers=headers, verify=False).json().get("response", {}) or {}
     nodes = topo.get("nodes", []) or []
     links = topo.get("links", []) or []
 
-    # Build an index of nodes by id
+    # 2) Index nodes and locate the switch node id
     node_by_id = {n.get("id"): n for n in nodes if n.get("id")}
 
-    # DNA Center's node id for devices should match the network-device id
     if switch_device_id not in node_by_id:
-        # Some tenants use 'physicalTopology' nodes with different id fields.
-        # Try to find by 'deviceId' field if present, as a fallback.
+        # fallback: try 'deviceId'
         fallback = next((n for n in nodes if n.get("deviceId") == switch_device_id), None)
         if fallback:
             switch_node_id = fallback.get("id")
         else:
-            # Try match by label/hostname as a last resort
+            # last resort: match by hostname/label
             dev = function.get_device(switch_device_id) or {}
             hostname = (dev.get("hostname") or dev.get("name") or "").upper()
             match = next((n for n in nodes if (n.get("label") or "").upper() == hostname), None)
             if match:
                 switch_node_id = match.get("id")
             else:
-                # Return empty to avoid 500; you can log for troubleshooting
+                # Nothing found; avoid 500
                 return []
     else:
         switch_node_id = switch_device_id
 
-    # Collect direct neighbor node IDs from links touching the switch node
+    # 3) Collect neighbor node IDs
     neighbor_ids = set()
     for lk in links:
         src = lk.get("source")
@@ -196,7 +265,7 @@ def get_ap_neighbors(switch_device_id):
         elif tgt == switch_node_id and src:
             neighbor_ids.add(src)
 
-    # Filter only AP nodes
+    # 4) Filter AP neighbors (topology-level)
     ap_neighbors = []
     for nid in neighbor_ids:
         node = node_by_id.get(nid)
@@ -205,7 +274,7 @@ def get_ap_neighbors(switch_device_id):
         if _is_ap_node(node):
             ap_neighbors.append(node)
 
-    # Optional: de-duplicate by label
+    # 5) De-dupe by label
     seen = set()
     deduped = []
     for n in ap_neighbors:
@@ -215,7 +284,59 @@ def get_ap_neighbors(switch_device_id):
         seen.add(label)
         deduped.append(n)
 
-    return deduped
+    # 6) ENRICH each AP so the template has everything it needs
+    enriched = []
+    for n in deduped:
+        label = n.get("label") or ""
+        device_id = n.get("deviceId") or n.get("id")
+        additional = n.get("additionalInfo") or {}
+        # Inventory (network-device) pull
+        inv = _fetch_device_inventory_by_id(device_id, headers) or {}
+
+        # MAC and SiteID
+        mac = additional.get("macAddress") or inv.get("macAddress")
+        site_id = additional.get("siteid") or additional.get("siteId") or inv.get("siteId")
+
+        # Communication state (prefer your device detail API if MAC is present)
+        comm = None
+        details_payload = None
+        if mac:
+            try:
+                # Your existing function; in your other modules this returns an object that
+                # includes "communicationState". Reuse it for consistency with the template.
+                details_payload = function.get_device_detail(mac) or {}
+                comm = details_payload.get("communicationState")
+            except Exception:
+                comm = None
+
+        if not comm:
+            comm = _normalize_comm_state(inv.get("reachabilityStatus") or inv.get("reachability"))
+
+        # Fill out the final shape expected by the template
+        out = dict(n)  # keep original fields
+        out["ip"] = n.get("ip") or inv.get("managementIpAddress") or inv.get("ipAddress") or "-"
+        out["softwareVersion"] = n.get("softwareVersion") or inv.get("softwareVersion") or "-"
+        out["deviceType"] = n.get("deviceType") or inv.get("type") or n.get("type") or "-"
+        out["location"] = n.get("location") or _map_country_location(label) or "-"
+
+        # Ensure additionalInfo has the keys used by the template
+        out["additionalInfo"] = {
+            **additional,
+            "macAddress": mac or additional.get("macaddress") or additional.get("mac") or "unknown",
+            "siteid": site_id or "unknown"
+        }
+
+        # Ensure details.communicationState exists
+        base_details = n.get("details") or {}
+        out["details"] = {
+            **base_details,
+            **(details_payload or {}),
+            "communicationState": comm or base_details.get("communicationState") or "UNKNOWN"
+        }
+
+        enriched.append(out)
+
+    return enriched
 
 def parse_ap_name(ap_label: str):
     parts = (ap_label or "").split('-')
@@ -237,6 +358,10 @@ def group_ap_labels_by_floor(ap_nodes):
         groups.setdefault(floor, []).append(label)
     return groups
 
+# ==========================================
+#           Retrieve VLAN
+# ==========================================
+
 # Retriving VLAN information
 def get_vlan(device_id):
     function.get_token()
@@ -249,6 +374,10 @@ def get_vlan(device_id):
     url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/vlan"
     vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return vlan
+
+# ==========================================
+#        Retrieve Power Supply
+# ==========================================
 
 # Retrieving Power Supply information
 def get_powerSupply(device_id):
@@ -281,6 +410,10 @@ def sort_power_supplies(pwr_list):
         serial = (p or {}).get('serialNumber') or ''
         return (switch_num, psu_rank, serial)
     return sorted(pwr_list or [], key=keyfn)
+
+# ==========================================
+#        Retrieve interfaces
+# ==========================================
 
 # Retrieving interfaces from the switch
 def get_interface(device_id):
@@ -322,6 +455,10 @@ def format_speed_kbps(value):
         return f"{n / 1_000:.0f} Mbps"
     else:
         return f"{n} Kbps"
+
+# ==========================================
+#        Retrieve stacking info
+# ==========================================
 
 # Retrieving stacking switch information (stack/svl)
 def get_stack_info(device_id):
@@ -538,6 +675,10 @@ def dict_svl_summary(stack):
     rows.sort(key=lambda r: r['switch_num'])
     return rows
 
+# ==========================================
+#        Retrieve POE info
+# ==========================================
+
 # Retrieving POE from switch
 def get_poe(device_id): 
     function.get_token()
@@ -551,6 +692,10 @@ def get_poe(device_id):
    
     poe = requests.get(url_inventory, headers=header, verify=False).json().get("response")
     return poe
+
+# ==========================================
+#        Retrieve SW issue
+# ==========================================
 
 def get_switchIssues(device_id):
     function.get_token()
