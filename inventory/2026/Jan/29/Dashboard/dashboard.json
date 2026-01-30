@@ -3,29 +3,29 @@
         "version": "1.0",
         "response": [
             {
-                "time": "2026-01-29T07:45:00.000+0000",
-                "healthScore": 50,
+                "time": "2026-01-29T08:35:00.000+0000",
+                "healthScore": 48,
                 "totalCount": 700,
-                "goodCount": 348,
+                "goodCount": 337,
                 "noHealthCount": 2,
-                "fairCount": 151,
-                "badCount": 199,
+                "fairCount": 169,
+                "badCount": 192,
                 "maintenanceModeCount": 0,
                 "entity": null,
-                "timeinMillis": 1769672700000
+                "timeinMillis": 1769675700000
             }
         ],
         "measuredBy": "global",
         "latestMeasuredByEntity": null,
-        "latestHealthScore": 50,
+        "latestHealthScore": 48,
         "monitoredDevices": 698,
-        "monitoredHealthyDevices": 348,
-        "monitoredUnHealthyDevices": 350,
+        "monitoredHealthyDevices": 337,
+        "monitoredUnHealthyDevices": 361,
         "noHealthDevices": 2,
         "notApplicableDevices": 0,
         "totalDevices": 700,
-        "monitoredPoorHealthDevices": 199,
-        "monitoredFairHealthDevices": 151,
+        "monitoredPoorHealthDevices": 192,
+        "monitoredFairHealthDevices": 169,
         "healthContributingDevices": 698,
         "healthDistirubution": [
             {
@@ -107,14 +107,14 @@
             {
                 "category": "AP",
                 "totalCount": 541,
-                "healthScore": 35,
-                "goodPercentage": 35.489834,
-                "badPercentage": 36.598892,
-                "fairPercentage": 27.911276,
+                "healthScore": 33,
+                "goodPercentage": 33.456562,
+                "badPercentage": 35.30499,
+                "fairPercentage": 31.238447,
                 "noHealthPercentage": 0.0,
-                "goodCount": 192.0,
-                "badCount": 198.0,
-                "fairCount": 151.0,
+                "goodCount": 181.0,
+                "badCount": 191.0,
+                "fairCount": 169.0,
                 "noHealthCount": 0.0,
                 "thirdPartyDeviceCount": 0.0,
                 "kpiMetrics": [
@@ -127,16 +127,16 @@
         ]
     },
     "overall": {
-        "time": "2026-01-29T07:45:00.000+0000",
-        "healthScore": 50,
+        "time": "2026-01-29T08:35:00.000+0000",
+        "healthScore": 48,
         "totalCount": 700,
-        "goodCount": 348,
+        "goodCount": 337,
         "noHealthCount": 2,
-        "fairCount": 151,
-        "badCount": 199,
+        "fairCount": 169,
+        "badCount": 192,
         "maintenanceModeCount": 0,
         "entity": null,
-        "timeinMillis": 1769672700000
+        "timeinMillis": 1769675700000
     },
     "access": {
         "category": "Access",
@@ -217,14 +217,14 @@
     "ap": {
         "category": "AP",
         "totalCount": 541,
-        "healthScore": 35,
-        "goodPercentage": 35.489834,
-        "badPercentage": 36.598892,
-        "fairPercentage": 27.911276,
+        "healthScore": 33,
+        "goodPercentage": 33.456562,
+        "badPercentage": 35.30499,
+        "fairPercentage": 31.238447,
         "noHealthPercentage": 0.0,
-        "goodCount": 192.0,
-        "badCount": 198.0,
-        "fairCount": 151.0,
+        "goodCount": 181.0,
+        "badCount": 191.0,
+        "fairCount": 169.0,
         "noHealthCount": 0.0,
         "thirdPartyDeviceCount": 0.0,
         "kpiMetrics": [
@@ -243,7 +243,7 @@
             "distributionGoodCount": 43,
             "routerGoodCount": 7,
             "wlcDeviceGoodCount": 2,
-            "apDeviceGoodCount": 62,
+            "apDeviceGoodCount": 63,
             "accessTotalCount": 26,
             "coreTotalCount": 13,
             "distributionTotalCount": 44,
@@ -275,7 +275,7 @@
             "distributionGoodCount": 1,
             "routerGoodCount": 0,
             "wlcDeviceGoodCount": 2,
-            "apDeviceGoodCount": 75,
+            "apDeviceGoodCount": 76,
             "accessTotalCount": 12,
             "coreTotalCount": 1,
             "distributionTotalCount": 1,
@@ -323,7 +323,7 @@
             "distributionGoodCount": 6,
             "routerGoodCount": 0,
             "wlcDeviceGoodCount": 2,
-            "apDeviceGoodCount": 57,
+            "apDeviceGoodCount": 47,
             "accessTotalCount": 25,
             "coreTotalCount": 8,
             "distributionTotalCount": 6,
@@ -349,9 +349,9 @@
         }
     ],
     "clients": {
-        "wired": 1866,
-        "wireless": 3648,
-        "wiredHealth": 99,
+        "wired": 1868,
+        "wireless": 3593,
+        "wiredHealth": 100,
         "wirelessHealth": 99
     },
     "system": {
@@ -359,19 +359,19 @@
         "version": "1",
         "kpis": {
             "cpu": {
-                "utilization": "13.08",
+                "utilization": "12.73",
                 "units": "percent"
             },
             "memory": {
-                "utilization": "82.45",
+                "utilization": "82.73",
                 "units": "percent"
             },
             "network tx_rate": {
-                "utilization": "12595.96",
+                "utilization": "12264.27",
                 "units": "kbps"
             },
             "network rx_rate": {
-                "utilization": "15488.42",
+                "utilization": "15200.76",
                 "units": "kbps"
             }
         }
