@@ -414,58 +414,51 @@
                 </div>
                 <div class="tab-pane fade" id="ap-pane" role="tabpanel" aria-labelledby="ap-tab">
                     <div class="card flex-fill">
-                        <div > 
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Associate APs</h5>
-
-                                {% if wlc.hostname.startswith('APDC') %}
-                                                
-                                <div class="row justify-content-center mt-3 mb-2">
-                                    <div class="col-auto" id="office-filter-nav">
-                                        <!-- <nav class="nav btn-group" id="office-filter-nav"> -->
-                                            <button class="btn btn-outline-primary reset-btn" >All</button>
-                                            <button class="btn btn-outline-primary filter-btn" data-office="MY">Malaysia</button>
-                                            <button class="btn btn-outline-primary filter-btn" data-office="PH">Philippines</button>
-                                            <button class="btn btn-outline-primary filter-btn" data-office="SG">Singapore</button>
-                                        <!-- </nav> -->
-                                    </div>
-                                </div>
-                                {% endif %}
-
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Associate APs</h5>
+                        </div>
+                        {% if wlc.hostname.startswith('APDC') %}
+                                        
+                        <div class="row justify-content-center mt-3 mb-2">
+                            <div class="col-auto" id="office-filter-nav">
+                                <!-- <nav class="nav btn-group" id="office-filter-nav"> -->
+                                    <button class="btn btn-outline-primary reset-btn" >All</button>
+                                    <button class="btn btn-outline-primary filter-btn" data-office="MY">Malaysia</button>
+                                    <button class="btn btn-outline-primary filter-btn" data-office="PH">Philippines</button>
+                                    <button class="btn btn-outline-primary filter-btn" data-office="SG">Singapore</button>
+                                <!-- </nav> -->
                             </div>
-
-                            <table id="table-ap" class="display table table-striped my-0" style="width:100%;">
-                            {% if ap_wlc %}
-                                <thead>
-                                    <tr>
-                                        <th style="padding-left: 100px;">AP Name</th>
-                                        <th class="hide-column">Associated WLC IP</th>
-                                        <th class="hide-column">Office</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                        {% for ap in ap_wlc%}
-                                            <tr> 
-                                                {% for a in aps %}
-                                                    {% if ap.hostname == a.label%}
-                                                        <td style="padding-left: 100px;"><a href="{{ url_for('ap_detail', ap_mac = ap.macAddress, site_id=a.additionalInfo.siteid) }}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
-                                                            {{ ap.hostname if ap.hostname else 'N/A' }}</td> 
-                                                        <td  class="hide-column">{{ ap.associatedWlcIp }}</td>
-                                                        <td  class="hide-column">{{ ap.office }}</td>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </tr>
-                                        {% endfor %}
-                                    
-                                </tbody>
-                                {% else %}
-                                    <p style="padding-left: 100px;">No AP associate with current WLC</p>
-                                {% endif %}
-                            </table>
                         </div>
-                       
-                        </div>
+                        {% endif %}
+                        <table id="table-ap" class="display table table-striped my-0" style="width:100%;">
+                        {% if ap_wlc %}
+                            <thead>
+                                <tr>
+                                    <th style="padding-left: 100px;">AP Name</th>
+                                    <th class="hide-column">Associated WLC IP</th>
+                                    <th class="hide-column">Office</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ap in ap_wlc%}
+                                <tr> 
+                                    {% for a in aps %}
+                                        {% if ap.hostname == a.label%}
+                                            <td style="padding-left: 100px;"><a href="{{ url_for('ap_detail', ap_mac = ap.macAddress, site_id=a.additionalInfo.siteid) }}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
+                                                {{ ap.hostname if ap.hostname else 'N/A' }}</td> 
+                                            <td  class="hide-column">{{ ap.associatedWlcIp }}</td>
+                                            <td  class="hide-column">{{ ap.office }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}  
+                            </tbody>
+                            {% else %}
+                                <p style="padding-left: 100px;">No AP associate with current WLC</p>
+                            {% endif %}
+                        </table>
                     </div>
+                       
                 </div>
                 <div class="tab-pane fade" id="power-pane" role="tabpanel" aria-labelledby="power-tab">
                     <div class="card flex-fill">
@@ -515,35 +508,9 @@
             </div>
         </div>
     </main>
-
-    <!-- <footer class="footer">
-        <div class="container-fluid">
-            <div class="row text-muted">
-                <div class="col-6 text-start">
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Support</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Help Center</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Privacy</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="text-muted" href="#">Terms of Service</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-6 text-end">
-                    <p class="mb-0">
-                        &copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer> -->
-
+    
+    {% endblock %}
+    {% block script %}
     <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
 
     <script>
@@ -792,13 +759,5 @@
             });
     }
 </script>
-
-
-    
-    
-    
-    
-    
-    
-    
+  
 {% endblock %}
