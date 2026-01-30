@@ -7,34 +7,54 @@ from netmiko import ConnectHandler
 from os import replace
 import re
 
+
 def get_cdp(hostname, ip):
     device = {
-        "device_type": "cisco_ios",  
+        "device_type": "cisco_ios",
         "ip": ip,
         "host": hostname,
         "username": Config.username,
         "password": Config.password,
-        "secret": Config.password, 
+        "secret": Config.password,
         "fast_cli": True,
         "auth_timeout": 30,
     }
-    with ConnectHandler(**device) as net_connect:
-        try:
-            command_output = net_connect.send_command(
-                            "show cdp neighbors",
-                            read_timeout=600,
-                            use_textfsm=True,
-                            )   
-            if "Total cdp entries displayed : 0" in command_output:
-                return None
-            return command_output
-        except Exception:
-            pass
-            # Fallback: raw + regex parser
-            raw = net_connect.send_command("show cdp neighbors",
-                                           read_timeout=600,)
-            parse_cdp = parse_cdp_text_regex(raw)
-            return parse_cdp
+    try:
+        with ConnectHandler(**device) as net_connect:
+            # Try TextFSM first
+            output = net_connect.send_command(
+                "show cdp neighbors",
+                read_timeout=60,
+                use_textfsm=True
+            )
+
+            # If TextFSM template is found, this will be a list (possibly empty)
+            if isinstance(output, list):
+                rows = output
+            else:
+                # Fallback: when TextFSM not found, output is a raw string
+                raw = output if isinstance(output, str) else ""
+                if "Total cdp entries displayed : 0" in raw:
+                    return []
+                rows = parse_cdp_text_regex(raw)
+
+            # Normalize keys to your cached shape
+            def norm(row):
+                return {
+                    "neighbor": row.get("destination_host") or row.get("device_id") or row.get("neighbor"),
+                    "local_interface": row.get("local_interface"),
+                    "capability": row.get("capability") or row.get("capabilities"),
+                    "platform": row.get("platform"),
+                    "neighbor_interface": row.get("remote_port") or row.get("neighbor_interface")
+                }
+
+            return [norm(r) for r in (rows or [])]
+
+    except Exception as e:
+        # As a last resort, return empty list (never None)
+        print(f"[WARN] get_cdp failed for {hostname} ({ip}): {e}")
+        return []
+
 
 
 def parse_cdp_text_regex(output: str): # if textfsm isnt available, returns dictionary

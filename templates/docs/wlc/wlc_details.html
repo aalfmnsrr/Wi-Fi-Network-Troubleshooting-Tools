@@ -205,6 +205,13 @@
                             Associate APs
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="power-tab" data-bs-toggle="tab"
+                                data-bs-target="#power-pane" type="button" role="tab"
+                                aria-controls="power-pane" aria-selected="false">
+                            Power Supply Details
+                        </button>
+                    </li>
                 </ul>
             </div>
 
@@ -407,65 +414,100 @@
                 </div>
                 <div class="tab-pane fade" id="ap-pane" role="tabpanel" aria-labelledby="ap-tab">
                     <div class="card flex-fill">
-                        <div > 
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Associate APs</h5>
-
-                                {% if wlc.hostname.startswith('APDC') %}
-                                                
-                                <div class="row justify-content-center mt-3 mb-2">
-                                    <div class="col-auto" id="office-filter-nav">
-                                        <!-- <nav class="nav btn-group" id="office-filter-nav"> -->
-                                            <button class="btn btn-outline-primary reset-btn" >All</button>
-                                            <button class="btn btn-outline-primary filter-btn" data-office="MY">Malaysia</button>
-                                            <button class="btn btn-outline-primary filter-btn" data-office="PH">Philippines</button>
-                                            <button class="btn btn-outline-primary filter-btn" data-office="SG">Singapore</button>
-                                        <!-- </nav> -->
-                                    </div>
-                                </div>
-                                {% endif %}
-
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Associate APs</h5>
+                        </div>
+                        {% if wlc.hostname.startswith('APDC') %}
+                                        
+                        <div class="row justify-content-center mt-3 mb-2">
+                            <div class="col-auto" id="office-filter-nav">
+                                <!-- <nav class="nav btn-group" id="office-filter-nav"> -->
+                                    <button class="btn btn-outline-primary reset-btn" >All</button>
+                                    <button class="btn btn-outline-primary filter-btn" data-office="MY">Malaysia</button>
+                                    <button class="btn btn-outline-primary filter-btn" data-office="PH">Philippines</button>
+                                    <button class="btn btn-outline-primary filter-btn" data-office="SG">Singapore</button>
+                                <!-- </nav> -->
                             </div>
-
-                            <table id="table-ap" class="display table table-striped my-0" style="width:100%;">
-                            {% if ap_wlc %}
-                                <thead>
-                                    <tr>
-                                        <th style="padding-left: 100px;">AP Name</th>
-                                        <th class="hide-column">Associated WLC IP</th>
-                                        <th class="hide-column">Office</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                        {% for ap in ap_wlc%}
-                                            <tr> 
-                                                {% for a in aps %}
-                                                    {% if ap.hostname == a.label%}
-                                                        <td style="padding-left: 100px;"><a href="{{ url_for('ap_detail', ap_mac = ap.macAddress, site_id=a.additionalInfo.siteid) }}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
-                                                            {{ ap.hostname if ap.hostname else 'N/A' }}</td> 
-                                                        <td  class="hide-column">{{ ap.associatedWlcIp }}</td>
-                                                        <td  class="hide-column">{{ ap.office }}</td>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </tr>
-                                        {% endfor %}
-                                    
-                                </tbody>
-                                {% else %}
-                                    <p style="padding-left: 100px;">No AP associate with current WLC</p>
-                                {% endif %}
-                            </table>
                         </div>
-                       
-                        </div>
+                        {% endif %}
+                        <table id="table-ap" class="display table table-striped my-0" style="width:100%;">
+                        {% if ap_wlc %}
+                            <thead>
+                                <tr>
+                                    <th style="padding-left: 100px;">AP Name</th>
+                                    <th class="hide-column">Associated WLC IP</th>
+                                    <th class="hide-column">Office</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ap in ap_wlc%}
+                                <tr> 
+                                    {% for a in aps %}
+                                        {% if ap.hostname == a.label%}
+                                            <td style="padding-left: 100px;"><a href="{{ url_for('ap_detail', ap_mac = ap.macAddress, site_id=a.additionalInfo.siteid) }}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
+                                                {{ ap.hostname if ap.hostname else 'N/A' }}</td> 
+                                            <td  class="hide-column">{{ ap.associatedWlcIp }}</td>
+                                            <td  class="hide-column">{{ ap.office }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}  
+                            </tbody>
+                            {% else %}
+                                <p style="padding-left: 100px;">No AP associate with current WLC</p>
+                            {% endif %}
+                        </table>
                     </div>
-        </div>
-            <div class="row">
-            
+                       
+                </div>
+                <div class="tab-pane fade" id="power-pane" role="tabpanel" aria-labelledby="power-tab">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Power Supply Details</h5>
+                        </div>
+                        <table id="datatables-dashboard-modi-projects" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Operational Status</th>
+                                    <th>Serial Number</th>
+                                    <th>Vendor Equipment Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pwrSply in physical %}
+                                    {% if "cevPowerSupply" in pwrSply.vendorEquipmentType %}
+                                    <tr>
+                                        <td>{{ pwrSply.name | default('-', true) }}</td>
+                                        
+                                        {% set state = pwrSply.operationalStateCode | default('', true) | lower | trim %}
+                                        {% if state in ['normal', 'on', 'operational', 'ok'] %}
+                                            <td><i class="align-middle text-success" data-feather="check-circle"></i></td>
+                                        {% else %}
+                                            <td><i class="align-middle text-danger" data-feather="x-circle"></i></td>
+                                        {% endif %}
+    
+                                        <td>{{ pwrSply.serialNumber | default('-', true) }}</td>
+                                    
+                                        <td>{{ pwrSply.vendorEquipmentType | default('-', true) }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Operational Status</th>
+                                    <th>Serial Number</th>
+                                    <th>Vendor Equipment Type</th>
+                                </tr>
+                            </tfoot>
+                        </table>    
+                    </div>
+                </div>
             </div>
         </div>
     </main>
-
     
     {% endblock %}
     {% block script %}
@@ -573,16 +615,59 @@
     </script>
     
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-        $("#datatables-dashboard-modi-projects").DataTable({
-            paging: true,        // enable pagination
-            pageLength: 12,      // show 10 rows per page
-            lengthChange: false,  // allow user to change rows/page via a dropdown (optional)
-            autoWidth: false,
-            ordering: false,
-            bFilter: false,      // keep search disabled (optional)
-            info: true           // show "Showing X to Y of Z entries"
-        });
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            // 1) Add an input to each footer cell
+            $('#datatables-dashboard-modi-projects tfoot th').each(function () {
+                const title = $(this).text().trim();
+                $(this).html(
+                '<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />'
+                );
+            });
+            
+            // 2) Initialize DataTable
+            const table = $("#datatables-dashboard-modi-projects").DataTable({
+                paging: true,
+                pageLength: 10,
+                lengthChange: false,
+                autoWidth: false,
+                ordering: false,
+            
+                // IMPORTANT: keep searching enabled
+                // searching: true, // (default is true, so this line is optional)
+                dom: 'lrtip',      // hide default global search input, but keep filtering enabled
+            
+                info: true,
+                language: {
+                emptyTable: "No project data available.",
+                zeroRecords: "No matching records found.",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                infoEmpty: "Showing 0 to 0 of 0 entries"
+                },
+            
+                // 3) Bind footer inputs to column search
+                initComplete: function () {
+                const api = this.api();
+            
+                api.columns().every(function () {
+                    const column = this;
+                    const $input = $('input', column.footer());
+            
+                    // optional: debounce to reduce redraws on each keystroke
+                    let t;
+                    $input.on('keyup change', function () {
+                    clearTimeout(t);
+                    const val = this.value;
+                    t = setTimeout(function () {
+                        if (column.search() !== val) {
+                        // no regex, smart search on
+                        column.search(val, false, true).draw();
+                        }
+                    }, 150);
+                    });
+                });
+                }
+            });
         });
     </script>
 
@@ -674,13 +759,5 @@
             });
     }
 </script>
-
-
-    
-    
-    
-    
-    
-    
-    
+  
 {% endblock %}

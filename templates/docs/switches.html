@@ -14,31 +14,56 @@
             <h1 class="h3 mb-3">Switch Devices</h1>
 
             <div class="row">
-                <div class="col-12">
-                    <div class="card">                       
+                <div class="col-12">     
+                    <div class="card">
                         <div style="display: flex; margin: 10px; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                            <a href="/switches" class="btn btn-secondary role-filter" id="clear-filter">All Switches</a>
-                            <a href="/switches?role=CORE" class="btn btn-primary role-filter" role="CORE">Core</a>
-                            <a href="/switches?role=DISTRIBUTION" class="btn btn-primary role-filter" role="DISTRIBUTION">Distribution</a>
-                            <a href="/switches?role=ACCESS" class="btn btn-primary role-filter" role="ACCESS">Access</a>
+                            <a href="/switches"
+                                class="btn {{ 'btn-primary' if not role else 'btn-secondary' }} role-filter"
+                                id="clear-filter">
+                                All Switches
+                            </a>
+                        
+                            <a href="/switches?role=CORE"
+                                class="btn {{ 'btn-primary' if role and role.upper() == 'CORE' else 'btn-secondary' }} role-filter">
+                                Core
+                            </a>
+                        
+                            <a href="/switches?role=DISTRIBUTION"
+                                class="btn {{ 'btn-primary' if role and role.upper() == 'DISTRIBUTION' else 'btn-secondary' }} role-filter">
+                                Distribution
+                            </a>
+                        
+                            <a href="/switches?role=ACCESS"
+                                class="btn {{ 'btn-primary' if role and role.upper() == 'ACCESS' else 'btn-secondary' }} role-filter">
+                                Access
+                            </a>
                         </div>
+                    
                         <div class="card-body">
-                            <table id="datatables-column-search-text-inputs" class="table table-striped " style="width:100%" >
+                            <table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
                                 <thead>
-                                    <tr>
-                                        <th>Hostname</th>
-                                        <th>Role</th>
-                                        <th>IP Address</th>
-                                        <th>MAC Addresss</th>
-                                        <th>Software Version</th>
-                                        <th>Device Type</th>
-                                        <th>Location</th>
-                                    </tr>
+                                <tr>
+                                    <th>Hostname</th>
+                                    <th>Status</th>
+                                    <th>Role</th>
+                                    <th>IP Address</th>
+                                    <th>MAC Addresss</th>
+                                    <th>Software Version</th>
+                                    <th>Device Type</th>
+                                    <th>Location</th>
+                                </tr>
                                 </thead>
                                 <tbody>
                                 {% for device in devices %}
                                 <tr>
-                                    <td><a href = "/switches/{{device.id}}">{{ device.hostname }}</a></td>
+                                    <td><a href="/switches/{{ device.id }}">{{ device.hostname }}</a></td>
+                                    <td>
+                                    {% if device.reachabilityStatus == "Reachable" %}
+                                        <span class="badge bg-success">{{ device.reachabilityStatus | capitalize }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ device.reachabilityStatus | capitalize }}</span>
+                                    {% endif %}
+                                    </td>
                                     <td>{{ device.role }}</td>
                                     <td>{{ device.managementIpAddress }}</td>
                                     <td>{{ device.macAddress }}</td>
@@ -51,6 +76,7 @@
                                 <tfoot>
                                     <tr>
                                         <th>Hostname</th>
+                                        <th>Status</th>
                                         <th>Role</th>
                                         <th>IP Address</th>
                                         <th>MAC Addresss</th>
@@ -73,51 +99,40 @@
     <script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        let roleParam = (params.get('role') || '').trim();
-        
-        if (!roleParam) {
-            const roleraw = (document.getElementById("role")?.textContent || "").trim();
-            roleParam = roleraw;
-            roleParam = (roleParam || '').toString().trim();
-        }
         document.addEventListener("DOMContentLoaded", function() {
-            $('#datatables-column-search-text-inputs tfoot th').each(function() {
-                var title = $(this).text();
-                $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+          // Add search inputs to each footer cell
+          $('#datatables-column-search-text-inputs tfoot th').each(function() {
+            const title = $(this).text();
+            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+          });
+      
+          const table = $('#datatables-column-search-text-inputs').DataTable({
+            columnDefs: [{ searchable: true }]
+          });
+      
+          // Column search functionality
+          table.columns().every(function() {
+            const that = this;
+            $('input', this.footer()).on('keyup change clear', function() {
+              if (that.search() !== this.value) {
+                that.search(this.value).draw();
+              }
             });
-    
-            var table = $('#datatables-column-search-text-inputs').DataTable({
-                columnDefs: [
-                    { searchable: true }
-                ]
-            });
-            // Column search functionality
-            table.columns().every(function() {
-                var that = this;
-                $('input', this.footer()).on('keyup change clear', function() {
-                    if (that.search() !== this.value) {
-                        that.search(this.value).draw();
-                    }
-                });
-            });
-            // Button filtering on Country column
-            const ROLE_COL = 1; 
-            $('.role-filter').on('click', function() {
-                const ctr = $(this).attr('role');
-                table.column(ROLE_COL).search('^' + ctr + '$', true, false).draw();
-            });
-            // Clear all filters
-            $('#clear-filter').on('click', function() {
-                table.columns().search('');
-                $('#datatables-column-search-text-inputs tfoot input').val('');
-                table.search(''); 
-                table.draw();
-            });
-            if (roleParam && roleParam.trim() !== "") {
-                // Assuming role contains the role code like "MY", "SG", etc.
-                table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
-            }
+          });
+      
+          // Clear all filters button
+          $('#clear-filter').on('click', function(e) {
+            // Let it navigate back to /switches (all devices)
+            // No need to clear DataTables since page reloads
+          });
+      
+          // Optional: If you also want client-side filtering applied based on URL param (not necessary since server filtered)
+          // const params = new URLSearchParams(window.location.search);
+          // const roleParam = (params.get('role') || '').trim().toUpperCase();
+          // const ROLE_COL = 2;
+          // if (roleParam) {
+          //   table.column(ROLE_COL).search('^' + roleParam + '$', true, false).draw();
+          // }
         });
     </script>
 

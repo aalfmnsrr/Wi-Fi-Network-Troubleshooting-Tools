@@ -28,6 +28,7 @@ def refresh(id):
             d["interface"] = get_interface(d.get("id"))
             d["poe"] = get_poe(d.get("id"))
             d["cdp"] = function.get_cdp(d.get("hostname"), d.get("managementIpAddress"))
+            d["powerSupply"] = get_powerSupply(d.get("id"))
             sw = d
             break
     return sw
@@ -54,6 +55,7 @@ def get_switches(): # get switch by role
         d["interface"] = get_interface(d.get("id"))
         d["poe"] = get_poe(d.get("id"))
         d["cdp"] = function.get_cdp(d.get("hostname"), d.get("managementIpAddress"))
+        d["powerSupply"] = get_powerSupply(d.get("id"))
     makedirs(Config.inventory_path + "/Switches", exist_ok=True)
     with open(Config.switch_path, "w", encoding="utf-8") as f:
         json.dump(devices, f, indent=4, ensure_ascii=False, default=str)
@@ -239,10 +241,10 @@ def group_ap_labels_by_floor(ap_nodes):
 def get_vlan(device_id):
     function.get_token()
     header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Auth-Token': Config.token
-        }
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Auth-Token': Config.token
+    }
     
     url_inventory = f"{Config.dnac}/intent/api/v1/network-device/{device_id}/vlan"
     vlan = requests.get(url_inventory, headers=header, verify=False).json().get("response")
