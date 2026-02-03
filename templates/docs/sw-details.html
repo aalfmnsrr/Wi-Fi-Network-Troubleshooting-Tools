@@ -505,7 +505,7 @@
 											</div>
 										</div>
 									</div>
-									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerAllocated }} W</span>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerAllocated | default('-', true) }}</span>
 								</div>
 							</div>
 						</div>
@@ -523,7 +523,7 @@
 											</div>
 										</div>
 									</div>
-									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerConsumed }} W</span>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerConsumed | default('-', true) }}</span>
 								</div>
 							</div>
 						</div>
@@ -541,7 +541,7 @@
 											</div>
 										</div>
 									</div>
-									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerRemaining }} W</span>
+									<span class="h1 d-inline-block mt-1 mb-3">{{ poe.powerRemaining | default('-', true) }}</span>
 								</div>
 							</div>
 						</div>
