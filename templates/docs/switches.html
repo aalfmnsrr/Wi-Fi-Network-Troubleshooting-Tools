@@ -66,8 +66,8 @@
                                     </td>
                                     <td>{{ device.role }}</td>
                                     <td>{{ device.managementIpAddress }}</td>
-                                    <td>{{ device.macAddress }}</td>
-                                    <td>{{ device.softwareVersion }}</td>
+                                    <td>{{ device.macAddress | upper }}</td>
+                                    <td>{{ device.softwareVersion | upper }}</td>
                                     <td>{{ device.type }}</td>
                                     <td>{{ sw_locations.get(device.id, '-') }}</td>
                                 </tr>
