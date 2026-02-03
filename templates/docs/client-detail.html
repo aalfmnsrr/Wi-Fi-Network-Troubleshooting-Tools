@@ -3,128 +3,164 @@
 
 <main class="content">
     <div class="container-fluid p-0">
-        <div class="row" >
+
+    <div class="row">
+
+      <div class="col-12 col-lg-5">
+             <div class="row" >
+
+              <div class="card flex-fill">
+              <div class="card-body py-3">
+                  <div class="d-flex align-items-start">
+                      <div class="flex-grow-1">
             <!-- <div class="col-md-3 text-center mb-3"> -->
                 <div class="mb-3">
-                    <span class="rounded-circle d-inline-block bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
-                        <i class="align-middle" data-feather="user" style="width: 110px; height: 110px; color: #555;"></i>
+                    <span class="rounded-circle d-inline-block bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 131px;">
+                        <i class="align-middle" data-feather="user" style="width: 90px; height: 90px; color: #555;"></i>
                     </span>
                 </div>
     
-                <h3 class="mb-0 text-center">
-                    <nobr style="color:#3266bb;">{{ client.userId or 'N/A' }}  </nobr>
-                    {% if client.connectionStatus == "CONNECTED" %}
-                        <span class="badge bg-success p-2 px-3 position-relative">
-                            {{ client.connectionStatus  | capitalize }}
-                        </span>
-                    {% else %}
-                        <span class="badge bg-danger ms-2 align-middle">
-                            {{ client.connectionStatus  | capitalize }}
-                        </span>
-                    {% endif %}
-                    <div class="col-auto ms-auto text-end mt-n1 mb-3">
-                        <button class="btn btn-primary shadow-sm">
-                            <i class="align-middle" data-feather="refresh-cw" onclick="location.reload()">&nbsp;</i>
-                        </button>
-                    </div>
-                </h3>
+                    <h4 class="mb-0 text-center">
+                      {% if client.connectionStatus == "CONNECTED" %}
+                      <span class="badge bg-success p-1 px-3 position-relative" style="font-size: 14px; margin-bottom: 7px;">
+                          {{ client.connectionStatus  }}
+                      </span>
+                  {% else %}
+                      <span class="badge bg-danger p-1 px-3 position-relative" style="font-size: 14px; margin-bottom: 7px;">
+                          {{ client.connectionStatus  }}
+                      </span>
+                  {% endif %}</br>
+                        <span style="color:#3266bb; ">{{ client.userId or 'N/A' }}  </span>
+          
+                        <!-- <div class="col-auto ms-auto text-end mt-n1 mb-3">
+                            <button class="btn btn-primary shadow-sm">
+                                <i class="align-middle" data-feather="refresh-cw" onclick="location.reload()">&nbsp;</i>
+                            </button>
+                        </div> -->
+                    </h4>
+
+                  </div>
                 </div>
-                <div class="row">  
-                    <div class="col-12 col-lg-3">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h3 class="mb-2">{{ overallScore }}</h3>
-                                        <p class="mb-2">Overall Health</p>
-                                        {% if 4 > overallScore %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
-                                        {% elif 7 > overallScore %}
-                                            <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
-                                        {% else %}
-                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
-                                        {% endif %}
-                                    </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-success" data-feather="activity"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-3">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h3 class="mb-2">{{ onboardedScore }}</h3>
-                                        <p class="mb-2">Onboarded Health</p>
-                                        {% if 4 > onboardedScore %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
-                                        {% elif 7 > onboardedScore %}
-                                            <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
-                                        {% else %}
-                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
-                                        {% endif %}
-                                    </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-success" data-feather="loader"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-3">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h3 class="mb-2">{{ connectedScore }}</h3>
-                                        <p class="mb-2">Connected Health</p>
-                                        {% if 4 > connectedScore %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
-                                        {% elif 7 > connectedScore %}
-                                            <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
-                                        {% else %}
-                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
-                                            {% endif %}
-                                    </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-danger" data-feather="wifi"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-3">
-                        <div class="card flex-fill">
-                            <div class="card-body py-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h3 class="mb-2">{{ client.issueCount }}</h3>
-                                        <p class="mb-2">Issue Count</p>
-                                        {% if client.issueCount > 0 %}
-                                            <i class="align-middle text-danger" data-feather="thumbs-down"></i>
-                                        {% else %}
-                                            <i class="align-middle text-success" data-feather="thumbs-up"></i>
-                                        {% endif %}
-                                    </div>
-                                    <div class="d-inline-block ms-3">
-                                        <div class="stat">
-                                            <i class="align-middle text-danger" data-feather="alert-triangle"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              </div>
             </div>
+
+
+                </div>
+              </div>
+
+      <div class="col-12 col-lg-7">
+         <div class="row ">
+
+                <div class="col-12 col-lg-6">
+                  <div class="card flex-fill">
+                      <div class="card-body py-3">
+                          <div class="d-flex align-items-start">
+                              <div class="flex-grow-1">
+
+                                  <h4 class="mb-2">Location</h4>
+                                  <p class="mb-2">
+                                    {% set parts = client.location.split('/') %}
+                                    {{ parts[2] }}, {{ parts[1] }}, {{ parts[0] }}
+                                  </p>
+                              </div>
+                              <div class="d-inline-block ms-3">
+                                  <div class="stat">
+                                      <i class="align-middle text-danger" data-feather="map-pin"></i>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+                  <div class="col-12 col-lg-6 ">
+                      <div class="card flex-fill">
+                          <div class="card-body py-3">
+                              <div class="d-flex align-items-start">
+                                  <div class="flex-grow-1">
+                                      <h3 class="mb-2">{{ overallScore }}</h3>
+                                      <p class="mb-2">Overall Health</p>
+                                  
+                                  </div>
+                                  <div class="d-inline-block ms-3">
+                                      <div class="stat">
+                                        {% if 4 > overallScore %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                    {% elif 7 > overallScore %}
+                                        <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="col-12 col-lg-6">
+                      <div class="card flex-fill">
+                          <div class="card-body py-3">
+                              <div class="d-flex align-items-start">
+                                  <div class="flex-grow-1">
+                                      <h3 class="mb-2">{{ client.rssi or 'N/A'}}</h3>
+                                      <p class="mb-2">Singal Strength</p>
+                                    
+                          
+
+                                  </div>
+                                  <div class="d-inline-block ms-3">
+                                      <div class="stat">
+
+                                        {% set strength = client.rssi | int %}
+
+                                    
+                                        {% if strength < -70 %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+
+                                        {% elif strength < -50 %}
+                                        <i class="align-middle" style="color: orange;" data-feather="thumbs-up"></i>
+
+                                        {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                        {% endif %}
+
+
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              
+                  <div class="col-12 col-lg-6 ">
+                      <div class="card flex-fill">
+                          <div class="card-body py-3">
+                              <div class="d-flex align-items-start">
+                                  <div class="flex-grow-1">
+                                      <h3 class="mb-2">{{ client.issueCount }}</h3>
+                                      <p class="mb-2">Issue Count</p>
+                              
+                                  </div>
+                                  <div class="d-inline-block ms-3">
+                                      <div class="stat">
+                                        {% if client.issueCount > 0 %}
+                                        <i class="align-middle text-danger" data-feather="thumbs-down"></i>
+                                    {% else %}
+                                        <i class="align-middle text-success" data-feather="thumbs-up"></i>
+                                    {% endif %}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+            </div>
+       </div>
+  </div>
+
+
+<!-- 
             <div class="row">
                 <div class="col-12">
                     <div class="card">     
@@ -172,166 +208,435 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
+
+
             <div class="row">
                 <div class="col-12 mb-0">
                     <div class="card flex-fill mb-0">
                         <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Details</h3>
+                              <div class="card-header">
+                                  <h3 class="card-title">Assurance</h3>
+                              </div>
+                              <div class="col-auto d-none d-sm-block">
+                                <ul class="nav nav-tabs mb-3" id="clientTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab"
+                                            data-bs-target="#inventory-pane" type="button" role="tab"
+                                            aria-controls="inventory-pane" aria-selected="true">
+                                        Issues
+                                    </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="conn-tab" data-bs-toggle="tab"
+                                            data-bs-target="#conn-pane" type="button" role="tab"
+                                            aria-controls="conn-pane" aria-selected="false">
+                                        Events
+                                    </button>
+                                    </li>
+                                </ul>
                             </div>
-                <div class="col-auto d-none d-sm-block">
-                <ul class="nav nav-tabs mb-3" id="clientTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab"
-                            data-bs-target="#inventory-pane" type="button" role="tab"
-                            aria-controls="inventory-pane" aria-selected="true">
-                        Inventory
-                    </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="conn-tab" data-bs-toggle="tab"
-                            data-bs-target="#conn-pane" type="button" role="tab"
-                            aria-controls="conn-pane" aria-selected="false">
-                        Connection
-                    </button>
-                    </li>
-                </ul>
-            </div>
-            <div class="tab-content mb-0" id="clientTabContent">
-                <div class="tab-pane fade show active" id="inventory-pane" role="tabpanel" aria-labelledby="inventory-tab">
-                <div class="card flex-fill mb-0">
-                        <div class="card-header mb-0">
-                            <h5 class="card-title mb-0">Inventory</h5>
+                            <div class="tab-content mb-0" id="clientTabContent">
+                                <div class="tab-pane fade show active" id="inventory-pane" role="tabpanel" aria-labelledby="inventory-tab">
+                                    <div class="card flex-fill mb-0">
+                                        <div class="card-header mb-0">
+                                            <h5 class="card-title mb-0">Issues</h5>
+                                        </div>
+                                        <div class="card-body">
+                                          <table id="datatables-column-search-text-inputs" class="table table-striped " style="width:100%">
+                                              <thead>
+                                                  <tr>
+                                                      <th>ID</th>
+                                                      <th>Description</th>
+                                                      <th>Entity</th>
+                                                      <th>Priority</th>
+                                                      <th>Severity</th>
+                                                      <th>Summary</th>
+                                                      <th>Source</th>
+                                                      <th>Timestamp</th>
+                                                  </tr>
+                                              </thead>
+                                              <tbody>
+                                                  {% for iss in issues %}
+                                                  <tr>
+                                                      <td>{{ iss.issueId | default('-', true) }}</td>
+                                                      <td>{{ iss.issueDescription | default('-', true) }}</td>
+                                                      <td>{{ iss.issueEntityValue | default('-', true) }}</td>
+                                                      <td>{{ iss.issuePriority | default('-', true) }}</td>
+                                                      <td>{{ iss.issueSeverity | default('-', true) }}</td>
+                                                      <td>{{ iss.issueSource | default('-', true) | capitalize }}</td>
+                                                      <td>{{ iss.issueTimestamp | default('-', true) }}</td>
+                                                  </tr>
+                                                  {% endfor %}
+                                                  {% if not issues %}
+                                                  <td>-</td>
+                                                  <td>-</td>
+                                                      <td>-</td>
+                                                      <td>-</td>
+                                                      <td>-</td>
+                                                      <td>-</td>
+                                                      <td>-</td>
+                                                      <td>-</td>
+                                                  {% endif %}
+                                              </tbody>
+                                          </table>
+                                      </div>
+                                            
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade mb-0" id="conn-pane" role="tabpanel" aria-labelledby="conn-tab">
+                                  <div class="card flex-fill mb-0">
+                                      <div class="card-header">
+                                          <h5 class="card-title mb-0">Events</h5>
+                                      </div>
+                                      <div class="card-body">
+                                        <!-- <table id="eventsTable" class="table table-striped " style="width:100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Timestamp</th>
+                                                    <th>Name</th>
+                                                    <th>Network Device</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for e in event %}
+                                                <details>
+                                                  <summary>
+                                                    <tr>
+                                                        <td>{{ e.id| default('-', true) }}</td>
+                                                        <td data-ts="{{ e.timestamp | default(0, true) }}">N/A</td>
+                                                        <td> {{ e.name | default('-', true) }}</td>
+                                                        <td>{{ e.networkDeviceName | default('-', true) }}</td>
+                                                  
+                                                    </tr>
+                                                  </summary>
+                                                <table  class="table table-striped " style="width:100%">
+                                                    <thead>
+                                                        <tr>
+                                                              <th>ID</th>
+                                                              <th>Timestamp</th>
+                                                              <th>Name</th>
+                                                          </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                        <td> {{ e.name | default('-', true) }}</td>
+                                                        <td> {{ e.name | default('-', true) }}</td>
+                                                        <td> {{ e.name | default('-', true) }}</td>
+                                                  </tbody>
+                                                </table>
+
+                                              </details>
+                                                {% endfor %}
+                                                {% if not event %}
+                                                <td>-</td>
+                                                <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                {% endif %}
+                                            </tbody>
+                                        </table> -->
+                                    
+                                        <!-- <table id="eventsTable" class="table table-striped" style="width:100%"> -->
+                                        <table class="table table-striped" style="width:100%">
+                                          <thead>
+                                            <tr>
+                                              <th>Name</th>
+                                              <th>Timestamp</th>
+                                              <th>Network Device</th>
+                                              <!-- <th>ID</th> -->
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {% for e in event %}
+                                            <!-- Master row -->
+                                            <tr class="master-row">
+                                              <td>
+                                                <details>
+                                                  <summary class="summary-btn">
+                                                    <span class="chev">▶</span> {{ e.name | default('-', true) }}
+                                                  </summary>
+                                                </details>
+                                              </td>
+                                              <td data-ts="{{ e.timestamp | default(0, true) }}">N/A</td>
+                                              <td>{{ e.networkDeviceName | default('-', true) }}</td>
+                                              <!-- <td> {{ e.id | default('-', true) }}</td> -->
+
+                                            </tr>
+                                        
+                                            <!-- Details row -->
+                                            <tr class="details-row" role="region" aria-label="Event">
+                                              <td colspan="4" class="p-0">
+                                                <div class="details-inner">
+                                                  <!-- <strong>Event {{ e.id | default('-', true) }} – Details</strong> -->
+                                        
+                                                  <!-- Nested table -->
+                                                  <table class="table table-sm mini-table mb-0" >
+                                                    <thead>
+                                                      <tr>
+                                                        <th>Name</th>
+                                                        <th>Timestamp</th>
+                                                        <th>Details</th>
+                                                        <th>Status</th> 
+                                                        <!-- <th>Event Type</th> -->
+                                                        <!-- <th>Reson Code</th> -->
+                                                        <th>Failure</th>
+                                                      </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                      {% for c in e.childEvent %}
+                                                      <tr>
+                                                          <td>{{ c.name | default('-', true) }}</td>
+                                                          <td data-ts="{{ c.timestamp | default(0, true) }}">N/A</td>
+                                                          <td>{{ c.details | default('-', true) }}</td>
+                                                          <td>
+
+                                                          {% if "SUCCESS" in c.resultStatus  %}
+                                                              <span class="badge bg-success p-1 px-2 position-relative" style="font-size: 10px; ">
+                                                                SUCCESS
+                                                              </span>
+                                                          {% else %}
+                                                              <span class="badge bg-success p-1 px-2 position-relative" style="font-size: 10px; ">
+                                                                {{ c.resultStatus | default('-', true) }}
+                                                              </span>
+                                                          {% endif %}
+                                                        
+                                                          </td>
+                                                          <!-- <td>{{ c.wirelessEventType | default('-', true) }}</td> -->
+                                                          <!-- <td>{{ c.reasonCode | default('-', true) }}</td> -->
+                                                          <td>{{ c.failureCategory | default('-', true) }}</td>
+                                                      </tr>
+                                                      {% endfor %}
+                                                    </tbody>
+                                                  </table>
+                                        
+                                                
+                                                </div>
+                                              </td>
+                                            </tr>
+                                            {% endfor %}
+                                        
+                                            {% if not event %}
+                                            <tr>
+                                              <td colspan="4" class="text-center text-muted">No events</td>
+                                            </tr>
+                                            {% endif %}
+                                          </tbody>
+                                        </table>
+                                        
+
+                                    
+                                      </div>
+                                              
+                                  </div>
+                                </div>
+                            </div>
+  
                         </div>
-                            <table id="datatables-dashboard-projects" class="table table-striped my-0 mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Key</th>
-                                        <th class="d-none d-xl-table-cell">Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Username</td>
-									    <td class="d-none d-xl-table-cell">{{ client.userId or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Device Hostname</td>
-									    <td class="d-none d-xl-table-cell">{{ client.hostName or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>MAC Address</td>
-									    <td class="d-none d-xl-table-cell">{{ client.hostMac }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>IP Address</td>
-									    <td class="d-none d-xl-table-cell">{{ details.hostIpV4 }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Location</td>
-									    <td class="d-none d-xl-table-cell">{{ client.location or '1st Floor' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Device Type</td>
-									    <td class="d-none d-xl-table-cell">{{ details.subType  or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Device OS</td>
-									    <td class="d-none d-xl-table-cell">{{ client.hostOs  or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Hardware Manufacturer</td>
-									    <td class="d-none d-xl-table-cell">{{ client.deviceVendor  or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tracked</td>
-									    <td class="d-none d-xl-table-cell">{{ client.tracked | capitalize or 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                      </div>
                     </div>
                 </div>
-                <div class="tab-pane fade mb-0" id="conn-pane" role="tabpanel" aria-labelledby="conn-tab">
-                <div class="card flex-fill mb-0">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Connection Details</h5>
+
+  
+
+
+    <div class="row g-2">
+
+      <!-- Left column accordion -->
+      <div class="col-12 col-lg-6">
+        <div class="accordion mg-4" id="clientAccordionLeft">
+    
+          <div class="accordion-item">
+            <h2 class="accordion-header flex-fill" id="heading-conn-left">
+              <button class="accordion-button flex-fill" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#conn-left"
+                      aria-expanded="false" aria-controls="conn-left" style="background-color: #fff;">
+                Device Details
+              </button>
+            </h2>
+            <div id="conn-left" class="accordion-collapse collapse show mb-4"
+                 data-bs-parent="#clientAccordionLeft" aria-labelledby="heading-conn-left">
+              <div class="accordion-body">
+                <div class="row g-2">
+
+                  <!-- <div class="col-12 col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Username</medium>
+                      <div>{{ client.userId or '-' }}</div>
                     </div>
-                            <table id="datatables-dashboard-projects" class="table table-striped my-0">
-                                <thead>
-                                    <tr>
-                                        <th>Key</th>
-                                        <th class="d-none d-xl-table-cell">Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Connection Type</td>
-									    <td class="d-none d-xl-table-cell">{{ client.hostType | capitalize or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Authentication Type</td>
-									    <td class="d-none d-xl-table-cell">{{ client.authType or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>VLAN ID</td>
-									    <td class="d-none d-xl-table-cell">{{ client.vlanId or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>SSID</td>
-									    <td class="d-none d-xl-table-cell">{{ client.ssid or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Channel</td>
-									    <td class="d-none d-xl-table-cell">{{ client.channel or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Frequency</td>
-									    <td class="d-none d-xl-table-cell">{{ client.frequencyList or 'N/A' }} GHz</td>
-                                    </tr>
-                                    <tr>
-                                        <td>AAA Server</td>
-									    <td class="d-none d-xl-table-cell">{{ client.aaaServerIp or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>DHCP Server</td>
-									    <td class="d-none d-xl-table-cell">{{ client.dhcpServerIp | capitalize or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Signal Strength</td>
-									    <td class="d-none d-xl-table-cell">{{ client.rssi or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Port</td>
-									    <td class="d-none d-xl-table-cell">{{ client.port or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Slot ID</td>
-									    <td class="d-none d-xl-table-cell">{{ client.slotId or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dot 11 Protocol</td>
-									    <td class="d-none d-xl-table-cell">{{ client.dot11Protocol or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dot 11 Capability</td>
-									    <td class="d-none d-xl-table-cell">{{ client.dot11ProtocolCapability or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>L2 Virtual Network</td>
-									    <td class="d-none d-xl-table-cell">{{ client.l2VirtualNetwork or 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>L3 Virtual Network</td>
-									    <td class="d-none d-xl-table-cell">{{ client.l3VirtualNetwork or 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                  </div> -->
+                
+                  <div class="col-12 col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Device Hostname</medium>
+                      <div>{{ client.hostName or '-' }}</div>
+                    </div>
+                  </div>
+                
+                  <div class="col-12 col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">MAC Address</medium>
+                      <div>{{ client.hostMac }}</div>
+                    </div>
+                  </div>
+                
+                  <div class="col-12 col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">IPv4 Address</medium>
+                      <div>{{ details.hostIpV4 }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Device Type</medium>
+                      <div>{{ details.subType  or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Device OS</medium>
+                      <div>{{ client.hostOs  or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Hardware Manufacturer</medium>
+                      <div>{{ client.deviceVendor  or '-' }}</div>
+                    </div>
+                  </div>
+
+                
                 </div>
+              </div>
             </div>
-    </div></div></div></div></div>
+          </div>
+    
+    
+        </div>
+      </div>
+    
+      <!-- Right column accordion -->
+      <div class="col-12 col-lg-6">
+        <div class="accordion mb-4" id="clientAccordionRight">
+    
+          <div class="accordion-item">
+            <h2 class="accordion-header flex-fill" id="heading-device-right">
+              <button class="accordion-button flex-fill" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#device-right"
+                      aria-expanded="false" aria-controls="device-right" style="background-color:#fff">
+                Connection Details
+              </button>
+            </h2>
+            <div id="device-right" class="accordion-collapse collapse show mb-4"
+                 data-bs-parent="#clientAccordionRight" aria-labelledby="heading-device-right">
+              <div class="accordion-body">
+                <div class="row g-2">
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Connection Type</medium>
+                      <div>{{ client.hostType | capitalize or '-' }}</div>
+                    </div>
+                  </div>
+                
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Auth. Type</medium>
+                      <div>{{ client.authType or '-' }}</div>
+                    </div>
+                  </div>
+                
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">VLAN ID</medium>
+                      <div>{{ client.vlanId or '-' }}</div>
+                    </div>
+                  </div>
+                
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">SSID</medium>
+                      <div>{{ client.ssid or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Channel</medium>
+                      <div>{{ client.channel or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Frequency</medium>
+                      <div>{{ client.frequencyList or '-' }} GHz</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">AAA Server</medium>
+                      <div>{{ client.aaaServerIp or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">DHCP Server</medium>
+                      <div>{{ client.dhcpServerIp | capitalize or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Signal Strength</medium>
+                      <div>{{ client.rssi or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Port</medium>
+                      <div>{{ client.port or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Slot ID</medium>
+                      <div>{{ client.slotId or '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <div class="p-2 border rounded bg-light">
+                      <medium class="text-muted">Dot 11 Protocol</medium>
+                      <div>{{ client.dot11Protocol or '-' }}</div>
+                    </div>
+                  </div>
+                
+                </div>
+              </div>
+            </div>
+          </div>
+    
+    
+        </div>
+      </div>
+    
+    </div>
+    
+
+
+
+<!--     
     <div class = "row">
-        <div class="col-12">
             <div class="card flex-fill">
                 <div class="card">
                     <div class="card-header">
@@ -382,7 +687,7 @@
                                                                 <div class="font-monospace mb-1">{{ node.radioFrequency }}</div>
                                                             </div>
 
-                                                        {% elif node.description == 'AP'  %}
+                                                        {% elif node.family == 'Unified AP'  %}
                                                         <div class="mb-2">
                                                             <div class="bg-info bg-opacity-10 p-2 rounded-circle d-inline-block">
                                                                 <i class="text-info" data-feather="radio"></i>
@@ -398,7 +703,7 @@
                                                         </h6>
                                                         
 
-                                                        {% elif node.description == 'WLC' %}
+                                                        {% elif node.family == 'Wireless Controller' %}
                                                             <div class="mb-2">
                                                                 <div class="bg-purple bg-opacity-10 p-2 rounded-circle d-inline-block" style="background-color: rgba(111, 66, 193, 0.1);">
                                                                     <i data-feather="server" style="color: #6f42c1;"></i>
@@ -410,7 +715,7 @@
                                                                 </a> 
                                                                
                                                             </h6>
-                                                        {% elif node.description == 'SWITCH' %}
+                                                        {% elif node.family == 'Switches and Hubs' %}
                                                             <div class="mb-2">
                                                                 <div class="bg-success bg-opacity-10 p-2 rounded-circle d-inline-block">
                                                                     <i class="text-success" data-feather="hard-drive"></i>
@@ -448,7 +753,7 @@
                                                 </div>
                                             </div>
 
-                                            {% if node.description == 'AP'  %}
+                                            {% if node.family == 'Unified AP'  %}
                                                 <p> {{link.sourceInterfaceName}}</p>
                                             {% endif %}
 
@@ -459,7 +764,7 @@
                                                 </div>
                                             {% endif %}
 
-                                            {% if node.description == 'AP'  %}
+                                            {% if node.family == 'Unified AP'   %}
                                                 <p> {{link.targetInterfaceName}}</p>
                                             {% endif %}
 
@@ -468,11 +773,56 @@
 
                                     </div>
                                 </div>
+                                <div class="card-header">
+                                    <h3 class="card-title">Neighboring Topology</h3>
+                                </div>
+                                 <div id="cy" style="width: 100%; height: 250px; display: block;"></div> 
                         </div>
-                            </div>
-                        </div></div></div>
+                        
+               
+
+
+                        </div></div></div> -->
+                       
+                        <!-- <div class = "row g-1">
+                          <div class="col-12">
+                              <div class="card flex-fill">
+                                  <div class="card">
+                                      <div class="card-header">
+                                          <h3 class="card-title">Neighboring Topology</h3>
+                                      </div>
+                                      <div class="card-body">
+                                        <div class="border rounded p-2 bg-light overflow-auto">
+                                            <div id="cy" style="width: 100%; height: 180px; display: block;">
+                                            </div>
+                                        </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                        </div> -->
+
+                        <div class="row g-1">
+                          <div class="col-12">
+                              <div class="card flex-fill">
+                      
+                                  <div class="card-header py-3">
+                                      <h3 class="card-title mb-0">Neighboring Topology</h3>
+                                  </div>
+                      
+                                  <div class="card-body py-2">
+                                      <div class="border rounded p-2 bg-light overflow-auto">
+                                          <div id="cy" style="width: 100%; height: 180px; display: block;"></div>
+                                      </div>
+                                  </div>
+                      
+                              </div>
+                          </div>
+                      </div>
+
+                
                         <div class="row">
-                            <div class="col-12 col-lg-6">
+                            <div class="col-12 col-lg-6">   
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title">Radio Tx Power</h5>
@@ -497,9 +847,541 @@
                                 </div>
                             </div>
                         </div>
+                      </div>
 
                     </main>
                     {% endblock %}{% block script %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialize DataTable (add your own options as needed)
+      var table = $('#eventsTable').DataTable({
+        pageLength: 10,
+        lengthChange: false,
+        order: [[1, 'desc']], // e.g., order by Timestamp
+        dom: 'tip', // customize controls if needed
+      });
+  
+      // Column index for Title (0-based): ID=0, Timestamp=1, Title=2, Device=3
+      const TITLE_COL = 2;
+  
+      // Debounce helper to avoid excessive redraws
+      function debounce(fn, delay) {
+        let t;
+        return function () {
+          clearTimeout(t);
+          const args = arguments, ctx = this;
+          t = setTimeout(() => fn.apply(ctx, args), delay);
+        };
+      }
+  
+
+    });
+  </script>
+  <script>
+    (function () {
+      function normalize(ts) {
+        const n = Number(ts);
+        if (!n || n <= 0) return null;
+        if (n > 1e15) return n / 1e6;  // µs -> s
+        if (n > 1e11) return n / 1e3;  // ms -> s
+        return n;                       // s
+      }
+      function fmt(ts) {
+        const s = normalize(ts);
+        if (!s) return 'N/A';
+        const d = new Date(s * 1000);
+        return isNaN(d.getTime()) ? 'N/A' : d.toLocaleString();
+      }
+      document.querySelectorAll('[data-ts]').forEach(el => {
+        el.textContent = fmt(el.getAttribute('data-ts'));
+      });
+    })();
+    </script>
+
+
+<script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/cytoscape-node-html-label/dist/cytoscape-node-html-label.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-popper@2/cytoscape-popper.min.js"></script>
+<script src="https://unpkg.com/tippy.js@6/dist/tippy.umd.min.js"></script>
+
+
+
+
+<script>
+    
+
+const elements = {{ elements | tojson }};
+
+
+console.log("elements (raw):", elements);
+console.log("nodes:", elements?.nodes?.length, "edges:", elements?.edges?.length);
+
+
+
+
+   
+const cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: elements,
+   
+style: [
+    {
+      selector: 'node',
+      style: {
+        'shape': 'rectangle',
+
+        // Fixed node box
+        'width': 170,
+        'height': 100,
+
+        // Icon inside node
+        'background-color': '#fff',
+        'background-image': 'data(icon)',
+        'background-fit': 'contain',
+        'background-clip': 'none',
+        'background-opacity': 0,
+
+        // Label inside the box (wrap)
+        'text-wrap': 'wrap',
+        'text-max-width': 200,     // keep or tweak (try 70–80 if you increase width)
+        'font-size': '20px',
+        'color': '#222',
+        'text-valign': 'bottom',  // or 'center' if you want it centered
+        'text-halign': 'center',
+        'text-margin-y': 10,      // reduce if you center text
+        'padding': '5px',
+      }
+    },
+    {
+      selector: 'edge',
+      style: {
+        'label': 'data(label)',
+        'text-rotation': 'autorotate',
+        'font-size': '15px',
+        'text-margin-y': -15,
+        'text-background-color': '#fff',
+        'text-background-opacity': 0,
+        'text-background-padding': '1px',
+
+        'curve-style': 'bezier',     // or 'straight' if you want strict straight lines
+        'line-color': '#ccc',
+        'width': 5,
+
+        'target-arrow-shape': 'triangle',
+        'target-arrow-color': '#ccc',
+        'source-endpoint': 'outside-to-node',
+        'target-endpoint': 'outside-to-node',
+      }
+    }
+  ],
+
+
+    layout: {
+    name: 'breadthfirst',
+    directed: true,
+    spacingFactor:2.5,                // tweak to increase/decrease spacing
+    nodeDimensionsIncludeLabels: false,// << stop labels affecting layout spacing
+    padding: 1,
+    // Rotate so hierarchy is left->right
+    transform: (node, pos) => ({ x: pos.y, y: pos.x })
+  }
+
+  });
+    const origPosMap = {};
+    cy.nodes().forEach(n => {
+    origPosMap[n.id()] = { x: n.position('x'), y: n.position('y') };
+    });
+
+    // Restore via preset
+    cy.on('tap', (e) => {
+    if (e.target === cy) {
+        cy.elements().unselect();
+        const preset = cy.layout({
+        name: 'preset',
+        positions: node => origPosMap[node.id()]
+        });
+        preset.run();
+        cy.fit(cy.elements(), 20);
+    }
+    });
+    cy.on('tap', 'edge', (e) => {
+      const url = e.target.data('url');
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    });
+  cy.nodeHtmlLabel([{
+    query: 'node',
+    halign: 'center',
+    valign: 'bottom',
+    halignBox: 'center',
+    valignBox: 'bottom',
+    tpl: (data) => {
+      const url = data.url || '#';
+      const label = data.label || 'Disconnected' ;
+      return `
+        <button style="padding:4px 6px; border:0px solid #ddd; border-radius:4px;" >
+                  <a href="${url}">
+                     ${label}
+            </a> 
+        </button>
+      `;
+    }
+  }]);
+
+  if (typeof cytoscape !== 'undefined' && typeof cytoscape.use === 'function') {
+    if (!cytoscape.plugins || !cytoscape.plugins['cytoscape-popper']) {
+      cytoscape.use(cytoscapePopper);
+      // console.log('[popper] cytoscape-popper registered once.');
+
+    }
+  }
+
+// Safe HTML escape — no double-escaping
+function esc(s = '') {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const ORDER = ['User', 'IPv4', 'SSID', 'Client Count', 'APs', 'Frequency', 'Health'];
+
+/**
+ * If v is a JSON-looking string, try to parse it safely.
+ * Returns { value, parsed } where parsed=true if JSON.parse succeeded.
+ */
+function tryParseJsonIfString(v) {
+  if (typeof v !== 'string') return { value: v, parsed: false };
+  const s = v.trim();
+  // Heuristic: starts with [ or { and ends with ] or }
+  if ((s.startsWith('[') && s.endsWith(']')) || (s.startsWith('{') && s.endsWith('}'))) {
+    try {
+      const parsed = JSON.parse(s);
+      return { value: parsed, parsed: true };
+    } catch {
+      // fall through: not valid JSON, keep as string
+    }
+  }
+  return { value: v, parsed: false };
+}
+
+/**
+ * Render arrays as chips, objects as compact JSON, and primitives as text.
+ */
+ function renderValue(v, urlMap = {}) {
+  // Attempt to parse JSON-looking strings
+  const { value } = tryParseJsonIfString(v);
+  v = value;
+
+  if (v == null) return '';
+
+  if (Array.isArray(v)) {
+  const items = v
+    .map(item => {
+      if (item == null) return '';
+      if (typeof item === 'object') {
+        // Render nested objects
+        return `<li class="tip-li"><code>${esc(JSON.stringify(item))}</code></li>`;
+      }
+      const s = String(item).trim();
+      // Check if URL exists
+      const url = urlMap[s];
+      if (url) {
+        return `<li class="tip-li"><a href="${esc(url)}" target="_blank" rel="noopener">${esc(s)}</a></li>`;
+      }
+      return s ? `<li class="tip-li">${esc(s)}</li>` : '';
+    })
+    .filter(Boolean)
+    .join('');
+  return items ? `<ul class="tip-list">${items}</ul>` : '';
+}
+
+
+  if (typeof v === 'object') {
+    const json = JSON.stringify(v);
+    if (!json || json === '{}' || json === '[]') return '';
+    return `<code>${esc(json)}</code>`;
+  }
+
+  const s = String(v).trim();
+  return s ? esc(s) : '';
+}
+
+function renderApList(labels, apMap) {
+  if (!Array.isArray(labels)) return '';
+
+  return labels
+    .map(label => {
+      const s = String(label ?? '').trim();
+      if (!s) return '';
+      const url = apMap?.[s];
+      const inner = url
+        ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(s)}</a>`
+        : esc(s);
+      return `<div class="tip-li">${inner}</div>`;
+    })
+    .filter(Boolean)
+    .join('');
+}
+
+
+
+function tooltipfromobject(obj, data) {
+  if (!obj || typeof obj !== 'object') return '';
+
+  // console.log(data.APinnode);
+
+  // First pass: ordered keys
+  const seen = new Set();
+  const orderedRows = ORDER
+    .filter(k => Object.prototype.hasOwnProperty.call(obj, k))
+    .map(k => {
+      const raw = obj[k];
+      const isArray = Array.isArray(raw);
+      const type = Array.isArray(raw) ? 'array' : typeof raw;
+
+      const html = renderValue(raw, data.APinnode);
+      if (!html) {
+        return '';
+      }
+      seen.add(k);
+
+      let result;
+      if (k === 'Client Count') {
+        result = `<a href="${data.urlClient}" target="_blank" rel="noopener" >${html}</a>`;
+      } 
+       else {
+        result = html;
+      }
+      
+      return `
+        <div class="tip-row">
+          <div class="tip-k">${esc(k)}</div>
+          <div class="tip-v">
+          ${result}
+          </div>
+        </div>`;
+    })
+    .filter(Boolean);
+
+  // Second pass: any extra keys not listed in ORDER (to help you see arrays that weren't in ORDER)
+  const extraRows = Object.keys(obj)
+    .filter(k => !seen.has(k))
+    .map(k => {
+      const raw = obj[k];
+      const type = Array.isArray(raw) ? 'array' : typeof raw;
+      // console.log(`[kv] EXTRA key="${k}" type=${type}`, raw);
+
+      const html = renderValue(raw, data.APinnode);
+      if (!html) {
+        // console.log(`[kv] skipping extra "${k}" (empty after render)`);
+        return '';
+      }
+      return `
+        <div class="tip-row">
+          <div class="tip-k">${esc(k)}</div>
+          <div class="tip-v">${html}</div>
+        </div>`;
+    })
+    .filter(Boolean);
+
+  const rows = [...orderedRows, ...extraRows].join('');
+  return rows ? `<div class="tip-kv">${rows}</div>` : '';
+}
+
+const nodeTippies = new Map();
+const hideTimers = new Map();
+
+function createTippyForNode(node) {
+  if (nodeTippies.has(node.id())) 
+    return nodeTippies.get(node.id());
+
+  const data = node.data();
+  const client = {{ client | tojson }};
+  const tooltip = data.tooltip || {}; 
+  const title  = esc(data.label || '');
+
+
+  // console.log(data.id !=='Disconnected' && client.connectionStatus === "CONNECTED" );
+
+    // Decide the icon based on connection status
+    let iconUrl;
+    if (data.id !=='Disconnected' && client.connectionStatus === "CONNECTED") {
+      iconUrl = "/static/assets/img/photos/icon-green.png";
+    } else if (data.id ==='Disconnected'){
+      iconUrl = "/static/assets/img/photos/icon-red.png";
+    } else {
+      iconUrl = "/static/assets/img/photos/icon-green.png";
+    }
+
+
+    // Build content
+    const content = document.createElement('div');
+    // console.log(tooltipfromobject(tooltip, data));
+
+    content.innerHTML = `
+  <div>
+    <div class="tip-title">
+      <span>
+        <img src="${iconUrl}" alt="" width="12" height="12" style="vertical-align:middle; margin-right:4px;" >
+        ${title}
+      </span>
+    </div>
+
+    <div>${tooltipfromobject(tooltip, data)} </div>
+    
+    <div class="tip-center">
+      ${data.role !== 'CLIENT' ?
+     `<span class="tip-center"><a href="${data.url}">...More</span>` 
+     : `<span> </span>`}
+    </div>
+
+    
+  </div>
+`;
+
+  const ref = node.popperRef();
+  const tip = tippy(document.body, {
+    content,
+    trigger: 'manual',
+    placement: 'top',
+    theme: 'net-modern',      // << use the modern theme
+    allowHTML: true,
+    interactive: true,
+    hideOnClick: false,
+    maxWidth: 320,
+    offset: [0, 10],
+    delay: [0, 150], 
+    animation: 'shift-away-subtle',
+    duration: [130, 100],
+    inertia: true,
+    zIndex: 9999,
+    getReferenceClientRect: ref.getBoundingClientRect,
+
+    
+    onShow(instance) {
+      const box = instance.popper;
+      const nodeId = node.id();
+
+      const cancelHide = () => {
+        const timer = hideTimers.get(nodeId);
+        if (timer) {
+          clearTimeout(timer);
+          hideTimers.delete(nodeId);
+        }
+      };
+
+      box.addEventListener('mouseenter', cancelHide);
+      box.addEventListener('mouseleave', () => {
+        // small delay to allow moving back to node
+        const timer = setTimeout(() => {
+          instance.hide();
+          hideTimers.delete(nodeId);
+        }, 200);
+        hideTimers.set(nodeId, timer);
+      });
+    },
+
+    
+
+  });
+  
+
+  // Optional: set accent/status based on Health
+  requestAnimationFrame(() => {
+    const box = tip.popper.querySelector('.tippy-box');
+    if (!box) return;
+    const health = tooltip.Health ?? tooltip.health ?? null;
+    if (health != null) {
+      const h = Number(health);
+      if (!Number.isNaN(h)) {
+        if (h >= 10) box.setAttribute('data-accent', 'success');
+        else if (h >= 6) box.setAttribute('data-accent', 'warn');
+        else if (h >= 3) box.setAttribute('data-accent', 'error');
+        else box.setAttribute('data-accent', 'error');
+      }
+    }
+    box.setAttribute('data-size', 'compact');  // or 'comfy'
+  });
+
+  nodeTippies.set(node.id(), tip);
+  return tip;
+}
+
+// Show/hide like you already do
+
+
+
+cy.on('mouseover', 'node', e => {
+  const n = e.target;
+  const id = n.id();
+
+  // Cancel any scheduled hide
+  if (hideTimers.has(id)) {
+    clearTimeout(hideTimers.get(id));
+    hideTimers.delete(id);
+  }
+
+  const t = createTippyForNode(n);
+
+  // Always refresh position
+  t.setProps({
+    getReferenceClientRect: n.popperRef().getBoundingClientRect,
+    interactive: true,
+    delay: [0, 150],   // optional extra hide delay inside Tippy
+  });
+
+  t.show();
+});
+
+
+
+
+// Delayed hide
+cy.on('mouseout', 'node', e => {
+  const n = e.target;
+  const id = n.id();
+  const t = nodeTippies.get(id);
+  if (!t) return;
+
+  const timer = setTimeout(() => {
+    t.hide();
+    hideTimers.delete(id);
+  }, 200);  // delay in ms — tweak (150–250ms is nice)
+
+  hideTimers.set(id, timer);
+});
+
+
+cy.on('pan zoom position', () => {
+  nodeTippies.forEach((t, id) => {
+    const n = cy.getElementById(id);
+    if (n.nonempty()) t.setProps({ getReferenceClientRect: n.popperRef().getBoundingClientRect });
+  });
+});
+cy.on('remove', 'node', e => {
+  const t = nodeTippies.get(e.target.id());
+  if (t) { t.destroy(); nodeTippies.delete(e.target.id()); }
+});
+cy.on('destroy', () => {
+  nodeTippies.forEach(t => t.destroy());
+  nodeTippies.clear();
+});
+
+  // console.log('[dbg] cy ready, nodes:', cy.nodes().length);
+</script>
+
+
+
+</script>
+
+
 <script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
@@ -975,7 +1857,6 @@
         });
     });
 </script>
-
 
 {% endblock %}
 

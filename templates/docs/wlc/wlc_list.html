@@ -12,40 +12,19 @@
 						</div>
 					</div>
 					<h1 class="h3 mb-3">Wireless LAN Controllers</h1>
-<!-- 
-					<div class="alert alert-warning alert-dismissible" role="alert">
-						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
-						<!-- <div class="alert-message">
-							<p class="mb-0">
-								<strong>jQuery required!</strong> This plugin requires jQuery to be functional. If you want to remove jQuery from your application, please check out <a href="docs-installation.html#drop-jquery">these docs</a>.
-							</p>
-						</div> -->
-					<!-- </div> -->
+
 					<div class="row">
 						<div class="col-12">
 							<div class="card">
-								<!-- <div class="card-header">
-									<h5 class="card-title">DataTables with Column Search by Text Inputs</h5>
-									<h6 class="card-subtitle text-muted">The searching functionality provided by DataTables is useful for quickly search through the information in the table. See official documentation <a href="https://datatables.net/examples/api/multi_filter.html"
-										 target="_blank" rel="noopener noreferrer nofollow">here</a>.</h6>
-								</div> -->
+					
+								</div>
 								<div class="card-body">
-									<!-- <div class="card-body text-center">
-										<div class="mb-3">
-											<button class="btn btn-secondary ms-2 country-filter" id="clear-filter">All</button>
-											<button class="btn btn-outline-primary country-filter" data-country="Malaysia">MY</button>
-											<button class="btn btn-outline-secondary country-filter" data-country="Thailand">TH</button>
-											<button class="btn btn-outline-success country-filter" data-country="Indonesia">ID</button>
-											<button class="btn btn-outline-danger country-filter" data-country="Hong Kong">HK</button>
-											<button class="btn btn-outline-warning country-filter" data-country="Philippines">PH</button>
-											<button class="btn btn-outline-info country-filter" data-country="Singapore">SG</button>
-											<button class="btn btn-outline-dark country-filter" data-country="Macao">MO</button>
-										</div>
-									</div> -->
+								
 									<table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
 										<thead>
 											<tr>
 												<th>Hostname</th>
+												<th>Status</th>
 												<th>Location</th>
 												<th>IP Address</th>
 												<th>MAC Address</th>
@@ -57,8 +36,15 @@
 										{% for w in wlc %}
 										<tr>
 											<td><a href = "{{url_for('wlc_details', id = w.id) }} " target="_blank">{{ w.hostname }}</a></td>
+											<td>
+												{% if w.reachabilityStatus == "Reachable" %}
+													<span class="badge bg-success">{{ w.reachabilityStatus | capitalize }}</span>
+												{% else %}
+													<span class="badge bg-danger">{{ w.reachabilityStatus | capitalize }}</span>
+												{% endif %}
+												</td>
 											<td>{{ w.dc }}</td>
-											<td>{{ w.managementIpAddress }}</td>
+											<td><a href = "https://{{ w.managementIpAddress}}">{{ w.managementIpAddress }}</td>
 											<td>{{ w.macAddress }}</td>
 											<td>{{ w.softwareVersion }}</td>
 											<td>{{ w.type }}</td>
@@ -68,6 +54,7 @@
 										<tfoot>
 											<tr>
 												<th>Hostname</th>
+												<th>Status</th>
 												<th>Location</th>
 												<th>IP Address</th>
 												<th>MAC Address</th>
@@ -114,7 +101,7 @@
 		});
 	
 		// Button filtering on Country column
-		const COUNTRY_COL = 5; 
+		const COUNTRY_COL = 7; 
 		$('.country-filter').on('click', function() {
 			const code = $(this).data('country');
 			table.column(COUNTRY_COL).search('^' + code + '$', true, false).draw();

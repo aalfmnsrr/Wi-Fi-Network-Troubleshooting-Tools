@@ -17,13 +17,213 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 	<link href="{{ url_for('static',filename='assets/css/light.css') }}" rel="stylesheet">
+    <link href="https://unpkg.com/tippy.js@6/dist/tippy.css" rel="stylesheet" >
 
     <style>
         th.hide-column,
         td.hide-column {
             display: none !important;
         }
-    </style>
+
+
+
+  /* Hide details-row until its master <details> is open */
+    .details-row { display: none; background: #fafbfd; }
+  /* Show the next .details-row when the row contains an open details */
+  tr:has(> td details[open]) + tr.details-row { display: table-row; }
+
+  /* Visuals */
+  .details-inner { padding: .75rem 1rem 1rem 1.5rem; border-left: 3px solid #dbe2f0; }
+  details > summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  .chev { display: inline-block; transition: transform .15s ease; }
+  details[open] .chev { transform: rotate(90deg); }
+
+  /* Make the nested table look compact */
+  .mini-table thead th { background: #edeff544; }
+
+
+  :root{
+    --tip-bg:#fff; --tip-fg:#1f2328; --tip-subtle:#6b7280; --tip-border:#e5e7eb;
+    --tip-shadow-1:0 6px 20px rgba(0,0,0,.08); --tip-shadow-2:0 2px 6px rgba(0,0,0,.06);
+    --tip-radius:10px; --tip-font:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+    --tip-size:12.5px; --tip-line:1.35; --tip-pad-y:8px; --tip-pad-x:10px;
+    --tip-accent-info:#3b82f6; --tip-accent-success:#16a34a; --tip-accent-warn:#f59e0b; --tip-accent-error:#ef4444;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --tip-bg:#181a1f; --tip-fg:#e5e7eb; --tip-subtle:#9ca3af; --tip-border:#262a33;
+      --tip-shadow-1:0 12px 30px rgba(0,0,0,.55); --tip-shadow-2:0 4px 10px rgba(0,0,0,.35);}
+  }
+
+  .tippy-box[data-theme~='net-modern']{
+    background:var(--tip-bg); color:var(--tip-fg); border:1px solid var(--tip-border);
+    border-radius:var(--tip-radius); box-shadow:var(--tip-shadow-1),var(--tip-shadow-2);
+    font:500 var(--tip-size)/var(--tip-line) var(--tip-font); max-width:320px; overflow:hidden;
+    -webkit-font-smoothing:antialiased; backdrop-filter:saturate(120%) blur(0px);
+  }
+  .tippy-box[data-theme~='net-modern'] .tippy-content{ padding:var(--tip-pad-y) var(--tip-pad-x); }
+
+  .tippy-box[data-theme~='net-modern'][data-placement^='top']    > .tippy-arrow::before{ border-top-color:var(--tip-bg); }
+  .tippy-box[data-theme~='net-modern'][data-placement^='bottom'] > .tippy-arrow::before{ border-bottom-color:var(--tip-bg); }
+  .tippy-box[data-theme~='net-modern'][data-placement^='left']   > .tippy-arrow::before{ border-left-color:var(--tip-bg); }
+  .tippy-box[data-theme~='net-modern'][data-placement^='right']  > .tippy-arrow::before{ border-right-color:var(--tip-bg); }
+
+  
+
+
+  .tip-title {
+  font-weight: 650;
+  letter-spacing: .2px;
+  margin: 0 0 6px 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;   /* center horizontally */
+  align-items: center;       /* vertically align icon + text */
+  gap: 6px;                  /* spacing between icon + text */
+}
+
+.tip-center {
+  display: flex; /* make it a flex container */
+  justify-content: center; /* horizontal centering of inline content */
+  align-items: center;     /* optional, vertical centering */
+  font-weight: 600;        /* use valid font-weight */
+  letter-spacing: 0.2px;
+  margin: 6px 0 3px 0;
+  border-radius: 8px;
+  text-align: center;      /* centers inline text if not flex */
+}
+
+
+.tip-icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+}
+
+.tip-kv {
+  display: grid;
+  grid-template-columns: max-content 1fr; /* key column fixed based on longest key */
+  column-gap: 10px;
+  border: 1px solid var(--tip-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+
+.tip-row {
+  display: contents;   /* Magic: children flow directly into parent grid */
+}
+
+/* Remove top border on the first row */
+.tip-row:first-child {
+  border-top: none;
+}
+
+/* Zebra striping for readability */
+.tip-row:nth-child(2n) {
+  background: color-mix(in srgb, var(--tip-bg) 92%, #000 8%); /* light tint */
+}
+
+.tip-k {
+  text-align: right;
+  color: var(--tip-subtle);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-top: 1px solid var(--tip-border);
+}
+
+    .tip-v {
+  text-align: left;
+  color: var(--tip-fg);
+  font-weight: 520;
+  padding: 6px 10px;
+  border-top: 1px solid var(--tip-border);
+  min-width: 0; /* required for ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tip-li {
+  background: #ffffff; border: 0px solid #e5e7eb;
+  border-radius: 999px; padding: 2px 2px;
+  line-height: 1.1; font-size: 12px;
+  list-style: none;
+}
+/* Remove bullets and indentation on the UL */
+.tippy-box .tip-list {
+  list-style: none;     /* remove bullets */
+  margin: 0;            /* remove default UL margin */
+  padding-left: 0;      /* remove left indent */
+  padding-right: 0;
+}
+
+/* Make sure LI adds no extra spacing either */
+.tippy-box .tip-list > li {
+  margin: 0;
+  padding: 2px;
+}
+
+/* Extra guard: remove any marker that a UA/framework could inject */
+.tippy-box .tip-list > li::marker {
+  content: '';
+}
+
+.tip-v code {
+  background: #f9fafb; border: 0px solid #e5e7eb;
+  border-radius: 4px; padding: 1px 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}
+
+
+/* even row striping */
+.tip-k:nth-child(4n+3),
+.tip-v:nth-child(4n+4) {
+  background: color-mix(in srgb, var(--tip-bg) 90%, #000 10%);
+}
+
+/* remove border on first row */
+.tip-k:nth-child(1),
+.tip-v:nth-child(2) {
+  border-top: none;
+}
+
+
+  /* Optional density variants */
+  .tip-wrap .tip-v { white-space: normal;}
+
+  .tippy-box[data-theme~='net-modern'][data-size='compact'] .tip-row { padding: 4px 8px; }
+.tippy-box[data-theme~='net-modern'][data-size='comfy']   .tip-row { padding: 8px 12px; }
+
+
+  /* Subtle show/hide */
+  .tippy-box[data-theme~='net-modern'][data-state='hidden']{ opacity:0; transform:translateY(2px) scale(.98); transition:transform .12s ease,opacity .12s ease; }
+  .tippy-box[data-theme~='net-modern'][data-state='visible']{ opacity:1; transform:translateY(0) scale(1); transition:transform .16s ease,opacity .16s ease; }
+
+  /* Optional: accent bar by status */
+  .tippy-box[data-theme~='net-modern'][data-accent]::before{
+    content:''; position:absolute; inset:0 auto auto 0; height:3px; width:100%;
+    background:var(--tip-accent-info);
+  }
+  .tippy-box[data-theme~='net-modern'][data-accent='success']::before{ background:var(--tip-accent-success); }
+  .tippy-box[data-theme~='net-modern'][data-accent='warn']::before{ background:var(--tip-accent-warn); }
+  .tippy-box[data-theme~='net-modern'][data-accent='error']::before{ background:var(--tip-accent-error); }
+
+  @media (prefers-reduced-motion: reduce){
+    .tippy-box[data-theme~='net-modern']{ transition:none !important; }
+  }
+  @media (forced-colors: active){
+    .tippy-box[data-theme~='net-modern']{ border:1px solid CanvasText; background:Canvas; color:CanvasText; box-shadow:none; }
+    .tippy-box[data-theme~='net-modern'] .tippy-arrow::before{ border-color:Canvas !important; }
+  }
+</style>
 
 </head>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">

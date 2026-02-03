@@ -145,10 +145,104 @@ def clients():
         query_connected_ap = query_connected_ap + "-AP*"
     else:
         query_connected_ap = query_connected_ap + "*"
-    clients = client_function.get_clients(200,offset,f"{query_connected_ap}")
+    # clients = client_function.get_clients(200,offset,"ID-ATO-10F-AP*")
+    clients = client_function.get_clients(200,offset,query_connected_ap)
+
+   
+
     branch_database = client_function.get_branch_database()
-    # print(clients)
-    return render_template("clients.html", clients=clients, database=branch_database)
+    # print("query",query_connected_ap)
+    # print("db",branch_database)
+    dbtojson = loctojson(branch_database)
+    listsc = clientlist(dbtojson)
+    # print("dbtojson",json.dumps(listsc, indent=2))
+
+    # clients = []
+    if query_connected_ap == "*":
+            clients = allclient(listsc)
+
+        
+    print(len(clients))
+    # print("dbtojson",json.dumps(clients, indent=2))
+
+    
+
+    return render_template("clients.html", clients=clients, database=branch_database, dbinjson = dbtojson)
+
+    
+@app.route('/clients/<AP>', methods=['POST', 'GET'])
+@session_check
+def clients_AP(AP):
+   
+
+    branch_database = client_function.get_branch_database()
+    dbtojson = loctojson(branch_database)
+    listsc = clientlist(dbtojson)
+    # clients = []
+
+    clients = allclient(AP)
+
+    print(len(clients))
+    # print("dbtojson",json.dumps(clients, indent=2))
+
+    
+
+    return render_template("clients.html", clients=clients, database=branch_database, dbinjson = dbtojson)
+
+def allclient(data):
+    # --- Simple type check ---
+    if isinstance(data, str):
+        data_list = [data]       # wrap string into list
+    elif isinstance(data, list):
+        data_list = data         # already a list
+    else:
+        raise TypeError("data must be a string or a list")
+
+    offset = request.args.get('offset')
+
+    clients = []
+    print("datalist", len(data_list))
+
+    for n in data_list:
+        result = client_function.get_clients(200, offset, n)
+        if not result: #if no client connected to AP
+            continue
+
+        # Keep only connected clients
+        for r in result:
+            if isinstance(r, dict) and r.get('connectionStatus', '').lower() == 'connected':
+                clients.append(r)
+
+    print(n)
+    return clients
+
+def clientlist(db):
+
+    out = []
+    for country, sites in db.items():
+        for site, floors in sites.items():
+            for floor in floors:
+                out.append(f"{country}-{site}-{floor}-AP*")
+    print(len(out))
+
+    return out
+
+def loctojson(data):
+
+    countries, sites_by_country, floors_by_country = data
+    out = {}
+    for ci, country in enumerate(countries):
+        site_list = sites_by_country[ci] if ci < len(sites_by_country) else []
+        floors_for_sites = floors_by_country[ci] if ci < len(floors_by_country) else []
+        site_map = {}
+        for si, site in enumerate(site_list):
+            floors = floors_for_sites[si] if si < len(floors_for_sites) else []
+            site_map[site] = floors
+        out[country] = site_map
+    return out
+
+
+
 
 @app.route('/client-detail/<client_mac>', methods=['POST', 'GET'])
 @session_check
@@ -157,6 +251,8 @@ def device_detail(client_mac):
     issues = client["issueDetails"]
     client = client["userDetails"]
     health = client.get("healthScore")
+
+    # print("dbtojson",json.dumps(client, indent=2))
     overallScore = 0
     onboardedScore = 0
     connectedScore = 0
@@ -183,19 +279,218 @@ def device_detail(client_mac):
     for p in phy_link:
         if p.get('sourceLinkStatus') == 'UP':
             phy_link = p
+    # print(json.dumps(phy_link, indent=2))
+
+
+    # event
+    # print(client_mac)
+    event = client_function.event(client_mac)
+    # print("dbtojson",json.dumps(event, indent=2))
+
+    event_child = client_function.clientevent(event)
+    # print("dbtojson",json.dumps(event_child, indent=2))
+
+
+    
+
 
     #to clean the array to be used in topology
     for n in client_connected[:]:
         if n.get('id') == 'client5ghz' or n.get('name') == '2.4GHz Clients':
             client_connected.remove(n)
 
-    # to insert topology following the order of the topology
+    ssid = None
+
     for n in neighbor_topology:
         if n.get('role') == 'CLIENT':
             client_connected.insert(0,n)
 
         elif n.get('role') == 'SSID' :
-            client_connected.insert(1,n)
+            ssid = n
+    # print(ssid)
+
+    for n in client_connected:
+        if n.get('role') == 'CLIENT' and ssid is not None:
+            n['ssid'] = ssid['name']
+        elif n.get('description') == 'AP':
+            n.update(phy_link)
+
+
+    from collections import defaultdict
+
+    topology = defaultdict(list)
+
+    
+    # test = allclient('HK-ASD-18F-AP02')
+    # # print(json.dumps(test, indent=2))
+    # print(len(test))
+
+    with open(Config.switch_path, 'r', encoding="utf-8") as f:
+        devices = json.load(f)
+
+    # to find connected AP to each sw
+    # AP = cdp.get
+
+
+    # print(client_connected)
+
+
+    # topology = {}        
+    for n in client_connected:
+        tooltip = {
+            'User': n.get('userId'),
+            'IPv4': n.get('ip'),
+            'Health': n.get('healthScore'),
+        }   
+
+        if n['role'] == 'CLIENT':
+    
+            n['icon'] = '/static/assets/img/devices/laptop.png' #to differetiate with phone/other device
+            n['url'] = url_for('device_detail', client_mac = client_mac)
+            tooltip['SSID'] = (ssid or {}).get('name', '')
+            tooltip['Frequency'] = (ssid or {}).get('radioFrequency', '')
+            tooltip = {k: v for k, v in tooltip.items() if v not in (None, '', [])}
+            n['tooltip'] = tooltip
+            print(tooltip)
+            topology['CLIENT'].append(n)
+        elif n['family'] == 'Unified AP':
+            n['icon'] = '/static/assets/img/devices/access.png'
+            n['url'] = url_for('ap_detail', ap_mac = n.get('additionalInfo').get('macAddress'))
+            n['urlClient']= url_for('clients_AP', AP = n.get('name'))
+            clientneighbor = allclient(n.get('name'))
+            print("client", len(clientneighbor))
+            tooltip['Client Count'] = len(clientneighbor)
+            tooltip = {k: v for k, v in tooltip.items() if v not in (None, '', [])}
+            n['tooltip'] = tooltip
+            print(tooltip)
+            topology['AP'].append(n)
+        elif n['family'] == 'Switches and Hubs':
+            n['icon'] = '/static/assets/img/devices/switch.png'
+            n['url'] = url_for('switch_detail', device_id = n.get('id'))
+
+            for s in devices:
+                if s["id"] == n["id"]:
+                    sw = s
+                    break
+            connectedAP = sw.get("AP")
+            APintooltip = []
+            APid = []
+            APinnode = {}
+
+            for c in connectedAP:
+                label = c.get('label')
+                mac = c.get('additionalInfo').get('macAddress')
+                APintooltip.append(label)
+                APid.append(mac)
+                APinnode[label] = url_for('ap_detail', ap_mac = mac)
+
+            # print(APid)
+            # print(APintooltip)
+            # print(APinnode)
+            n['APinnode'] = APinnode
+
+            
+            tooltip['AP'] = sorted(APintooltip)
+
+            tooltip = {k: v for k, v in tooltip.items() if v not in (None, '', [])}
+            n['tooltip'] = tooltip
+            topology['SWITCH'].append(n)
+        elif n['family'] == 'Wireless Controller':
+            n['icon'] = '/static/assets/img/devices/wlc.png'
+            n['url'] = url_for('wlc_details', id = n.get('id'))
+            tooltip = {k: v for k, v in tooltip.items() if v not in (None, '', [])}
+            n['tooltip'] = tooltip
+            print(tooltip)
+            topology['WLC'].append(n)
+ 
+    topology = dict(topology)
+
+    def checkNull(x):
+        if not x:               # catches None, {}, "", 0, False
+            return "Disconnected"
+        return x
+
+    nodes = []
+    for role, items in topology.items():
+        for item in items:
+            node_id = checkNull(item.get("name"))
+            nodes.append({
+                "data": {
+                    "id": str(node_id),
+                    "label": item.get("name", str(node_id)),
+                    "role": role,
+                    # include other fields if you like:
+                    **{k: v for k, v in item.items() if k not in ("id", "name")}
+                }
+            })
+           
+
+    clients = topology.get("CLIENT", [])
+    ap     = topology.get("AP", [])
+    switches= topology.get("SWITCH", [])
+    wlcs    = topology.get("WLC", [])
+
+    
+    def get_id(x):
+        if not x.get("name"):               # catches None, {}, "", 0, False
+            return "Disconnected"
+        return x.get("name",  "Disconnected")
+
+
+
+        
+    # Debug: see what's available
+    # print("CLIENT =", clients)
+    # print("AP      =", len(ap))
+    # print("SWITCH  =", len(switches))
+    # print("WLC     =", len(wlcs))
+
+    
+
+
+    edges = []
+    # Use the shortest chain length to avoid index errors
+    chain_len = min(len(clients), len(ap), len(switches), len(wlcs)) if wlcs else min(len(clients), len(ap), len(switches)) if switches else min(len(clients), len(ap)) if ap else 0
+    print("chain_len", chain_len)
+    for i in range(chain_len):
+        c = clients[i]; a = ap[i]
+        edges.append({ "data": {
+            "id": f"{get_id(c)}__to__{get_id(a)}",
+            "source": checkNull(c.get('name')), "target": a.get('name'),
+            "label": f"SSID: {c.get('ssid')}"
+        }})
+        if switches:
+            s = switches[i]
+            edges.append({ "data": {
+                "id": f"{get_id(a)}__to__{get_id(s)}",
+                "source": a.get('name'), "target": s.get('name'),
+                "label": f"{a.get('sourceInterfaceName')} → {a.get('targetInterfaceName')}"
+            }})
+            if wlcs:
+                w = wlcs[i]
+                edges.append({ "data": {
+                    "id": f"{get_id(s)}__to__{get_id(w)}",
+                    "source": s.get('name'), "target": w.get('name'),
+                    "label": ""
+                    
+                }})
+
+    elements = {"nodes": nodes, "edges": edges}
+    json_text = json.dumps(elements, ensure_ascii=False, indent=2)
+    # print(json_text)                                
+
+
+        # elif n.get('role') == 'SSID' :
+        #     client_connected.insert(1,n)
+
+    # print(json.dumps(topology['WLC'][0], indent=2))
+
+    # print(json.dumps(client_details, indent=2))
+    # print(json.dumps(client_connected, indent=2))
+
+
+
+
 
     txbyte = float(client_details.get('txBytes')) / (1024 * 1024)
     rxbyte = float(client_details.get('rxBytes')) / (1024 * 1024)
@@ -203,7 +498,10 @@ def device_detail(client_mac):
     tx.append(txbyte)
     rx.append(rxbyte)
     dataRate = client_details.get("dataRate")
-    return render_template('client-detail.html', tx = tx, rx =rx, link = phy_link, details = client_details, connected = client_connected, aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology, overallScore=overallScore, onboardedScore=onboardedScore, connectedScore=connectedScore, dataRate=dataRate,issues=issues)
+
+    # print(nodes)
+
+    return render_template('client-detail.html', event = event_child,elements = elements, tx = tx, rx =rx, link = phy_link, details = client_details, connected = client_connected, aps = aps, client=client, connectedAP=connectedAP, neighbor_nodes=neighbor_topology, overallScore=overallScore, onboardedScore=onboardedScore, connectedScore=connectedScore, dataRate=dataRate,issues=issues)
 
 @app.route('/access-points', methods=["POST", "GET"])
 @session_check
@@ -321,6 +619,14 @@ def signout():
     else:
         return render_template("sign-in.html")
 
+@app.route('/wlc', methods=['POST', 'GET'])
+@session_check
+def wlc_list():
+    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
+        wlc = json.load(f)
+    return render_template("/wlc/wlc_list.html", wlc = wlc)
+
+
 @app.route('/wlc/id=<id>', methods=['POST', 'GET'])
 @session_check
 def wlc_details(id):
@@ -348,59 +654,52 @@ def wlc_details(id):
         aps = json.load(f)
     for i in interface:
         i['formattedSpeed'] = switch.format_speed_kbps(i.get('speed'))
-    return render_template("/wlc/wlc_details.html", id= id, d = d, aps = aps, wlc = wlc, ap_wlc = ap_wlc, health = health, ssids = ssids, int = interface, physical = physical)
 
-@app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
-@session_check
-def wlc_ssid(dc, id):
-    wlc = None
-    ssids = None
-    interface = None
-    physical = None
-    hostname = None
-    series = None
-    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
-        device = json.load(f)
-    for w in device:
-        if w["id"] == id:
-            wlc = w
-            ssids = w.get("ssid")
-            interface = w.get("interface")
-            physical = w.get("physical")
-            hostname = w.get('name')
-            series = w.get('deviceSeries')
-    return render_template("/wlc/wlc_ssid.html", wlcs = wlc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
+    cdp = wlc.get('cdp')
+    
+    return render_template("/wlc/wlc_details.html", device = wlc, cdp=cdp, id= id, d = d, aps = aps, wlc = wlc, ap_wlc = ap_wlc, health = health, ssids = ssids, int = interface, physical = physical)
 
-@app.route('/wlc', methods=['POST', 'GET'])
-@session_check
-def wlc_home():
-    return render_template("/wlc/wlc_homepage.html")
+# @app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
+# @session_check
+# def wlc_ssid(dc, id):
+#     wlc = None
+#     ssids = None
+#     interface = None
+#     physical = None
+#     hostname = None
+#     series = None
+#     with open(Config.wlc_path, 'r', encoding="utf-8") as f:
+#         device = json.load(f)
+#     for w in device:
+#         if w["id"] == id:
+#             wlc = w
+#             ssids = w.get("ssid")
+#             interface = w.get("interface")
+#             physical = w.get("physical")
+#             hostname = w.get('name')
+#             series = w.get('deviceSeries')
+#     return render_template("/wlc/wlc_ssid.html", wlcs = wlc, s = series, hostname=hostname, ssids = ssids, int = interface, physical = physical)
 
-@app.route('/wlc/list', methods=['POST', 'GET'])
-@session_check
-def wlc_list():
-    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
-        wlc = json.load(f)
-    return render_template("/wlc/wlc_list.html", wlc = wlc)
 
-@app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
-@session_check
-def wlc(dc):
-    ap_wlc = {}
-    wlc = []
-    with open(Config.wlc_path, 'r', encoding="utf-8") as f:
-        all_wlc = json.load(f)
-    for w in all_wlc:
-        if w.get('hostname').startswith(dc):
-            wlc.append(w)
-    for w in wlc:
-        ip = w['managementIpAddress']
-        ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
-        # print(ip)
-        wlc_health = wlcs.health_wlc(dc, ip)
-    with open(Config.ap_path, 'r', encoding="utf-8") as f:
-        aps = json.load(f)
-    return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc, aps = aps, dc = dc)
+
+# @app.route('/wlc/dc=<dc>', methods=['POST', 'GET'])
+# @session_check
+# def wlc(dc):
+#     ap_wlc = {}
+#     wlc = []
+#     with open(Config.wlc_path, 'r', encoding="utf-8") as f:
+#         all_wlc = json.load(f)
+#     for w in all_wlc:
+#         if w.get('hostname').startswith(dc):
+#             wlc.append(w)
+#     for w in wlc:
+#         ip = w['managementIpAddress']
+#         ap_wlc[ip] = wlcs.get_AP_in_WLC(ip)
+#         # print(ip)
+#         wlc_health = wlcs.health_wlc(dc, ip)
+#     with open(Config.ap_path, 'r', encoding="utf-8") as f:
+#         aps = json.load(f)
+#     return render_template("/wlc/wlc_dashboard.html",  wlcs = wlc, wlc_health = wlc_health, ap_wlc = ap_wlc, aps = aps, dc = dc)
 
 # Alif
 @app.route('/switches', methods=['POST', 'GET'])
@@ -517,7 +816,7 @@ def search_client():
 
 
 if __name__ == '__main__':
-    app.config['DEBUG'] = False
+    app.config['DEBUG'] = True
     # error.html will be generated if error 400 or 500 if uncomment below
     # app.config['PROPAGATE_EXCEPTIONS'] = False
     # run when app loads
