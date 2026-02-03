@@ -248,13 +248,13 @@ def get_devName(dev_id, devType):
             wlc_json = json.load(f)
         for wlc in wlc_json:
             if wlc.get("id") == dev_id:
-                return wlc.get("label")
+                return wlc.get("hostname")
     elif devType == "Switch":
         with open(Config.switch_path, 'r', encoding="utf-8") as f:
             sw_json = json.load(f)
         for sw in sw_json:
             if sw.get("id") == dev_id:
-                return sw.get("label")
+                return sw.get("hostname")
 
 def get_device_detail(mac):
     get_token()
