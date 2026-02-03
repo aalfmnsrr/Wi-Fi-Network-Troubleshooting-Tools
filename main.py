@@ -145,7 +145,6 @@ def clients():
         query_connected_ap = query_connected_ap + "-AP*"
     else:
         query_connected_ap = query_connected_ap + "*"
-    # clients = client_function.get_clients(200,offset,"ID-ATO-10F-AP*")
     clients = client_function.get_clients(200,offset,query_connected_ap)
 
    
@@ -570,7 +569,9 @@ def ap_detail(ap_mac):
     issues = access_point.get_Issues(ap.get("nwDeviceId"))
     ap_details = function.append_AP_dev(ap.get("nwDeviceId"), "AP")
     radios = access_point.get_ap_radio(ap.get("nwDeviceName"), site_id)
-    return render_template('ap-detail.html', ap=ap, wlcName=wlcName, ap_details=ap_details, wlc_id=wlc_id, wlc_dc=wlc_dc, radio=radios, issues=issues, id=id)
+    clientneighbor = allclient(ap.get('nwDeviceName'))
+    clientcount = len(clientneighbor)
+    return render_template('ap-detail.html', ap=ap, wlcName=wlcName, clientcount=clientcount, clientneighbor=clientneighbor, ap_details=ap_details, wlc_id=wlc_id, wlc_dc=wlc_dc, radio=radios, issues=issues, id=id)
 
 @app.route('/', methods=["POST", "GET"])
 def sign_in():
