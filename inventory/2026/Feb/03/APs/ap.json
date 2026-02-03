@@ -18994,11 +18994,11 @@
         "deviceRole": "",
         "aiDriven": "No",
         "clientMac": null,
-        "issue_occurence_count": 7,
+        "issue_occurence_count": 8,
         "status": "active",
         "priority": "P3",
         "category": "Availability",
-        "last_occurence_time": 1770084900000
+        "last_occurence_time": 1770087000000
       }
     ],
     "device": {
@@ -19046,7 +19046,7 @@
       "memorySize": "NA",
       "tagCount": "0",
       "tunnelUdpPort": null,
-      "uptimeSeconds": 18361520,
+      "uptimeSeconds": 18363067,
       "vendor": "NA",
       "waasDeviceMode": null,
       "description": null,
