@@ -24,6 +24,43 @@ def get_client_enrichment_detail(client_mac):
     # print(client)
     return client
 
+def event(client_mac):
+    function.get_token()
+
+    header = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Auth-Token': Config.token
+    }
+
+    url = f"{Config.dnac}/data/api/v1/assuranceEvents?deviceFamily=Wireless Client&clientMac={client_mac}"
+
+    response = requests.get(url, headers=header, verify=False)
+    event = response.json().get("response", [])
+
+    return event
+
+def clientevent(event):
+
+    function.get_token()
+
+    header = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Auth-Token': Config.token
+    }
+
+    for e in event:
+
+        url = f"{Config.dnac}/data/api/v1/assuranceEvents/{e.get('id')}/childEvents"
+
+        response = requests.get(url, headers=header, verify=False)
+
+        child = response.json().get("response", [])
+
+        e['childEvent'] = child
+
+    return event
 
 def get_ap(limit, offset):
     """

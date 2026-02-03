@@ -1,0 +1,288 @@
+{% extends 'sidebar.html' %}
+{% block body %}
+
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<div class="row mb-2 mb-xl-3">
+						<div class="col-auto d-none d-sm-block">
+							<h3>WLC Dashboard</h3>
+						</div>
+
+						<div class="col-auto ms-auto text-end mt-n1">
+
+							<div class="dropdown me-2 d-inline-block position-relative">
+								<a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+        <i class="align-middle mt-n1" data-feather="calendar"></i> Today
+      </a>
+
+								<div class="dropdown-menu dropdown-menu-end">
+									<h6 class="dropdown-header">Settings</h6>
+									<a class="dropdown-item" href="#">Action</a>
+									<a class="dropdown-item" href="#">Another action</a>
+									<a class="dropdown-item" href="#">Something else here</a>
+									<div class="dropdown-divider"></div>
+									<a class="dropdown-item" href="#">Separated link</a>
+								</div>
+							</div>
+
+							<button class="btn btn-primary shadow-sm">
+								<i class="align-middle" data-feather="filter">&nbsp;</i>
+								</button>
+								<button class="btn btn-primary shadow-sm">
+								<i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
+								</button>
+						</div>
+					</div>
+					<div class="row">
+							<div class="w-100">
+								<div class="tab-content">
+									<div class="tab-pane fade show active" id="monthly">
+
+								
+											<div class="row">
+												{% for wlc in wlcs %}
+								
+												<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex">
+													<div class="card flex-fill">
+														<div class="card-body">
+															<div class="row">
+																<div class="col mt-0">
+																	<h5 class="card-title"></h5>
+																</div>
+
+													
+															</div>
+															<a href="{{ url_for('wlc_ssid', dc=dc, id=wlc.id) }}" target="_blank" class="btn btn-outline-primary d-inline-block mt-1 mb-4" style="font-size: 1.5em;">
+																{{ wlc.hostname }}
+															</a>
+															<div class="mb-0">
+														
+																<p>
+																	<strong>IP Address:</strong>
+																	<a href="https://{{ wlc.managementIpAddress }}" target="_blank">{{ wlc.managementIpAddress }}</a>
+																</p>
+																<p><strong>MAC Address:</strong> {{ wlc.macAddress | upper}}</p>
+																<p><strong>Model:</strong> {{ wlc.type }}</p>
+																<p><strong>Software Version:</strong> {{ wlc.softwareType }} : {{ wlc.softwareVersion }} </p>
+																<p><strong>Serial Number:</strong> {{ wlc.serialNumber }}</p>
+																<p><strong>Platform ID:</strong> {{ wlc.platformId }}</p>
+																<p><strong>Role:</strong> {{ wlc.role }}</p>
+																<p><strong>Uptime:</strong> {{ wlc.upTime }}</p>
+																<p><strong>Last Update:</strong> {{ wlc.lastUpdated }}</p>
+																<p><strong>Status:</strong> 
+																	<span class="badge {% if wlc.inventoryStatusDetail == '<status><general code="SUCCESS"/></status>' %}bg-success{% else %}bg-danger{% endif %}">
+																		{% if wlc.inventoryStatusDetail == '<status><general code="SUCCESS"/></status>' %}
+																		SUCESS
+																		{% else %}
+																		FAILURE
+																		{% endif %}
+																	</span>
+																</p>
+																
+															</div>
+														</div>
+													</div>
+												</div>
+												{% endfor %}
+											</div>
+
+										<div class="row">
+									
+											{% for wh in wlc_health %}
+										
+											<div class="col-sm-6 col-lg-12 col-xxl-6 d-flex" >
+												<div class="card flex-fill">
+													<div class="card-body">
+														<div class="row">
+															<div class="col mt-0">
+																<h5 class="card-title"></h5>
+															</div>
+														</div>
+														<p  style="font-size: 1.5em;">Device Health</p>
+
+														<div class="mb-0" >
+													
+															<p><strong>Temperature (<{{ ((wh.maxTemperature | int) / 100) | round(1) }} C) : </strong> {{ ((wh.avgTemperature | int) / 100) | round(1) }} C</p>
+															<p><strong>Overall Health: </strong> {{ wh.overallHealth }}</p>
+															<p><strong>Memory Utilization: </strong> {{ wh.memoryUtilization }} % </p>
+															<p><strong>Location: </strong> {{ wh.location }}</p>
+															<p><strong>Reachbility: </strong>
+																<span class="badge {% if wh.reachabilityHealth == "REACHABLE" %}bg-success{% else %}bg-danger{% endif %}">
+																	{{ wh.reachabilityHealth }}
+																</span>
+															</p>
+															<p><strong>AP Count (All): </strong>{{ wh.apCount }}</p>
+								
+														</div>
+													</div>
+												</div>
+											</div>
+											{% endfor %}
+										</div>
+									</div>
+								</div>
+										
+								<div class="row">
+									{% for wlc in wlcs %}
+									  <div class="col-sm-6 col-lg-12 col-xxl-6 d-flex mb-4">
+										<div class="card flex-fill">
+										  <div class="card flex-fill w-100">
+								  
+											<h4 style="font-size: 1.5em; margin-top:40px; margin-left: 20px;">Access Point for {{ wlc.hostname }}</h4>
+									
+											{% if wlc.hostname.startswith('APDC') %}
+											
+											<div class="row justify-content-center mt-3 mb-2">
+											  <div class="col-auto" id="office-filter-nav">
+												<!-- <nav class="nav btn-group" id="office-filter-nav"> -->
+								
+													<button class="btn btn-outline-primary filter-btn" data-wlc="{{ loop.index0 }}" data-office="MY">Malaysia</button>
+													<button class="btn btn-outline-primary filter-btn" data-wlc="{{ loop.index0 }}" data-office="PH">Philippines</button>
+													<button class="btn btn-outline-primary filter-btn" data-wlc="{{ loop.index0 }}" data-office="SG">Singapore</button>
+													<button class="btn btn-outline-primary reset-btn" data-wlc="{{ loop.index0 }}">ALL</button>
+												<!-- </nav> -->
+											  </div>
+											</div>
+											{% endif %}
+											<div style="margin-left: 30px; margin-right: 40px;">
+											<!-- Table for this WLC -->
+												<table id="table-wlc-{{ loop.index0 }}" class="display table table-striped my-0" style="width:100%;">
+													<thead>
+														<tr>
+															<th style="padding-left: 70px;">AP Name</th>
+															<th class="hide-column">Associated WLC IP</th>
+															<th class="hide-column">Office</th>
+														</tr>
+													</thead>
+													<tbody>
+												
+														{% for ap in ap_wlc[wlc.managementIpAddress] %}
+															<tr> 
+																{% for a in aps %}
+																	{% if ap.hostname == a.label%}
+																		<td style="padding-left: 70px;"><a href="{{ url_for('ap_detail', ap_mac = ap.macAddress, site_id=a.additionalInfo.siteid) }}" target="_blank" class="d-inline-block mt-0.2 mb-0.2" style="font-size: 1 em;">
+																			{{ ap.hostname if ap.hostname else 'N/A' }}</td> 
+																		<td  class="hide-column">{{ ap.associatedWlcIp }}</td>
+																		<td  class="hide-column">{{ ap.office }}</td>
+																	{% endif %}
+																{% endfor %}
+															</tr>
+														{% endfor %}
+													</tbody>
+												</table>
+												<br/></div>
+										  </div>
+										</div>
+									  </div>
+									{% endfor %}
+								  </div>
+							</div>
+						</div>
+					</div>
+
+			</main>
+
+			<footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-start">
+							<ul class="list-inline">
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Support</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Help Center</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Privacy</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Terms of Service</a>
+								</li>
+							</ul>
+						</div>
+						<div class="col-6 text-end">
+							<p class="mb-0">
+								&copy; 2023 - <a href="index.html" class="text-muted">AppStack</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+
+	<script src="{{ url_for('static',filename='assets/js/app.js') }}"></script>
+
+	<script>
+		$(document).ready(function() {
+			// Initialize all DataTables
+			{% for wlc in wlcs %}
+			$('#table-wlc-{{ loop.index0 }}').DataTable({
+				lengthChange: false
+			});
+			{% endfor %}
+		
+			// Handle filter buttons
+			$('.filter-btn').click(function() {
+				var wlcIndex = $(this).data('wlc');
+				var office = $(this).data('office');
+		
+				var table = $('#table-wlc-' + wlcIndex).DataTable();
+		
+				// Apply filter
+				table.column(2).search(office).draw();
+		
+				// Reset to the first page
+				table.page(0).draw('page');
+
+				// Hide columns
+				table.columns([1, 2]).visible(false);
+
+			   // Filter rows based on office
+				table.rows().every(function(rowIdx, tableLoop, rowLoop) {
+					var data = this.data();
+					// data[2] is the Office column
+					if (data[2] === office) {
+						$(this.node()).show();
+					} else {
+						$(this.node()).hide();
+					}
+				});
+			});
+		
+			// Handle reset filter
+			$('.reset-btn').click(function() {
+				var wlcIndex = $(this).data('wlc');
+				var table = $('#table-wlc-' + wlcIndex).DataTable();
+				table.rows().every(function(rowIdx, tableLoop, rowLoop) {
+					$(this.node()).show();
+				});
+				    // Clear search
+					table.columns([1, 2]).search('').draw();
+
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			$("#datatables-dashboard-traffic").DataTable({
+				pageLength: 10,
+				lengthChange: false,
+				bFilter: false,
+				autoWidth: false,
+				order: [
+					[0, "desc"]
+				]
+			});
+		});
+	</script>
+
+
+
+</body>
+
+</html>
+
+{% endblock %}
