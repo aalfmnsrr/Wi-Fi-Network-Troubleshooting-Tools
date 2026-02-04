@@ -257,6 +257,15 @@
 								</a>
 								</tr>
 								<tr>
+									<td>Client Count</td>
+									<td class="d-none d-xl-table-cell">
+										<a href="{{ url_for('clients_AP', AP=ap.nwDeviceName ) }}">
+											{{ clientcount }}
+										</a>
+									</td>
+								</a>
+								</tr>
+								<tr>
 									<td>Mode</td>
 									<td class="d-none d-xl-table-cell">{{ ap.mode }}</td>
 								</tr>
