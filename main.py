@@ -7,10 +7,8 @@ from flask_apscheduler import APScheduler
 import function, access_point, client_function, wlcs, switch, dashboard_page
 import bcrypt
 from datetime import timedelta
-from os.path import exists, isfile, join
-from os import listdir
+from os.path import exists
 import threading
-from pprint import pprint
 
 app = Flask(__name__, template_folder='templates/docs')
 app.secret_key = Config.SECRET_KEY
@@ -563,6 +561,8 @@ def ap_detail(ap_mac):
             id = a.get("id")
             ap = a.get("details")
             break
+    if not ap:
+        ap = access_point.refetch_details(id)
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id, "WLC")
     wlc_dc = function.get_dc(wlc_id)
