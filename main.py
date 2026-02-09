@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_file
 from config import Config
 from markupsafe import Markup
 from functools import wraps
@@ -7,10 +7,12 @@ from flask_apscheduler import APScheduler
 import function, access_point, client_function, wlcs, switch, dashboard_page
 import bcrypt
 from datetime import timedelta
-from os.path import exists, isfile, join
-from os import listdir
+from datetime import datetime
+from os.path import exists
+from io import BytesIO
+import pandas as pd
 import threading
-from pprint import pprint
+import re
 
 app = Flask(__name__, template_folder='templates/docs')
 app.secret_key = Config.SECRET_KEY
@@ -563,6 +565,8 @@ def ap_detail(ap_mac):
             id = a.get("id")
             ap = a.get("details")
             break
+    if not ap:
+        ap = access_point.refetch_details(id)
     wlc_id = ap.get("connectedWlcUuid")
     wlcName = function.get_devName(wlc_id, "WLC")
     wlc_dc = function.get_dc(wlc_id)
@@ -572,6 +576,70 @@ def ap_detail(ap_mac):
     clientneighbor = allclient(ap.get('nwDeviceName'))
     clientcount = len(clientneighbor)
     return render_template('ap-detail.html', ap=ap, wlcName=wlcName, clientcount=clientcount, clientneighbor=clientneighbor, ap_details=ap_details, wlc_id=wlc_id, wlc_dc=wlc_dc, radio=radios, issues=issues, id=id)
+
+@app.route('/access_points/export', methods=['GET'])
+@session_check
+def export_ap():
+
+    # Load devices from JSON inventory (same source used by /switches)
+    with open(Config.ap_path, 'r', encoding='utf-8') as f:
+        devices = json.load(f)
+
+    # Helper: safe getter
+    def _u(x):
+        return (x or "").upper() if isinstance(x, str) else x
+
+    # ---- Simple sheet: same columns as your table ----
+    def build_ap_df(devices_list):
+        rows = []
+        for a in devices_list:
+            addl = a.get("additionalInfo") or {}
+            dtl = a.get("details") or {}
+            rows.append({
+                "Hostname": a.get("label"),
+                "IP Address": a.get("ip"),
+                "MAC Address": _u(addl.get("macAddress")),
+                "Status": dtl.get("communicationState"),
+                "Software Version": _u(a.get("softwareVersion")),
+                "Device Type": a.get("deviceType"),
+                "Location": a.get("location"),
+            })
+        df = pd.DataFrame(rows)
+        # Order columns exactly like the table
+        desired_cols = [
+            "Hostname", "IP Address", "MAC Address", "Status",
+            "Software Version", "Device Type", "Location"
+        ]
+        return df.reindex(columns=desired_cols)
+
+    ap_df = build_ap_df(devices)
+
+    output = BytesIO()
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    fname = f"ap_ALL_{ts}.xlsx"
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        ap_df.to_excel(writer, sheet_name="APs", index=False)
+
+        for ws in writer.book.worksheets:
+            ws.freeze_panes = "A2"
+            if ws.max_row >= 1 and ws.max_column >= 1:
+                ws.auto_filter.ref = ws.dimensions
+            for col in ws.columns:
+                width = 10
+                letter = col[0].column_letter
+                for cell in col:
+                    v = "" if cell.value is None else str(cell.value)
+                    width = max(width, min(len(v) + 2, 50))
+                ws.column_dimensions[letter].width = width
+
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=fname,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 @app.route('/', methods=["POST", "GET"])
 def sign_in():
@@ -659,6 +727,70 @@ def wlc_details(id):
     cdp = wlc.get('cdp')
     
     return render_template("/wlc/wlc_details.html", device = wlc, cdp=cdp, id= id, d = d, aps = aps, wlc = wlc, ap_wlc = ap_wlc, health = health, ssids = ssids, int = interface, physical = physical)
+
+@app.route('/wlc/export', methods=['GET'])
+@session_check
+def export_wlc():
+
+    # Load devices from JSON inventory (same source used by /switches)
+    with open(Config.wlc_path, 'r', encoding='utf-8') as f:
+        devices = json.load(f)
+
+    # Helper: safe getter
+    def _u(x):
+        return (x or "").upper() if isinstance(x, str) else x
+
+    # ---- Simple sheet: same columns as your table ----
+    def build_wlc_df(devices_list):
+        rows = []
+        for w in devices_list:
+            rows.append({
+                "Hostname": w.get("hostname"),
+                "Status": w.get("reachabilityStatus"),
+                "Role": w.get("role"),
+                "IP Address": w.get("managementIpAddress"),
+                "MAC Address": _u(w.get("macAddress")),
+                "Software Version": _u(w.get("softwareVersion")),
+                "Device Type": w.get("type"),
+                "SSID Count": len(w.get("ssid")),
+                "Location": w.get("dc"),
+            })
+        df = pd.DataFrame(rows)
+        # Order columns exactly like the table
+        desired_cols = [
+            "Hostname", "Status", "IP Address", "MAC Address",
+            "Software Version", "SSID Count", "Device Type", "Location"
+        ]
+        return df.reindex(columns=desired_cols)
+
+    wlc_df = build_wlc_df(devices)
+
+    output = BytesIO()
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    fname = f"wlc_ALL_{ts}.xlsx"
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        wlc_df.to_excel(writer, sheet_name="WLCs", index=False)
+
+        for ws in writer.book.worksheets:
+            ws.freeze_panes = "A2"
+            if ws.max_row >= 1 and ws.max_column >= 1:
+                ws.auto_filter.ref = ws.dimensions
+            for col in ws.columns:
+                width = 10
+                letter = col[0].column_letter
+                for cell in col:
+                    v = "" if cell.value is None else str(cell.value)
+                    width = max(width, min(len(v) + 2, 50))
+                ws.column_dimensions[letter].width = width
+
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=fname,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 # @app.route('/wlc/dc=<dc>/id=<id>', methods=['POST', 'GET'])
 # @session_check
@@ -810,6 +942,137 @@ def switch_vlans(device_id):
     vlans = switch.get_vlan(device_id)
 
     return render_template("sw-vlan.html", device=device, vlans=vlans)
+
+@app.route('/switches/export', methods=['GET'])
+@session_check
+def export_switches():
+    """
+    Exports the list of Switch devices to Excel.
+    Respects the "role" filter and supports:
+      - mode=simple  => single Devices sheet (matches table columns)
+      - mode=full    => multi-sheet workbook (Devices, Interfaces, VLANs, CDP, PoE, AP, PowerSupplies, StackSummary)
+    """
+    role = request.args.get("role")
+    mode = (request.args.get("mode") or "simple").strip().lower()
+
+    # Load devices from JSON inventory (same source used by /switches)
+    with open(Config.switch_path, 'r', encoding='utf-8') as f:
+        devices = json.load(f)
+
+    # Apply same normalization + filter as /switches
+    if role:
+        role_norm = (role or "").strip().upper()
+        devices = [d for d in devices if (d.get("role") or "").strip().upper() == role_norm]
+    else:
+        role_norm = None
+
+    # Compute cleaned locations
+    sw_locations = switch.get_swLocation(devices)
+
+    # Helper: safe getter
+    def _u(x):
+        return (x or "").upper() if isinstance(x, str) else x
+
+    VIRTUAL_PREFIXES = (
+        "Vlan", "Loopback", "Tunnel", "Port-channel", "Po", "NVE", "MgmtEth", "NVI",
+        "Null", "Dialer", "SVI", "BDI", "Vl", "Lo", "Tu", "Po", "Port-Channel"
+    )
+
+    def is_physical_ethernet(itf: dict) -> bool:
+        name = (itf.get("name") or "").strip()
+        interface_type = (itf.get("interfaceType") or "").strip()
+        port_type = (itf.get("portType") or "").strip()
+
+        if not name:
+            return False
+
+        # Exclude known virtual/logical types by prefix
+        if name.startswith(VIRTUAL_PREFIXES):
+            return False
+
+        # Consider physical if flagged as Physical or Ethernet
+        if interface_type.lower() == "physical":
+            return True
+
+        if "ethernet" in port_type.lower():
+            return True
+
+        # Fallback: name pattern looks like an ethernet port (Gi/Te/Fa/Eth/Et/ApGi)
+        if re.match(r"^(Gi|Te|Fa|Eth|Et|AppGi)\d", name, flags=re.IGNORECASE):
+            return True
+
+        return False
+
+    def count_physical_ports(device: dict) -> int:
+        iface_list = device.get("interface") or []
+        return sum(1 for itf in iface_list if isinstance(itf, dict) and is_physical_ethernet(itf))
+        
+    # ---- Simple sheet: same columns as your table ----
+    def build_sw_df(devices_list, locations_map):
+        rows = []
+        for d in devices_list:
+            rows.append({
+                "Hostname": d.get("hostname"),
+                "Model (Series)": d.get("type"),
+                "IP Address": d.get("managementIpAddress"),
+                "MAC Address": _u(d.get("macAddress")),
+                "Role": d.get("role"),
+                "Status": d.get("reachabilityStatus"),
+                "IOS Version": _u(d.get("softwareVersion")),
+                "Location": locations_map.get(d.get("id"), "-"),
+                "Interfaces Count": len(d.get("interface")),
+                "Physical Ports Count": count_physical_ports(d),
+            })
+        df = pd.DataFrame(rows)
+        # Order columns exactly like the table
+        desired_cols = [
+            "Hostname", "Model (Series)", "IP Address", "MAC Address", "Role",
+            "Status", "IOS Version", "Location", "Interfaces Count", "Physical Ports Count"
+        ]
+        return df.reindex(columns=desired_cols)
+
+    
+    devices_df = build_sw_df(devices, sw_locations)
+
+    # Create in-memory buffer
+    output = BytesIO()
+
+    # Filename e.g., switches_CORE_simple_20260206_1145.xlsx
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    fname = f"switches_{(role_norm or 'ALL')}_{ts}.xlsx"
+
+    # Write to Excel
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        devices_df.to_excel(writer, sheet_name="Devices", index=False)
+
+        if mode == "full":
+            # TODO: add more sheets as needed, e.g.:
+            # interfaces_df = build_interfaces_df(devices)
+            # if not interfaces_df.empty:
+            #     interfaces_df.to_excel(writer, "Interfaces", index=False)
+            pass
+
+        # Light formatting: freeze header, add autofilter, set widths
+        for ws in writer.book.worksheets:
+            ws.freeze_panes = "A2"
+            if ws.max_row >= 1 and ws.max_column >= 1:
+                ws.auto_filter.ref = ws.dimensions
+            for col in ws.columns:
+                width = 10
+                letter = col[0].column_letter
+                for cell in col:
+                    v = "" if cell.value is None else str(cell.value)
+                    width = max(width, min(len(v) + 2, 50))
+                ws.column_dimensions[letter].width = width
+
+    # Rewind buffer and return
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=fname,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 @app.route('/search-client', methods=['GET', 'POST'])
 def search_client():

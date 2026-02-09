@@ -38,7 +38,12 @@
                                 Access
                             </a>
                         </div>
-                    
+                        <div style="display: flex; margin: 0 10px 10px 10px; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                            <a class="btn btn-success"
+                                href="{{ url_for('export_switches', role=role, mode='simple') }}">
+                                Export (current view)
+                            </a>
+                        </div>
                         <div class="card-body">
                             <table id="datatables-column-search-text-inputs" class="table table-striped" style="width:100%">
                                 <thead>

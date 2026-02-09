@@ -79,6 +79,27 @@ def fetch_ap(id):
     replace(temp, Config.ap_path)
     return new_data.get("additionalInfo").get("macAddress")
 
+def refetch_details(id):
+    ap_json = None
+    ind = None
+    new_data = None
+    details = None
+    with open(Config.ap_path, 'r', encoding="utf-8") as f:
+        ap_json = json.load(f)
+    for i, ap in enumerate(ap_json):
+        print(id)
+        if ap.get("id") == id:
+            ind = i
+            new_data = refresh(ap.get("id"))
+            details = function.get_device_detail(ap.get("additionalInfo").get("macAddress"))
+            break
+    ap_json[ind] = new_data
+    temp = Config.ap_path + ".tmp"
+    with open(temp, 'w', encoding="utf-8") as f:
+        json.dump(ap_json, f, ensure_ascii=False, indent=2)
+    replace(temp, Config.ap_path)
+    return details
+
 def get_ap():
     function.get_token()
     access_points = []
