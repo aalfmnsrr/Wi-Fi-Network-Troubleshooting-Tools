@@ -85,6 +85,177 @@ def dashboard():
                            system=dashboard_json.get("system")
                            )
 
+@app.route('/dashboard/export', methods=['GET'])
+@session_check
+def export_all():
+
+    # Load devices from JSON inventory (same source used by /switches)
+    with open(Config.ap_path, 'r', encoding='utf-8') as f:
+        ap = json.load(f)
+    
+    with open(Config.wlc_path, 'r', encoding='utf-8') as f:
+        wlc = json.load(f)
+
+    with open(Config.switch_path, 'r', encoding='utf-8') as f:
+        sw = json.load(f)
+
+    # Apply same normalization + filter as /switches
+    role = request.args.get("role")
+    role_norm = (role or "").strip().upper() if role else None
+
+    if role_norm:
+        wlc = [w for w in wlc if (w.get("role") or "").strip().upper() == role_norm]
+        sw  = [s for s in sw  if (s.get("role") or "").strip().upper() == role_norm]
+
+
+    # Compute cleaned locations
+    sw_locations = switch.get_swLocation(sw)
+
+    # Interface ports
+    VIRTUAL_PREFIXES = (
+        "Vlan", "Loopback", "Tunnel", "Port-channel", "Po", "NVE", "MgmtEth", "NVI",
+        "Null", "Dialer", "SVI", "BDI", "Vl", "Lo", "Tu", "Po", "Port-Channel"
+    )
+
+    # Helper: safe getter
+    def _u(x):
+        return (x or "").upper() if isinstance(x, str) else x
+
+    def build_ap_df(ap_list):
+        rows = []
+        for a in ap_list:
+            addl = a.get("additionalInfo") or {}
+            dtl = a.get("details") or {}
+            rows.append({
+                "Hostname": a.get("label"),
+                "IP Address": a.get("ip"),
+                "MAC Address": _u(addl.get("macAddress")),
+                "Status": dtl.get("communicationState"),
+                "Software Version": _u(a.get("softwareVersion")),
+                "Device Type": a.get("deviceType"),
+                "Location": a.get("location"),
+            })
+        df = pd.DataFrame(rows)
+        # Order columns exactly like the table
+        desired_cols = [
+            "Hostname", "IP Address", "MAC Address", "Status",
+            "Software Version", "Device Type", "Location"
+        ]
+        return df.reindex(columns=desired_cols)
+
+    def build_wlc_df(wlc_list):
+        rows = []
+        for w in wlc_list:
+            rows.append({
+                "Hostname": w.get("hostname"),
+                "Status": w.get("reachabilityStatus"),
+                "Role": w.get("role"),
+                "IP Address": w.get("managementIpAddress"),
+                "MAC Address": _u(w.get("macAddress")),
+                "Software Version": _u(w.get("softwareVersion")),
+                "Device Type": w.get("type"),
+                "SSID Count": len(w.get("ssid")),
+                "Location": w.get("dc"),
+            })
+        df = pd.DataFrame(rows)
+        # Order columns exactly like the table
+        desired_cols = [
+            "Hostname", "Status", "IP Address", "MAC Address",
+            "Software Version", "SSID Count", "Device Type", "Location"
+        ]
+        return df.reindex(columns=desired_cols)
+    
+    def is_physical_ethernet(itf: dict) -> bool:
+        name = (itf.get("name") or "").strip()
+        interface_type = (itf.get("interfaceType") or "").strip()
+        port_type = (itf.get("portType") or "").strip()
+
+        if not name:
+            return False
+
+        # Exclude known virtual/logical types by prefix
+        if name.startswith(VIRTUAL_PREFIXES):
+            return False
+
+        # Consider physical if flagged as Physical or Ethernet
+        if interface_type.lower() == "physical":
+            return True
+
+        if "ethernet" in port_type.lower():
+            return True
+
+        # Fallback: name pattern looks like an ethernet port (Gi/Te/Fa/Eth/Et/ApGi)
+        if re.match(r"^(Gi|Te|Fa|Eth|Et|AppGi)\d", name, flags=re.IGNORECASE):
+            return True
+
+        return False
+
+    def count_physical_ports(device: dict) -> int:
+        iface_list = device.get("interface") or []
+        return sum(1 for itf in iface_list if isinstance(itf, dict) and is_physical_ethernet(itf))
+        
+    def build_sw_df(sw_list, locations_map):
+        rows = []
+        for sw in sw_list:
+            rows.append({
+                "Hostname": sw.get("hostname"),
+                "Model (Series)": sw.get("type"),
+                "IP Address": sw.get("managementIpAddress"),
+                "MAC Address": _u(sw.get("macAddress")),
+                "Role": sw.get("role"),
+                "Status": sw.get("reachabilityStatus"),
+                "IOS Version": _u(sw.get("softwareVersion")),
+                "Location": locations_map.get(sw.get("id"), "-"),
+                "Interfaces Count": len(sw.get("interface")),
+                "Physical Ports Count": count_physical_ports(sw),
+            })
+        df = pd.DataFrame(rows)
+        # Order columns exactly like the table
+        desired_cols = [
+            "Hostname", "Model (Series)", "IP Address", "MAC Address", "Role",
+            "Status", "IOS Version", "Location", "Interfaces Count", "Physical Ports Count"
+        ]
+        return df.reindex(columns=desired_cols)
+
+    ap_df = build_ap_df(ap)
+    wlc_df = build_wlc_df(wlc)
+    sw_df = build_sw_df(sw, sw_locations)
+
+    output = BytesIO()
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    fname = f"ALL_Devices_{ts}.xlsx"
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        if not ap_df.empty:
+            ap_df.to_excel(writer, sheet_name="APs", index=False)
+        if not wlc_df.empty:
+            wlc_df.to_excel(writer, sheet_name="WLCs", index=False)
+        if not sw_df.empty:
+            sw_df.to_excel(writer, sheet_name="Switches", index=False)
+
+        # Formatting for each sheet
+        for ws in writer.book.worksheets:
+            ws.freeze_panes = "A2"
+            if ws.max_row >= 1 and ws.max_column >= 1:
+                ws.auto_filter.ref = ws.dimensions
+            # Set reasonable column widths
+            for col in ws.columns:
+                width = 10
+                letter = col[0].column_letter
+                for cell in col:
+                    v = "" if cell.value is None else str(cell.value)
+                    width = max(width, min(len(v) + 2, 50))
+                ws.column_dimensions[letter].width = width
+
+
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=fname,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
 @app.route("/get-ap-by-region", methods=["GET"])
 @session_check
 def get_ap_by_region():

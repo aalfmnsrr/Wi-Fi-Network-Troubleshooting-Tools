@@ -18,30 +18,24 @@
                     <div class="card">
                         <div style="display: flex; margin: 10px; justify-content: center; gap: 10px; flex-wrap: wrap;">
                             <a href="/switches"
-                                class="btn {{ 'btn-primary' if not role else 'btn-secondary' }} role-filter"
+                                class="btn btn-secondary ms-2 country-filter"
                                 id="clear-filter">
                                 All Switches
                             </a>
                         
                             <a href="/switches?role=CORE"
-                                class="btn {{ 'btn-primary' if role and role.upper() == 'CORE' else 'btn-secondary' }} role-filter">
+                                class="btn btn-outline-primary country-filter">
                                 Core
                             </a>
                         
                             <a href="/switches?role=DISTRIBUTION"
-                                class="btn {{ 'btn-primary' if role and role.upper() == 'DISTRIBUTION' else 'btn-secondary' }} role-filter">
+                                class="btn btn-outline-secondary country-filter">
                                 Distribution
                             </a>
                         
                             <a href="/switches?role=ACCESS"
-                                class="btn {{ 'btn-primary' if role and role.upper() == 'ACCESS' else 'btn-secondary' }} role-filter">
+                                class="btn btn-outline-success country-filter">
                                 Access
-                            </a>
-                        </div>
-                        <div style="display: flex; margin: 0 10px 10px 10px; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                            <a class="btn btn-success"
-                                href="{{ url_for('export_switches', role=role, mode='simple') }}">
-                                Export (current view)
                             </a>
                         </div>
                         <div class="card-body">
