@@ -10,7 +10,7 @@ class Config:
     day = today.strftime("%d")
 
     # paths
-    dnac = "https://10.54.201.2/dna"
+    dnac = "https://dnac.example.local/dna"
     script_path = "PATH/TO/YOUR/SCRIPT/"
     inventory_path = f"{script_path}/inventory/{year}/{abbmonth}/{day}"
     ap_path = f"{inventory_path}/APs/ap.json"
@@ -19,11 +19,11 @@ class Config:
     dashboard_path = f"{inventory_path}/Dashboard/dashboard.json"
 
     # credentials
-    username = "TACACS_USERNAME"
-    password = 'TACACS_PASSWORD'
+    username = ''
+    password = ''
     token = ''
-    port = 5004
-    SECRET_KEY = 'SECRET_KEY'
+    port = ''
+    SECRET_KEY = ''
 
     # initial values
     floor_id =[]
