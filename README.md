@@ -40,6 +40,7 @@ Python · Flask · Cisco DNA Center REST API · Netmiko (CLI automation) · JSON
 ├── templates/ # HTML templates (Jinja)
 └── static/assets/ # CSS & static assets
 
+```
 ## 🔒 Note on Configuration
 
 `config_example.py` is a template only — real credentials, tokens, and internal endpoint values are excluded from this repository for security reasons. To run this project, populate your own `config.py` with valid Cisco DNA Center API credentials.
