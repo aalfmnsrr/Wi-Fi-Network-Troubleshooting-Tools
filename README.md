@@ -28,9 +28,9 @@ Engineers had to manually check individual devices (Access Points, Switches, WLC
 Python · Flask · Cisco DNA Center REST API · Netmiko (CLI automation) · JSON · HTML/CSS (Jinja templates)
 
 ## 📂 Project Structure
-├── main.py # Application entry point
-├── dashboard_page.py # Dashboard rendering logic
-├── access_point.py # AP data retrieval & processing
+|- main.py # Application entry point
+|- dashboard_page.py # Dashboard rendering logic
+|- access_point.py # AP data retrieval & processing
 ├── switch.py # Switch data retrieval & processing
 ├── wlcs.py # WLC data retrieval & processing
 ├── client_function.py # Client device lookup logic
